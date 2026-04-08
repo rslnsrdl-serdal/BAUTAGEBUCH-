@@ -1810,12 +1810,14 @@ body{
   <div class="sh">
     <h2>Gewerke & Nachunternehmer <span class="sub">Gewerk klasörleri ve firmalar</span></h2>
     <div class="sh-act">
-      <button class="btn btn-ghost" onclick="openModal('addNU')">+ Nachunternehmer</button>
-      <button class="btn btn-primary" onclick="openModal('addGewerk')">+ Gewerk hinzufügen</button>
+      <button class="btn btn-primary" onclick="openModal('addNU')">+ Nachunternehmer</button>
     </div>
   </div>
   <div class="card" style="margin-bottom:14px;">
     <div class="card-body">
+      <div style="font-size:12px;color:var(--text3);margin-bottom:10px;">
+        Gewerk kodları sistemde hazır yüklüdür. Burada sadece alt firma / Nachunternehmer eklemen yeterli.
+      </div>
       <div class="fr3">
         <input type="text" class="fi" id="gwSearch" placeholder="🔍 Suchen…" oninput="renderGewerke()">
         <select class="fs" id="gwStatusFilter" onchange="renderGewerke()">
@@ -1828,7 +1830,7 @@ body{
       </div>
     </div>
   </div>
-  <div id="gewerkeList"><div class="empty-state"><div class="ei">📁</div><h4>Keine Gewerke</h4><p>Önce Gewerk ekle, sonra altına firma ekle</p></div></div>
+  <div id="gewerkeList"><div class="empty-state"><div class="ei">📁</div><h4>Keine Gewerke</h4><p>Hazır Gewerk listesine alt firma ekleyebilirsin</p></div></div>
 </div>
 
 <!-- ═══════════ PAGE: CONTAINER ═══════════ -->
@@ -2242,7 +2244,7 @@ body{
     <div class="modal-body">
       <input type="hidden" id="nu-id">
       <div class="fr2">
-        <div class="fg"><div class="fl">Übergeordnetes Gewerk</div><select class="fs" id="nu-gewerk"></select></div>
+        <div class="fg"><div class="fl">Übergeordnetes Gewerk <span class="tr">Hazır listeden seç</span></div><select class="fs" id="nu-gewerk"></select></div>
         <div class="fg"><div class="fl">NU-Code</div><input type="text" class="fi" id="nu-code" placeholder="902.01"></div>
       </div>
       <div class="fg"><div class="fl">Firma / Ordnername</div><input type="text" class="fi" id="nu-name" placeholder="Skokotas"></div>
@@ -2463,6 +2465,48 @@ function makePhotoMetaSafe() {
 
 let pendingTimelinePhotoId = null;
 
+
+const PRESET_GEWERKE = [
+  {code:'901', nameDe:'Erd- und Entwässerungsarbeiten', nameTr:'Toprak ve drenaj işleri'},
+  {code:'902', nameDe:'Beton- und Stahlbetonarbeiten', nameTr:'Beton ve betonarme işleri'},
+  {code:'903', nameDe:'Hallensohle', nameTr:'Salon tabanı'},
+  {code:'904', nameDe:'Bauwerksabdichtung', nameTr:'Yapı yalıtımı'},
+  {code:'905', nameDe:'Industriefußboden Estrich', nameTr:'Endüstriyel zemin şapı'},
+  {code:'906', nameDe:'Mauerwerksarbeiten', nameTr:'Duvar işleri'},
+  {code:'908', nameDe:'Betonfertigteile', nameTr:'Beton prefabrik elemanlar'},
+  {code:'910', nameDe:'Tore, Türen, Überladebrücken', nameTr:'Kapılar, yükleme köprüleri'},
+  {code:'911', nameDe:'Lichtbandwand', nameTr:'Işık bantlı duvar'},
+  {code:'912', nameDe:'Dacheindeckung', nameTr:'Çatı kaplaması'},
+  {code:'913', nameDe:'Lichtkuppeln', nameTr:'Çatı ışıklıkları'},
+  {code:'914', nameDe:'Blechverlegearbeiten (906+936)', nameTr:'Sac döşeme işleri'},
+  {code:'915', nameDe:'Brandschutz', nameTr:'Yangın koruma'},
+  {code:'916', nameDe:'Innenausbau', nameTr:'İç yapı işleri'},
+  {code:'917', nameDe:'Sonnenschutz', nameTr:'Güneş koruma'},
+  {code:'918', nameDe:'Malerarbeiten', nameTr:'Boya işleri'},
+  {code:'919', nameDe:'Fliesenarbeiten', nameTr:'Fayans işleri'},
+  {code:'920', nameDe:'Bodenbeläge', nameTr:'Zemin kaplamaları'},
+  {code:'921', nameDe:'Elektro (840-860+880)', nameTr:'Elektrik işleri'},
+  {code:'922', nameDe:'Löschanlagen (875)', nameTr:'Söndürme sistemleri'},
+  {code:'923', nameDe:'HKLS (811-830)', nameTr:'Isıtma-klima-havalandırma-sıhhi tesisat'},
+  {code:'925', nameDe:'Ingenieurleistungen (1870)', nameTr:'Mühendislik hizmetleri'},
+  {code:'927', nameDe:'Schlosserarbeiten', nameTr:'Metal/doğrama işleri'},
+  {code:'928', nameDe:'Baustelleneinrichtung', nameTr:'Şantiye kurulumu'},
+  {code:'930', nameDe:'Aufzugsanlage', nameTr:'Asansör sistemi'},
+  {code:'934', nameDe:'Außenanlagen', nameTr:'Dış saha düzenlemeleri'}
+];
+
+function getDefaultGewerke() {
+  return PRESET_GEWERKE.map((g, i) => ({
+    id: 'gw_preset_' + g.code,
+    code: g.code,
+    nameDe: g.nameDe,
+    nameTr: g.nameTr,
+    status: 'active',
+    note: '',
+    nus: []
+  }));
+}
+
 function newState() {
   return {
     projectNr:'', projectName:'', bauleiter:'', standort:'',
@@ -2485,7 +2529,7 @@ function newState() {
     weeklyReports: [],
     workAreas: [],
     maengel: [],
-    gewerke: [],
+    gewerke: getDefaultGewerke(),
   };
 }
 
@@ -2504,6 +2548,7 @@ function loadAll() {
     if (rawAr) {
       archive = makeArchiveSafeForStorage(JSON.parse(rawAr));
     }
+    ensurePresetGewerke();
   } catch(e) { console.warn('Load error', e); }
 }
 
@@ -2834,6 +2879,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const savedTheme = localStorage.getItem('sero_theme') || 'light';
   setTheme(savedTheme);
   applyStateToForm();
+  ensurePresetGewerke();
   syncProjectInfoToTB();
   buildPersonnel();
   buildGeraete();
@@ -4067,6 +4113,33 @@ function countLinkedForNU(nuCode) {
   return {tasks:tasks.length, maengel:maengel.length, fotos:fotos.length, geraete:geraete.length, timeline:timeline.length};
 }
 
+
+function ensurePresetGewerke() {
+  if (!S.gewerke) S.gewerke = [];
+  const existingByCode = new Map((S.gewerke||[]).map(g => [g.code, g]));
+  const merged = [];
+  for (const preset of getDefaultGewerke()) {
+    const ex = existingByCode.get(preset.code);
+    if (ex) {
+      merged.push({
+        ...preset,
+        ...ex,
+        code: preset.code,
+        nameDe: preset.nameDe,
+        nameTr: preset.nameTr,
+        nus: ex.nus || []
+      });
+    } else {
+      merged.push(preset);
+    }
+  }
+  // keep any custom extra gewerke too
+  for (const g of (S.gewerke||[])) {
+    if (!merged.find(x => x.code === g.code)) merged.push(g);
+  }
+  S.gewerke = merged.sort((a,b)=>(a.code||'').localeCompare(b.code||''));
+}
+
 function populateGewerkSelect() {
   const sel = document.getElementById('nu-gewerk');
   if (!sel) return;
@@ -4166,7 +4239,7 @@ function renderGewerke() {
   const nbg = document.getElementById('nb-gewerke'); if (nbg) nbg.textContent = (S.gewerke||[]).length;
 
   if (!rows.length) {
-    box.innerHTML = '<div class="empty-state"><div class="ei">📁</div><h4>Keine Gewerke</h4><p>Önce Gewerk ekle, sonra altına firma ekle</p></div>';
+    box.innerHTML = '<div class="empty-state"><div class="ei">📁</div><h4>Keine Gewerke</h4><p>Hazır Gewerk listesine alt firma ekleyebilirsin</p></div>';
     return;
   }
   box.innerHTML = '';
@@ -4192,9 +4265,7 @@ function renderGewerke() {
           </div>
         </div>
         <div style="display:flex;gap:8px;align-items:center;">
-          <button class="btn btn-ghost btn-xs" onclick="event.stopPropagation();editGewerk('${g.id}')">Bearbeiten</button>
           <button class="btn btn-primary btn-xs" onclick="event.stopPropagation();openModal('addNU');populateGewerkSelect();svs('nu-gewerk','${g.id}');sv('nu-code','${g.code}.');">+ Firma</button>
-          <button class="btn-icon" onclick="event.stopPropagation();delGewerk('${g.id}')">✕</button>
         </div>
       </div>
       <div class="gewerk-body" id="gwb_${g.id}">
