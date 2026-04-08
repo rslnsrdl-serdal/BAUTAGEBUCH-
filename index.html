@@ -939,6 +939,11 @@ body{
   .kbc{padding:10px 11px;}
 }
 @media(max-width:600px){
+  #pg-settings > div[style*="grid-template-columns:1fr 1fr"]{
+    display:grid !important;
+    grid-template-columns:1fr !important;
+    gap:10px !important;
+  }
   #pg-dash > div[style*="grid-template-columns:1fr 1fr"],
   #pg-dash > div[style*="grid-template-columns:2fr 1fr"]{
     display:grid !important;
@@ -1001,7 +1006,6 @@ body{
       </div>
       <button class="theme-toggle" id="themeBtn" onclick="toggleTheme()" title="Tema değiştir">🌙</button>
       <button class="btn btn-excel btn-sm" onclick="exportExcel()">📊 Excel</button>
-      <button class="btn btn-pdf btn-sm" onclick="exportPDF()">📄 PDF</button>
     </div>
   </div>
   <div class="nav-bar">
@@ -1014,6 +1018,7 @@ body{
       <button class="nav-tab" data-page="pg-meet" onclick="goPage(this)"><span class="ti">📅</span>Besprechungen <span class="nav-badge" id="nb-meet">0</span></button>
       <button class="nav-tab" data-page="pg-files" onclick="goPage(this)"><span class="ti">📂</span>Dateien <span class="nav-badge" id="nb-files">0</span></button>
       <button class="nav-tab" data-page="pg-archive" onclick="goPage(this)"><span class="ti">🗃</span>Archiv <span class="nav-badge" id="nb-archive">0</span></button>
+      <button class="nav-tab" data-page="pg-settings" onclick="goPage(this)"><span class="ti">⚙️</span>Einstellungen</button>
     </div>
   </div>
 </header>
@@ -1102,7 +1107,6 @@ body{
     <div class="sh-act">
       <button class="btn btn-ghost btn-sm" onclick="saveReport()">💾 Speichern & Archivieren</button>
       <button class="btn btn-excel btn-sm" onclick="exportExcel()">📊 Excel</button>
-      <button class="btn btn-pdf btn-sm" onclick="exportPDF()">📄 PDF</button>
       <button class="btn btn-blue btn-sm" onclick="sendToEvernote()">📩 Evernote</button>
     </div>
   </div>
@@ -1320,6 +1324,57 @@ body{
   <div id="archiveList"><div class="empty-state"><div class="ei">🗃</div><h4>Kein Archiv</h4><p>"Bericht speichern" ile rapor kaydet</p></div></div>
 </div>
 
+
+<!-- ═══════════ PAGE: SETTINGS ═══════════ -->
+<div class="page" id="pg-settings">
+  <div class="sh">
+    <h2>Einstellungen <span class="sub">Ayarlar</span></h2>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+    <div class="card">
+      <div class="card-hd"><div class="card-hd-l"><div class="ci ci-b">💾</div><h3>Daten sichern <small>Veri Yedekleme</small></h3></div></div>
+      <div class="card-body">
+        <div class="fg">
+          <div class="fl">JSON Export <span class="tr">Yedek indir</span></div>
+          <button class="btn btn-primary" onclick="exportBackup()">⬇ Backup exportieren</button>
+        </div>
+        <div class="fg">
+          <div class="fl">JSON Import <span class="tr">Yedek yükle</span></div>
+          <input type="file" id="backupIn" accept=".json" style="display:none" onchange="importBackup(this)">
+          <button class="btn btn-ghost" onclick="document.getElementById('backupIn').click()">⬆ Backup importieren</button>
+        </div>
+        <p style="font-size:12px;color:var(--text3);margin-top:10px;">Tüm günlük kayıtlar, arşiv, personel, cihazlar ve toplantılar JSON olarak dışa alınabilir.</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-hd"><div class="card-hd-l"><div class="ci ci-o">🗓</div><h3>Tagesauswahl <small>Gün seçimi</small></h3></div></div>
+      <div class="card-body">
+        <div class="fg">
+          <div class="fl">Berichtstag laden <span class="tr">Tarihe göre yükle</span></div>
+          <input type="date" class="fi" id="loadReportDate">
+        </div>
+        <div class="fg" style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="btn btn-primary" onclick="loadReportByDate()">Tag laden</button>
+          <button class="btn btn-ghost" onclick="startNewDay()">Neuen Tag beginnen</button>
+        </div>
+        <p style="font-size:12px;color:var(--text3);margin-top:10px;">Belirli bir günü açabilir, o gün neler olduğunu tekrar görebilirsin.</p>
+      </div>
+    </div>
+
+    <div class="card" style="grid-column:1/-1;">
+      <div class="card-hd"><div class="card-hd-l"><div class="ci ci-g">📘</div><h3>Tagesarchiv <small>Günlük kayıt mantığı</small></h3></div></div>
+      <div class="card-body">
+        <p style="font-size:12px;color:var(--text2);line-height:1.6;">
+          Bu sürümde her gün ayrı arşiv kaydı olarak tutulur. İstediğin günü seçip tekrar açabilir,
+          o gün personel, cihaz, iş kalemi ve notlarda neler olduğunu görebilirsin.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+
 </div><!-- /main -->
 
 <!-- ══════════════════════ MODALS ══════════════════════ -->
@@ -1505,7 +1560,6 @@ body{
     <div class="modal-ft">
       <button class="btn btn-ghost" onclick="closeModal('viewAr')">Schließen</button>
       <button class="btn btn-excel btn-sm" id="ar-excel-btn">📊 Excel</button>
-      <button class="btn btn-pdf btn-sm" id="ar-pdf-btn">📄 PDF</button>
     </div>
   </div>
 </div>
@@ -1721,6 +1775,125 @@ function syncProjectInfoToTB() {
   sv('tbBL', gv('hBL'));
 }
 
+
+function exportBackup() {
+  try {
+    collectFormToState();
+    const backup = {
+      exportedAt: new Date().toISOString(),
+      version: 1,
+      state: S,
+      archive: archive,
+      theme: currentTheme
+    };
+    const blob = new Blob([JSON.stringify(backup, null, 2)], {type:'application/json'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `SERO_Bautagebuch_Backup_${todayStr()}.json`;
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 500);
+    showToast('Backup exportiert','ok');
+  } catch(e) {
+    showToast('Backup Export fehlgeschlagen','err');
+  }
+}
+
+function importBackup(inp) {
+  const file = inp.files && inp.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (data.state) S = deepMerge(newState(), data.state);
+      if (Array.isArray(data.archive)) archive = data.archive;
+      persistState();
+      applyStateToForm();
+      if (typeof syncProjectInfoToTB === 'function') syncProjectInfoToTB();
+      buildPersonnel();
+      buildGeraete();
+      renderSigGrid();
+      renderWorkEntries();
+      renderKanban();
+      renderFirms();
+      renderContainers();
+      renderMeetings();
+      renderPhotos();
+      renderDocs();
+      renderArchive();
+      updateBadges();
+      refreshDash();
+      if (data.theme) setTheme(data.theme);
+      showToast('Backup importiert','ok');
+    } catch(err) {
+      showToast('Backup konnte nicht importiert werden','err');
+    }
+  };
+  reader.readAsText(file);
+  inp.value = '';
+}
+
+function loadArchiveIntoCurrent(id) {
+  const ar = archive.find(a => a.id === id);
+  if (!ar || !ar.snap) return;
+  S = deepMerge(newState(), ar.snap);
+  persistState();
+  applyStateToForm();
+  if (typeof syncProjectInfoToTB === 'function') syncProjectInfoToTB();
+  buildPersonnel();
+  buildGeraete();
+  renderSigGrid();
+  renderWorkEntries();
+  renderKanban();
+  renderFirms();
+  renderContainers();
+  renderMeetings();
+  renderPhotos();
+  renderDocs();
+  updateBadges();
+  refreshDash();
+  goPageById('pg-tb');
+  showToast('Bericht geladen: ' + (ar.reportDate || ''), 'ok');
+}
+
+function loadReportByDate() {
+  const date = gv('loadReportDate');
+  if (!date) { showToast('Datum auswählen','warn'); return; }
+  const ar = archive.find(a => a.reportDate === date);
+  if (!ar) { showToast('Kein Bericht für dieses Datum','warn'); return; }
+  loadArchiveIntoCurrent(ar.id);
+}
+
+function startNewDay() {
+  const keepProjectNr = S.projectNr || '';
+  const keepProjectName = S.projectName || '';
+  const keepBauleiter = S.bauleiter || '';
+  const keepStandort = S.standort || '';
+  S = newState();
+  S.projectNr = keepProjectNr;
+  S.projectName = keepProjectName;
+  S.bauleiter = keepBauleiter;
+  S.standort = keepStandort;
+  S.reportDate = todayStr();
+  S.reportNr = autoRNr();
+  persistState();
+  applyStateToForm();
+  if (typeof syncProjectInfoToTB === 'function') syncProjectInfoToTB();
+  buildPersonnel();
+  buildGeraete();
+  renderSigGrid();
+  renderWorkEntries();
+  renderKanban();
+  renderFirms();
+  renderContainers();
+  renderMeetings();
+  renderPhotos();
+  renderDocs();
+  updateBadges();
+  refreshDash();
+  showToast('Neuer Tag gestartet','ok');
+}
+
 // ═══════════════════════════════════════════════════
 // SAVE REPORT TO ARCHIVE
 // ═══════════════════════════════════════════════════
@@ -1748,10 +1921,10 @@ function saveReport() {
   const existIdx = archive.findIndex(a => a.reportDate === entry.reportDate);
   if (existIdx >= 0) {
     archive[existIdx] = entry;
-    showToast('Bericht aktualisiert: '+entry.reportDate, 'ok');
+    showToast('Bericht für den Tag aktualisiert: '+entry.reportDate, 'ok');
   } else {
     archive.unshift(entry);
-    showToast('Bericht archiviert: '+entry.reportDate, 'ok');
+    showToast('Neuer Tagesbericht gespeichert: '+entry.reportDate, 'ok');
   }
   persistState();
   updateBadges();
@@ -2635,7 +2808,6 @@ function viewArchiveEntry(id) {
     <div style="font-size:10px;color:var(--text3);margin-top:14px;font-style:italic;">Gespeichert am ${ar.savedAtDisplay}</div>
   `;
   document.getElementById('ar-excel-btn').onclick=()=>exportArchiveExcel(id);
-  document.getElementById('ar-pdf-btn').onclick=()=>exportArchivePDF(id);
   openModal('viewAr');
 }
 
