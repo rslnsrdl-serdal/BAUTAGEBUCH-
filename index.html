@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="de" data-theme="dark">
+<html lang="de" data-theme="light">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -43,6 +43,7 @@
   --card-bg:var(--bg2);
 }
 [data-theme="light"] {
+  --bg:     #f7f9fc;
   --bg-raw: #dbeafe;
   --bg2:    #ffffff;
   --bg3:    #f0f7ff;
@@ -342,7 +343,10 @@ body{
 .stat-inner{padding:14px 16px;}
 .stat-label{font-size:9px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--text3);margin-bottom:6px;}
 .stat-val-row{display:flex;align-items:baseline;gap:8px;margin-bottom:4px;}
-.stat-val{font-family:'Syne',sans-serif;font-size:28px;font-weight:800;line-height:1;}
+.stat-val{
+  font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','SF Pro Text','Segoe UI',sans-serif;
+  font-size:30px;font-weight:700;line-height:1;letter-spacing:-.04em;
+}
 .s-o .stat-val{color:var(--accent);}
 .s-b .stat-val{color:var(--accent2);}
 .s-g .stat-val{color:var(--accent3);}
@@ -454,7 +458,7 @@ body{
 ═══════════════════════════════════════════════════ */
 .tb-layout{
   display:grid;
-  grid-template-columns:290px 1fr;
+  grid-template-columns:290px minmax(0,1fr);
   gap:14px;
   align-items:start;
 }
@@ -465,18 +469,15 @@ body{
   position:sticky;
   top:88px;
   align-self:start;
-  height:calc(100dvh - 100px);
-  max-height:calc(100dvh - 100px);
-  min-height:0;
+  height:calc(100vh - 108px);
   overflow-y:auto;
   overflow-x:hidden;
-  overscroll-behavior:contain;
-  -webkit-overflow-scrolling:touch;
   scrollbar-width:thin;
+  -webkit-overflow-scrolling:touch;
   padding-right:4px;
 }
-.tb-sidebar::-webkit-scrollbar{width:5px;}
-.tb-sidebar::-webkit-scrollbar-thumb{background:var(--bg5);border-radius:6px;}
+.tb-sidebar::-webkit-scrollbar{width:6px;}
+.tb-sidebar::-webkit-scrollbar-thumb{background:var(--bg5);border-radius:8px;}
 .tb-content{
   display:flex;
   flex-direction:column;
@@ -527,7 +528,7 @@ body{
   padding:0 10px;max-height:0;overflow:hidden;
   transition:max-height .25s ease,padding .25s;
 }
-.pers-detail.open{max-height:300px;padding:0 10px 8px;}
+.pers-detail.open{max-height:500px;padding:0 10px 8px;}
 .pers-entry{
   display:grid;grid-template-columns:1fr 1fr auto;gap:6px;
   margin-bottom:5px;align-items:center;
@@ -551,6 +552,23 @@ body{
 .geraet-row:last-child{margin-bottom:0;}
 .geraet-name{flex:1;font-size:12px;font-weight:500;color:var(--text);}
 .geraet-icon{font-size:16px;flex-shrink:0;}
+
+
+.geraet-row{
+  flex-direction:column;align-items:stretch;
+}
+.geraet-head{
+  display:flex;align-items:center;gap:8px;
+}
+.geraet-sub{
+  font-size:10px;color:var(--text3);margin-top:2px;
+}
+.geraet-detail-grid{
+  display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px;
+}
+.geraet-detail-grid .fi,.geraet-detail-grid .fs{
+  padding:5px 8px;font-size:11px;
+}
 
 /* ═══════════════════════════════════════════════════
    WORK ENTRIES
@@ -1102,6 +1120,21 @@ body{
         </div>
       </div>
 
+      <!-- Projektinfo -->
+      <div class="card">
+        <div class="card-hd"><div class="card-hd-l"><div class="ci ci-c">🏢</div><h3>Projektinfo <small>Proje Bilgileri</small></h3></div></div>
+        <div class="card-body">
+          <div class="fg"><div class="fl">Projekt-Nr. <span class="tr">Proje No</span></div>
+            <input type="text" class="fi" id="tbPN" placeholder="2025-001" oninput="syncProjectInfoFromTB()"></div>
+          <div class="fg"><div class="fl">Bauvorhaben <span class="tr">Proje Adı</span></div>
+            <input type="text" class="fi" id="tbPName" placeholder="Projektname…" oninput="syncProjectInfoFromTB()"></div>
+          <div class="fg"><div class="fl">Standort <span class="tr">Proje Yeri</span></div>
+            <input type="text" class="fi" id="tbST" placeholder="Adresse / Ort…" oninput="syncProjectInfoFromTB()"></div>
+          <div class="fg"><div class="fl">Bauleiter <span class="tr">Sorumlu</span></div>
+            <input type="text" class="fi" id="tbBL" placeholder="Name…" oninput="syncProjectInfoFromTB()"></div>
+        </div>
+      </div>
+
       <!-- Wetter -->
       <div class="card">
         <div class="card-hd"><div class="card-hd-l"><div class="ci ci-gl">🌤</div><h3>Wetter <small>Hava</small></h3></div></div>
@@ -1326,6 +1359,10 @@ body{
         <input type="text" class="fi" id="ap-tr" placeholder="z.B. Duvar Ustası, Marangoz…"></div>
       <div class="fg"><div class="fl">Anzahl <span class="tr">Sayı</span></div>
         <input type="number" class="fi" id="ap-count" placeholder="0" min="0" value="1"></div>
+      <div class="fg"><div class="fl">Name <span class="tr">İsim</span></div>
+        <input type="text" class="fi" id="ap-name" placeholder="z.B. Max Mustermann"></div>
+      <div class="fg"><div class="fl">Firma <span class="tr">Şirket</span></div>
+        <select class="fs" id="ap-firm"><option value="">— Keine Firma</option></select></div>
     </div>
     <div class="modal-ft"><button class="btn btn-ghost" onclick="closeModal('addPers')">Abbrechen</button><button class="btn btn-primary" onclick="addPersonnelType()">Hinzufügen ✓</button></div>
   </div>
@@ -1344,6 +1381,13 @@ body{
         <div class="fg"><div class="fl">Anzahl <span class="tr">Sayı</span></div><input type="number" class="fi" id="ag-count" value="1" min="0"></div>
         <div class="fg"><div class="fl">Betriebsstunden <span class="tr">Çalışma saati</span></div><input type="number" class="fi" id="ag-hours" placeholder="0" min="0"></div>
       </div>
+      <div class="fr2">
+        <div class="fg"><div class="fl">Marke</div><input type="text" class="fi" id="ag-brand" placeholder="CAT, Hilti…"></div>
+        <div class="fg"><div class="fl">Modell</div><input type="text" class="fi" id="ag-model" placeholder="320D, TE 70…"></div>
+      </div>
+      <div class="fg"><div class="fl">Nutzende Firma <span class="tr">Kullanan Firma</span></div>
+        <select class="fs" id="ag-firm"><option value="">— Keine Firma</option></select></div>
+      <div class="fg"><div class="fl">Notiz</div><textarea class="fta" id="ag-note" style="min-height:60px;" placeholder="Seriennummer, konum, operatör…"></textarea></div>
     </div>
     <div class="modal-ft"><button class="btn btn-ghost" onclick="closeModal('addGeraet')">Abbrechen</button><button class="btn btn-primary" onclick="addGeraet()">Hinzufügen ✓</button></div>
   </div>
@@ -1500,10 +1544,22 @@ const DEFAULT_PERS = [
   {key:'hilfskraft',de:'Hilfskraft',tr:'Yardımcı'},
 ];
 const DEFAULT_GERAETE = [
-  {key:'kran',de:'Kran',tr:'Vinç',icon:'🏗',count:0,hours:0},
-  {key:'bagger',de:'Bagger',tr:'Ekskavatör',icon:'🚜',count:0,hours:0},
-  {key:'betonmischer',de:'Betonmischer',tr:'Beton Mikseri',icon:'🔄',count:0,hours:0},
-  {key:'betonpumpe',de:'Betonpumpe',tr:'Beton Pompası',icon:'💧',count:0,hours:0},
+  {key:'kran',de:'Kran',tr:'Vinç',icon:'🏗',count:0,hours:0,brand:'',model:'',firmId:'',note:''},
+  {key:'bagger',de:'Bagger',tr:'Ekskavatör',icon:'🚜',count:0,hours:0,brand:'',model:'',firmId:'',note:''},
+  {key:'radlader',de:'Radlader',tr:'Yükleyici',icon:'🚛',count:0,hours:0,brand:'',model:'',firmId:'',note:''},
+  {key:'dumper',de:'Dumper',tr:'Damper',icon:'🚚',count:0,hours:0,brand:'',model:'',firmId:'',note:''},
+  {key:'kranmobil',de:'Mobilkran',tr:'Mobil Vinç',icon:'🏗️',count:0,hours:0,brand:'',model:'',firmId:'',note:''},
+  {key:'betonmischer',de:'Betonmischer',tr:'Beton Mikseri',icon:'🔄',count:0,hours:0,brand:'',model:'',firmId:'',note:''},
+  {key:'betonpumpe',de:'Betonpumpe',tr:'Beton Pompası',icon:'💧',count:0,hours:0,brand:'',model:'',firmId:'',note:''},
+  {key:'ruettelplatte',de:'Rüttelplatte',tr:'Kompaktör',icon:'🧰',count:0,hours:0,brand:'',model:'',firmId:'',note:''},
+  {key:'walze',de:'Walze',tr:'Silindir',icon:'🛞',count:0,hours:0,brand:'',model:'',firmId:'',note:''},
+  {key:'stapler',de:'Stapler',tr:'Forklift',icon:'🏭',count:0,hours:0,brand:'',model:'',firmId:'',note:''},
+  {key:'hebebuehne',de:'Hebebühne',tr:'Platform',icon:'⬆️',count:0,hours:0,brand:'',model:'',firmId:'',note:''},
+  {key:'generator',de:'Generator',tr:'Jeneratör',icon:'🔌',count:0,hours:0,brand:'',model:'',firmId:'',note:''},
+  {key:'kompressor',de:'Kompressor',tr:'Kompresör',icon:'🌀',count:0,hours:0,brand:'',model:'',firmId:'',note:''},
+  {key:'schweissgeraet',de:'Schweißgerät',tr:'Kaynak Makinesi',icon:'⚡',count:0,hours:0,brand:'',model:'',firmId:'',note:''},
+  {key:'bautrockner',de:'Bautrockner',tr:'Kurutucu',icon:'🌬️',count:0,hours:0,brand:'',model:'',firmId:'',note:''},
+  {key:'pumpe',de:'Pumpe',tr:'Pompa',icon:'🚿',count:0,hours:0,brand:'',model:'',firmId:'',note:''},
 ];
 
 let S = newState();   // current working state
@@ -1511,7 +1567,7 @@ let archive = [];     // array of saved reports
 let saveTimer = null;
 let draggingId = null;
 let ctEditId = null;
-let currentTheme = 'dark';
+let currentTheme = 'light';
 
 function newState() {
   return {
@@ -1617,6 +1673,10 @@ function applyStateToForm() {
   sv('hPName', S.projectName);
   sv('hBL', S.bauleiter);
   sv('hST', S.standort);
+  sv('tbPN', S.projectNr);
+  sv('tbPName', S.projectName);
+  sv('tbBL', S.bauleiter);
+  sv('tbST', S.standort);
   sv('rDate', S.reportDate || todayStr());
   sv('rNr', S.reportNr || autoRNr());
   sv('tMin', S.tempMin);
@@ -1644,6 +1704,21 @@ function autoSave() {
     updateBadges();
     refreshDash();
   }, 900);
+}
+
+
+function syncProjectInfoFromTB() {
+  sv('hPN', gv('tbPN'));
+  sv('hPName', gv('tbPName'));
+  sv('hST', gv('tbST'));
+  sv('hBL', gv('tbBL'));
+  autoSave();
+}
+function syncProjectInfoToTB() {
+  sv('tbPN', gv('hPN'));
+  sv('tbPName', gv('hPName'));
+  sv('tbST', gv('hST'));
+  sv('tbBL', gv('hBL'));
 }
 
 // ═══════════════════════════════════════════════════
@@ -1694,9 +1769,10 @@ function formatDateTimeDisplay(d) {
 document.addEventListener('DOMContentLoaded', () => {
   loadAll();
   // Apply saved theme
-  const savedTheme = localStorage.getItem('sero_theme') || 'dark';
+  const savedTheme = localStorage.getItem('sero_theme') || 'light';
   setTheme(savedTheme);
   applyStateToForm();
+  syncProjectInfoToTB();
   buildPersonnel();
   buildGeraete();
   renderSigGrid();
@@ -1804,14 +1880,26 @@ function buildPersonnel() {
       <div class="pers-detail" id="pd_${p.key}">
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:6px;">
           <div>
-            <div style="font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text3);margin-bottom:3px;">NAME</div>
+            <div style="font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text3);margin-bottom:3px;">NAME 1</div>
             <input class="fi" type="text" style="padding:5px 8px;font-size:11px;" placeholder="Name…" value="${esc(names[0]||'')}" onchange="setPersName('${p.key}',0,this.value)">
+          </div>
+          <div>
+            <div style="font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text3);margin-bottom:3px;">NAME 2</div>
+            <input class="fi" type="text" style="padding:5px 8px;font-size:11px;" placeholder="Name…" value="${esc(names[1]||'')}" onchange="setPersName('${p.key}',1,this.value)">
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+          <div>
+            <div style="font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text3);margin-bottom:3px;">NAME 3</div>
+            <input class="fi" type="text" style="padding:5px 8px;font-size:11px;" placeholder="Name…" value="${esc(names[2]||'')}" onchange="setPersName('${p.key}',2,this.value)">
           </div>
           <div>
             <div style="font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text3);margin-bottom:3px;">FIRMA</div>
             <select class="fs" style="padding:5px 8px;font-size:11px;" onchange="setPersFirm('${p.key}',this.value)">${firmOpts}</select>
           </div>
         </div>
+      </div>
+    </div>
       </div>
     `;
     list.appendChild(row);
@@ -1861,6 +1949,10 @@ function addPersonnelType() {
   if (!S.personnelTypes) S.personnelTypes = [];
   S.personnelTypes.push({key, de:role, tr:gv('ap-tr')||''});
   S.personnelCounts[key] = parseInt(gv('ap-count')||'1');
+  if (!S.personnelNames) S.personnelNames = {};
+  if (!S.personnelFirms) S.personnelFirms = {};
+  S.personnelNames[key] = [gv('ap-name') || ''];
+  S.personnelFirms[key] = gv('ap-firm') || '';
   closeModal('addPers');
   buildPersonnel();
   autoSave();
@@ -1887,17 +1979,24 @@ function buildGeraete() {
     row.className = 'geraet-row';
     const gFirmOpts = '<option value="">— Keine</option>'+(S.contractors||[]).map(c=>`<option value="${esc(c.id)}" ${(g.firmId||'')=== c.id?'selected':''}>${esc(c.name)}</option>`).join('');
     row.innerHTML = `
-      <span class="geraet-icon">${g.icon||'🔧'}</span>
-      <div class="geraet-name">
-        <div style="font-size:12px;font-weight:600;">${esc(g.de)}</div>
-        <div style="font-size:9px;color:var(--text3);font-style:italic;">${esc(g.tr||'')}</div>
+      <div class="geraet-head">
+        <span class="geraet-icon">${g.icon||'🔧'}</span>
+        <div class="geraet-name">
+          <div style="font-size:12px;font-weight:600;">${esc(g.de)}</div>
+          <div class="geraet-sub">${esc(g.tr||'')} ${g.brand||g.model?`· ${esc(g.brand||'')} ${esc(g.model||'')}`:''}</div>
+        </div>
+        <button class="cnt-btn" onclick="chgGeraet('${g.key}',-1)">−</button>
+        <div class="cnt-val" id="gv_${g.key}">${g.count||0}</div>
+        <button class="cnt-btn" onclick="chgGeraet('${g.key}',1)">+</button>
+        <button class="btn-icon" style="width:24px;height:24px;font-size:11px;margin-left:4px;" onclick="delGeraet('${g.key}')">✕</button>
       </div>
-      <select class="fs" style="padding:4px 7px;font-size:11px;min-width:88px;" onchange="setGeraetFirm('${g.key}',this.value)">${gFirmOpts}</select>
-      <button class="cnt-btn" onclick="chgGeraet('${g.key}',-1)">−</button>
-      <div class="cnt-val" id="gv_${g.key}">${g.count||0}</div>
-      <button class="cnt-btn" onclick="chgGeraet('${g.key}',1)">+</button>
-      ${g.hours!==undefined?`<span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3);margin-left:4px;">${g.hours}h</span>`:''}
-      <button class="btn-icon" style="width:24px;height:24px;font-size:11px;margin-left:4px;" onclick="delGeraet('${g.key}')">✕</button>
+      <div class="geraet-detail-grid">
+        <input class="fi" type="text" placeholder="Marke" value="${esc(g.brand||'')}" onchange="setGeraetField('${g.key}','brand',this.value)">
+        <input class="fi" type="text" placeholder="Modell" value="${esc(g.model||'')}" onchange="setGeraetField('${g.key}','model',this.value)">
+        <select class="fs" onchange="setGeraetField('${g.key}','firmId',this.value)">${gFirmOpts}</select>
+        <input class="fi" type="number" min="0" placeholder="Stunden" value="${esc(g.hours||'')}" onchange="setGeraetField('${g.key}','hours',this.value)">
+        <textarea class="fta" style="grid-column:1/-1;min-height:54px;" placeholder="Notiz / Seriennr. / Standort…" onchange="setGeraetField('${g.key}','note',this.value)">${esc(g.note||'')}</textarea>
+      </div>
     `;
     list.appendChild(row);
   });
@@ -1906,6 +2005,12 @@ function buildGeraete() {
 function setGeraetFirm(key, firmId) {
   const g=(S.geraete||[]).find(x=>x.key===key);
   if(g){g.firmId=firmId;autoSave();}
+}
+function setGeraetField(key, field, value) {
+  const g=(S.geraete||[]).find(x=>x.key===key);
+  if(!g) return;
+  g[field] = field === 'hours' ? (parseInt(value||'0')||0) : value;
+  autoSave();
 }
 
 function chgGeraet(key, delta) {
@@ -1932,6 +2037,10 @@ function addGeraet() {
     key, de:name, tr:gv('ag-tr')||'', icon:'🔧',
     count:parseInt(gv('ag-count')||'1'),
     hours:parseInt(gv('ag-hours')||'0'),
+    brand: gv('ag-brand')||'',
+    model: gv('ag-model')||'',
+    firmId: gv('ag-firm')||'',
+    note: gv('ag-note')||'',
   });
   closeModal('addGeraet');
   buildGeraete();
@@ -2050,9 +2159,19 @@ function openModal(name, col) {
   if (name === 'km') {
     sv('km-title',''); sv('km-note',''); sv('km-time',''); sv('km-trade','');
     if (col) svs('km-col', col);
-    // populate firms
     const sel = document.getElementById('km-firm');
     sel.innerHTML = '<option value="">— Alle</option>' + (S.contractors||[]).map(c=>`<option value="${esc(c.id)}">${esc(c.name)}</option>`).join('');
+  }
+  if (name === 'addPers') {
+    sv('ap-role',''); sv('ap-tr',''); sv('ap-count','1'); sv('ap-name','');
+    const sel = document.getElementById('ap-firm');
+    if (sel) sel.innerHTML = '<option value="">— Keine Firma</option>' + (S.contractors||[]).map(c=>`<option value="${esc(c.id)}">${esc(c.name)}</option>`).join('');
+  }
+  if (name === 'addGeraet') {
+    sv('ag-name',''); sv('ag-tr',''); sv('ag-count','1'); sv('ag-hours','');
+    sv('ag-brand',''); sv('ag-model',''); sv('ag-note','');
+    const sel = document.getElementById('ag-firm');
+    if (sel) sel.innerHTML = '<option value="">— Keine Firma</option>' + (S.contractors||[]).map(c=>`<option value="${esc(c.id)}">${esc(c.name)}</option>`).join('');
   }
   if (name === 'addNote') {
     sv('note-txt',''); sv('note-date', todayStr());
