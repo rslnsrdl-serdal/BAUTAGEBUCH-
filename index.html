@@ -570,6 +570,25 @@ body{
   padding:5px 8px;font-size:11px;
 }
 
+
+.timeline-item{
+  display:grid;grid-template-columns:96px 1fr 160px auto;gap:8px;
+  align-items:start;padding:8px 10px;background:var(--bg3);
+  border:1px solid var(--border);border-radius:var(--radius-xs);margin-bottom:6px;
+}
+.wa-tag{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:6px 10px;border-radius:999px;background:var(--bg3);
+  border:1px solid var(--border);font-size:11px;color:var(--text2);
+}
+.wa-tag button{border:none;background:none;color:var(--red);cursor:pointer;font-size:11px;}
+.wr-card{
+  padding:10px 12px;background:var(--bg3);border:1px solid var(--border);
+  border-radius:var(--radius-xs);margin-bottom:8px;
+}
+.wr-title{font-size:12px;font-weight:700;color:var(--text);}
+.wr-meta{font-size:11px;color:var(--text3);margin-top:4px;line-height:1.6;}
+
 /* ═══════════════════════════════════════════════════
    WORK ENTRIES
 ═══════════════════════════════════════════════════ */
@@ -767,6 +786,67 @@ body{
 .doc-name{font-size:10px;color:var(--text2);word-break:break-all;line-height:1.3;}
 .doc-size{font-size:9px;color:var(--text3);}
 
+
+.ph-meta{
+  position:absolute;left:0;right:0;bottom:24px;
+  background:rgba(0,0,0,.68);color:#fff;padding:4px 6px;
+  font-size:8px;line-height:1.3;display:none;
+}
+.ph-thumb:hover .ph-meta{display:block;}
+.photo-detail-grid{
+  display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px;
+}
+.photo-detail-grid .fi,.photo-detail-grid .fs,.photo-detail-grid .fta{
+  padding:6px 8px;font-size:11px;
+}
+.photo-card{
+  background:var(--bg3);border:1px solid var(--border);
+  border-radius:var(--radius-s);padding:10px;margin-top:10px;
+}
+
+
+.timeline-actions{
+  display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-top:6px;
+}
+.timeline-photo-btn{
+  padding:4px 8px;border-radius:6px;border:1px solid var(--border);
+  background:var(--bg4);color:var(--text2);font-size:10px;font-weight:700;
+  cursor:pointer;-webkit-appearance:none;
+}
+.timeline-photo-btn:hover{background:var(--accent2);color:#fff;border-color:transparent;}
+.timeline-photo-list{
+  margin-top:6px;display:flex;flex-wrap:wrap;gap:6px;
+}
+.timeline-photo-chip{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:4px 8px;border-radius:999px;background:var(--bg4);
+  border:1px solid var(--border);font-size:10px;color:var(--text2);
+}
+
+
+.mangel-card{
+  background:var(--card-bg);border:1px solid var(--border);
+  border-radius:var(--radius);padding:14px 15px;margin-bottom:10px;
+  transition:border-color .18s, box-shadow .18s;
+}
+.mangel-card:hover{border-color:var(--border2);box-shadow:var(--shadow);}
+.mangel-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:8px;}
+.mangel-title{font-size:14px;font-weight:700;color:var(--text);}
+.mangel-meta{font-size:10px;color:var(--text3);line-height:1.6;}
+.mangel-desc{font-size:12px;color:var(--text2);line-height:1.6;margin-top:8px;}
+.mangel-actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;}
+.mangel-badge{
+  font-size:9px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;
+  padding:4px 9px;border-radius:999px;border:1px solid var(--border);
+}
+.mg-offen{background:rgba(239,68,68,.12);color:var(--red);}
+.mg-bearbeitung{background:rgba(245,158,11,.12);color:var(--gold);}
+.mg-erledigt{background:rgba(16,185,129,.12);color:var(--accent3);}
+.mangel-photo-ref{
+  margin-top:8px;padding:8px 10px;border-radius:8px;background:var(--bg3);
+  border:1px solid var(--border);font-size:11px;color:var(--text2);
+}
+
 /* ═══════════════════════════════════════════════════
    ARCHIVE
 ═══════════════════════════════════════════════════ */
@@ -883,6 +963,354 @@ body{
 .prog-bar{height:5px;background:var(--bg4);border-radius:3px;overflow:hidden;}
 .prog-fill{height:100%;border-radius:3px;transition:width .4s ease;}
 
+
+/* APPLE CONSTRUCTION LIGHT UI */
+:root{
+  --accent:#007aff;
+  --accent2:#0a84ff;
+  --accent3:#34c759;
+  --gold:#ff9f0a;
+  --red:#ff3b30;
+  --purple:#af52de;
+  --cyan:#64d2ff;
+  --radius:16px;
+  --radius-s:12px;
+  --radius-xs:10px;
+}
+[data-theme="light"]{
+  --bg:#f6f7fb;
+  --bg2:#ffffff;
+  --bg3:#f9fafb;
+  --bg4:#f2f4f7;
+  --bg5:#e3e8ef;
+  --border:rgba(15,23,42,0.08);
+  --border2:rgba(15,23,42,0.14);
+  --text:#1c1c1e;
+  --text2:#4b5563;
+  --text3:#8a94a6;
+  --shadow:0 1px 3px rgba(15,23,42,0.06),0 8px 24px rgba(15,23,42,0.04);
+  --shadow2:0 10px 30px rgba(15,23,42,0.08);
+  --card-bg:#ffffff;
+}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','SF Pro Display','Helvetica Neue',Arial,sans-serif !important;
+  letter-spacing:-0.012em;
+  background:#f6f7fb;
+}
+.hdr,.nav-bar,.card,.kb-col,.con-card,.mt-card,.mangel-card,.ar-item,.ct-card,.modal,.stat-card,.we,.photo-card{
+  box-shadow:var(--shadow) !important;
+}
+.hdr{
+  background:rgba(255,255,255,0.86);
+  backdrop-filter:blur(18px);
+}
+.hdr-brand{padding:14px 16px;}
+.logo-mark{
+  border-radius:12px;
+  background:linear-gradient(135deg,#0a84ff,#5ac8fa);
+  box-shadow:none;
+}
+.nav-bar{
+  background:transparent;
+}
+.nav-inner{
+  padding:0 8px;
+  gap:6px;
+}
+.nav-tab{
+  border-radius:12px;
+  margin:8px 0;
+  border-bottom:none !important;
+  padding:10px 14px;
+}
+.nav-tab.active{
+  background:rgba(0,122,255,0.10);
+  color:var(--accent);
+}
+.nav-tab.active .nav-badge{
+  background:var(--accent);
+}
+.card,.kb-col,.con-card,.mt-card,.ct-card,.mangel-card,.ar-item,.photo-card,.modal{
+  border-radius:16px !important;
+  border:1px solid var(--border) !important;
+  background:#fff !important;
+}
+.card-hd,.kb-hd,.we-hd{
+  background:transparent !important;
+}
+.sh h2,.brand-text h1{
+  font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Helvetica Neue',sans-serif !important;
+  letter-spacing:-0.03em;
+}
+.card-hd h3,.kb-title,.con-name,.mt-title,.ar-title,.mangel-title{
+  font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Helvetica Neue',sans-serif !important;
+  letter-spacing:-0.02em;
+}
+.btn{
+  border-radius:12px;
+  font-weight:600;
+}
+.btn-primary,.btn-blue{
+  background:linear-gradient(180deg,#0a84ff,#007aff);
+  color:#fff;
+}
+.btn-ghost{
+  background:#f5f7fa;
+  color:var(--text);
+}
+.theme-toggle,.btn-icon,.cnt-btn,.ct-btn,.kb-add{
+  border-radius:12px !important;
+}
+.ci{
+  border-radius:12px;
+}
+.main{
+  max-width:1520px;
+  padding:18px 14px 86px;
+}
+
+/* Dashboard widgets */
+.dash-stats{
+  grid-template-columns:repeat(5,minmax(0,1fr));
+  gap:14px;
+}
+.stat-card{
+  border-radius:18px !important;
+  overflow:hidden;
+}
+.stat-bar{
+  height:4px;
+}
+.stat-inner{
+  padding:16px 16px 15px;
+}
+.stat-val{
+  font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Helvetica Neue',Arial,sans-serif !important;
+  font-size:32px !important;
+  font-weight:700 !important;
+  letter-spacing:-0.05em !important;
+  color:var(--text) !important;
+}
+.stat-label{
+  font-size:10px;
+  color:var(--text3);
+  letter-spacing:.08em;
+}
+.stat-sub{
+  font-size:11px;
+  color:var(--text2);
+  font-style:normal;
+}
+.s-o .stat-bar{background:#0a84ff;}
+.s-b .stat-bar{background:#5ac8fa;}
+.s-g .stat-bar{background:#34c759;}
+.s-gl .stat-bar{background:#ff9f0a;}
+.s-r .stat-bar{background:#ff3b30;}
+.s-p .stat-bar{background:#af52de;}
+
+/* Kanban */
+.kb-wrap{gap:16px;}
+.kb-col{
+  min-height:420px;
+}
+.kbc{
+  background:#fff !important;
+  border:1px solid var(--border) !important;
+  border-left-width:5px !important;
+  border-radius:14px !important;
+  padding:12px 12px 10px;
+}
+.kbc:hover{
+  transform:translateY(-1px);
+}
+.kbc.ph{border-left-color:#ff3b30 !important;}
+.kbc.pm{border-left-color:#ff9f0a !important;}
+.kbc.pl{border-left-color:#34c759 !important;}
+.kbc-top{padding-right:68px;}
+.kbc-title{
+  font-size:14px;
+  font-weight:700;
+  letter-spacing:-0.02em;
+}
+.kbc-firm,.timeline-firm{
+  background:rgba(0,122,255,0.10) !important;
+  color:#007aff !important;
+  border:1px solid rgba(0,122,255,0.12);
+  border-radius:999px !important;
+}
+.chip{
+  border-radius:999px !important;
+  font-size:9px;
+}
+.chip-h{background:rgba(255,59,48,0.10);color:#ff3b30;}
+.chip-m{background:rgba(255,159,10,0.12);color:#c77700;}
+.chip-l{background:rgba(52,199,89,0.12);color:#239a43;}
+.chip-t{background:#f4f6f8;color:#667085;border:1px solid var(--border);}
+.kbc-note{
+  background:#f8fafc;
+  border:1px solid var(--border);
+  padding:8px 10px;
+  border-radius:12px;
+  margin-top:8px;
+  font-style:normal;
+}
+
+/* Timeline */
+.timeline-item{
+  grid-template-columns:92px 1fr 180px auto !important;
+  background:#fff !important;
+  border-radius:16px !important;
+  border:1px solid var(--border) !important;
+  box-shadow:var(--shadow);
+  padding:12px !important;
+  margin-bottom:10px !important;
+}
+.timeline-item textarea{
+  border-radius:12px !important;
+}
+.timeline-actions{
+  display:flex;
+  gap:8px;
+  align-items:center;
+  flex-wrap:wrap;
+  margin-top:8px;
+}
+.timeline-photo-btn{
+  padding:6px 10px;
+  border-radius:999px;
+  border:1px solid var(--border);
+  background:#f6f8fb;
+  color:var(--text2);
+  font-size:10px;
+  font-weight:700;
+}
+.timeline-photo-list{
+  margin-top:8px;
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px;
+}
+.timeline-photo-chip{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  padding:5px 8px;
+  border-radius:999px;
+  background:#f5f7fa;
+  border:1px solid var(--border);
+  font-size:10px;
+  color:var(--text2);
+}
+
+/* Photo manager */
+.photo-card{
+  background:#fff !important;
+  border-radius:18px !important;
+  padding:12px;
+}
+.photo-detail-grid{
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+}
+.ph-thumb{
+  border-radius:14px !important;
+  box-shadow:var(--shadow);
+}
+.ph-meta{
+  border-radius:0 0 14px 14px;
+}
+#photoManager{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:12px;
+  margin-top:14px;
+}
+
+/* Mangel punch-list */
+.mangel-card{
+  border-left:5px solid #ff9f0a !important;
+}
+.mg-offen{background:rgba(255,59,48,0.10);color:#ff3b30;border:none;}
+.mg-bearbeitung{background:rgba(255,159,10,0.12);color:#c77700;border:none;}
+.mg-erledigt{background:rgba(52,199,89,0.12);color:#239a43;border:none;}
+.mangel-photo-ref{
+  background:#f6f8fb;
+  border-radius:12px;
+}
+.mangel-actions .btn{
+  border-radius:999px;
+}
+
+/* Work area chips */
+.wa-tag{
+  border-radius:999px;
+  background:#eef5ff;
+  color:#0066d6;
+  border-color:rgba(0,122,255,0.10);
+}
+
+/* Floating action button */
+.fab-wrap{
+  position:fixed;
+  right:18px;
+  bottom:20px;
+  z-index:950;
+  display:flex;
+  flex-direction:column;
+  align-items:flex-end;
+  gap:10px;
+}
+.fab-main{
+  width:58px;
+  height:58px;
+  border:none;
+  border-radius:50%;
+  background:linear-gradient(180deg,#0a84ff,#007aff);
+  color:#fff;
+  font-size:30px;
+  box-shadow:0 14px 34px rgba(0,122,255,0.28);
+  cursor:pointer;
+}
+.fab-menu{
+  display:none;
+  flex-direction:column;
+  gap:10px;
+  align-items:flex-end;
+}
+.fab-wrap.open .fab-menu{display:flex;}
+.fab-item{
+  min-width:178px;
+  border:none;
+  border-radius:16px;
+  background:#fff;
+  color:var(--text);
+  box-shadow:var(--shadow2);
+  border:1px solid var(--border);
+  padding:12px 14px;
+  display:flex;
+  align-items:center;
+  justify-content:flex-start;
+  gap:10px;
+  font-weight:600;
+  cursor:pointer;
+}
+.fi-ico{font-size:18px; width:22px; text-align:center;}
+
+/* Photos and cards on smaller screens */
+@media(max-width:1100px){
+  .dash-stats{grid-template-columns:repeat(3,minmax(0,1fr));}
+}
+@media(max-width:760px){
+  .dash-stats{grid-template-columns:repeat(2,minmax(0,1fr));}
+  .timeline-item{grid-template-columns:1fr !important;}
+  .photo-detail-grid{grid-template-columns:1fr;}
+}
+@media(max-width:600px){
+  .fab-wrap{right:14px; bottom:14px;}
+  .fab-main{width:56px;height:56px;}
+  .main{padding-bottom:96px;}
+}
+
 /* ═══════════════════════════════════════════════════
    RESPONSIVE
 ═══════════════════════════════════════════════════ */
@@ -939,11 +1367,6 @@ body{
   .kbc{padding:10px 11px;}
 }
 @media(max-width:600px){
-  #pg-settings > div[style*="grid-template-columns:1fr 1fr"]{
-    display:grid !important;
-    grid-template-columns:1fr !important;
-    gap:10px !important;
-  }
   #pg-dash > div[style*="grid-template-columns:1fr 1fr"],
   #pg-dash > div[style*="grid-template-columns:2fr 1fr"]{
     display:grid !important;
@@ -1017,8 +1440,8 @@ body{
       <button class="nav-tab" data-page="pg-ct" onclick="goPage(this)"><span class="ti">🗑</span>Container <span class="nav-badge" id="nb-ct">0</span></button>
       <button class="nav-tab" data-page="pg-meet" onclick="goPage(this)"><span class="ti">📅</span>Besprechungen <span class="nav-badge" id="nb-meet">0</span></button>
       <button class="nav-tab" data-page="pg-files" onclick="goPage(this)"><span class="ti">📂</span>Dateien <span class="nav-badge" id="nb-files">0</span></button>
+      <button class="nav-tab" data-page="pg-mangel" onclick="goPage(this)"><span class="ti">⚠️</span>Mängel <span class="nav-badge" id="nb-mangel">0</span></button>
       <button class="nav-tab" data-page="pg-archive" onclick="goPage(this)"><span class="ti">🗃</span>Archiv <span class="nav-badge" id="nb-archive">0</span></button>
-      <button class="nav-tab" data-page="pg-settings" onclick="goPage(this)"><span class="ti">⚙️</span>Einstellungen</button>
     </div>
   </div>
 </header>
@@ -1219,6 +1642,40 @@ body{
         </div>
       </div>
 
+
+      <!-- Arbeitsbereiche -->
+      <div class="card">
+        <div class="card-hd">
+          <div class="card-hd-l"><div class="ci ci-c">📍</div><h3>Arbeitsbereiche <small>Çalışma Alanları</small></h3></div>
+        </div>
+        <div class="card-body">
+          <div class="tag-row" id="workAreaTags"></div>
+          <div class="divider"></div>
+          <div class="fr2">
+            <input type="text" class="fi" id="waInput" placeholder="z.B. NSHV Raum, Dach, Außenbereich West">
+            <button class="btn btn-primary" onclick="addWorkArea()">+ Bereich</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tageschronologie -->
+      <div class="card">
+        <div class="card-hd">
+          <div class="card-hd-l"><div class="ci ci-r">🕘</div><h3>Tageschronologie <small>Günlük Zaman Çizelgesi</small></h3></div>
+          <button class="btn btn-primary btn-sm" onclick="addTimelineEntry()">+ Eintrag</button>
+        </div>
+        <div class="card-body">
+          <div style="display:grid;grid-template-columns:110px 1fr 1fr auto;gap:8px;margin-bottom:10px;" id="timelineQuickAdd">
+            <input type="time" class="fi" id="tlTime" value="">
+            <input type="text" class="fi" id="tlText" placeholder="z.B. Stricker kam auf die Baustelle">
+            <select class="fs" id="tlFirmQuick"><option value="">— Firma wählen</option></select>
+            <button class="btn btn-ghost" onclick="quickAddTimeline()">Speichern</button>
+          </div>
+          <div id="timelineList"></div>
+          <div id="timelineEmpty" class="empty-state" style="padding:20px;"><div class="ei">🕘</div><h4>Keine Tagesereignisse</h4><p>Gün içi olay ekle</p></div>
+        </div>
+      </div>
+
       <!-- Bemerkungen -->
       <div class="card">
         <div class="card-hd"><div class="card-hd-l"><div class="ci ci-p">📝</div><h3>Allgemeine Bemerkungen <small>Genel Notlar</small></h3></div></div>
@@ -1284,6 +1741,7 @@ body{
       </div>
       <input type="file" id="photoIn" multiple accept="image/*" style="display:none" onchange="handlePhotos(this)">
       <div class="photo-grid" id="photoGrid"></div>
+      <div id="photoManager"></div>
     </div>
   </div>
   <div class="card">
@@ -1294,10 +1752,40 @@ body{
         <p>Dokumente, Pläne, DWG hochladen — Belgeler yükle</p>
       </div>
       <input type="file" id="docIn" multiple accept=".pdf,.doc,.docx,.xls,.xlsx,.dwg,.rvt,.ifc,.zip,.txt" style="display:none" onchange="handleDocs(this)">
+      <input type="file" id="timelinePhotoIn" accept="image/*" style="display:none" onchange="handleTimelinePhoto(this)">
       <div class="doc-grid" id="docGrid"></div>
     </div>
   </div>
 </div>
+
+
+<!-- ═══════════ PAGE: MÄNGEL ═══════════ -->
+<div class="page" id="pg-mangel">
+  <div class="sh">
+    <h2>Mängelmanagement <span class="sub">Eksik / Tespit Takibi</span></h2>
+    <button class="btn btn-primary" onclick="openModal('addMangel')">+ Mangel hinzufügen</button>
+  </div>
+
+  <div class="card" style="margin-bottom:14px;">
+    <div class="card-body">
+      <div class="fr3">
+        <input type="text" class="fi" id="mangelSearch" placeholder="🔍 Suchen…" oninput="renderMaengel()">
+        <select class="fs" id="mangelFilterStatus" onchange="renderMaengel()">
+          <option value="">Alle Status</option>
+          <option value="offen">Offen</option>
+          <option value="bearbeitung">In Bearbeitung</option>
+          <option value="erledigt">Erledigt</option>
+        </select>
+        <select class="fs" id="mangelFilterFirm" onchange="renderMaengel()">
+          <option value="">Alle Firmen</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div id="mangelList"><div class="empty-state"><div class="ei">⚠️</div><h4>Keine Mängel</h4><p>Tespit veya eksik ekle</p></div></div>
+</div>
+
 
 <!-- ═══════════ PAGE: ARCHIV ═══════════ -->
 <div class="page" id="pg-archive">
@@ -1324,63 +1812,6 @@ body{
   <div id="archiveList"><div class="empty-state"><div class="ei">🗃</div><h4>Kein Archiv</h4><p>"Bericht speichern" ile rapor kaydet</p></div></div>
 </div>
 
-
-<!-- ═══════════ PAGE: SETTINGS ═══════════ -->
-<div class="page" id="pg-settings">
-  <div class="sh">
-    <h2>Einstellungen <span class="sub">Ayarlar</span></h2>
-  </div>
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
-    <div class="card">
-      <div class="card-hd"><div class="card-hd-l"><div class="ci ci-b">💾</div><h3>Daten sichern <small>Veri Yedekleme</small></h3></div></div>
-      <div class="card-body">
-        <div class="fg">
-          <div class="fl">JSON Export <span class="tr">Yedek indir</span></div>
-          <button class="btn btn-primary" onclick="exportBackup()">⬇ Backup exportieren</button>
-        </div>
-        <div class="fg">
-          <div class="fl">JSON Import <span class="tr">Yedek yükle</span></div>
-          <input type="file" id="backupIn" accept=".json" style="display:none" onchange="importBackup(this)">
-          <button class="btn btn-ghost" onclick="document.getElementById('backupIn').click()">⬆ Backup importieren</button>
-        </div>
-        <div class="divider"></div>
-        <div class="fg">
-          <div class="fl">Firmen per CSV importieren <span class="tr">CSV ile firma yükle</span></div>
-          <input type="file" id="firmCsvIn" accept=".csv,text/csv" style="display:none" onchange="importFirmCSV(this)">
-          <button class="btn btn-ghost" onclick="document.getElementById('firmCsvIn').click()">🏢 CSV importieren</button>
-        </div>
-        <p style="font-size:12px;color:var(--text3);margin-top:10px;">CSV sütunları: name, trade, contact, phone, status. Tüm günlük kayıtlar, arşiv, personel, cihazlar ve toplantılar JSON olarak dışa alınabilir.</p>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="card-hd"><div class="card-hd-l"><div class="ci ci-o">🗓</div><h3>Tagesauswahl <small>Gün seçimi</small></h3></div></div>
-      <div class="card-body">
-        <div class="fg">
-          <div class="fl">Berichtstag laden <span class="tr">Tarihe göre yükle</span></div>
-          <input type="date" class="fi" id="loadReportDate">
-        </div>
-        <div class="fg" style="display:flex;gap:8px;flex-wrap:wrap;">
-          <button class="btn btn-primary" onclick="loadReportByDate()">Tag laden</button>
-          <button class="btn btn-ghost" onclick="startNewDay()">Neuen Tag beginnen</button>
-        </div>
-        <p style="font-size:12px;color:var(--text3);margin-top:10px;">Belirli bir günü açabilir, o gün neler olduğunu tekrar görebilirsin.</p>
-      </div>
-    </div>
-
-    <div class="card" style="grid-column:1/-1;">
-      <div class="card-hd"><div class="card-hd-l"><div class="ci ci-g">📘</div><h3>Tagesarchiv <small>Günlük kayıt mantığı</small></h3></div></div>
-      <div class="card-body">
-        <p style="font-size:12px;color:var(--text2);line-height:1.6;">
-          Bu sürümde her gün ayrı arşiv kaydı olarak tutulur. İstediğin günü seçip tekrar açabilir,
-          o gün personel, cihaz, iş kalemi ve notlarda neler olduğunu görebilirsin.
-        </p>
-      </div>
-    </div>
-  </div>
-</div>
-
-
 </div><!-- /main -->
 
 <!-- ══════════════════════ MODALS ══════════════════════ -->
@@ -1400,10 +1831,10 @@ body{
           <select class="fs" id="km-prio"><option value="high">🔴 Hoch</option><option value="mid" selected>🟡 Mittel</option><option value="low">🟢 Niedrig</option></select></div>
       </div>
       <div class="fr2">
-        <div class="fg"><div class="fl">Startzeit <span class="tr">Giriş saati</span></div><input type="time" class="fi" id="km-time"></div>
+        <div class="fg"><div class="fl">Uhrzeit <span class="tr">Saat</span></div><input type="time" class="fi" id="km-time"></div>
         <div class="fg"><div class="fl">Gewerk <span class="tr">İş Türü</span></div><input type="text" class="fi" id="km-trade" placeholder="Betonarbeiten…"></div>
       </div>
-      <div class="fg"><div class="fl">Notiz <span class="tr">Görev Notu</span></div><textarea class="fta" id="km-note" placeholder="Ek bilgiler, takip notu, yapılacak detaylar…" style="min-height:90px;"></textarea></div>
+      <div class="fg"><div class="fl">Notiz <span class="tr">Not</span></div><textarea class="fta" id="km-note" placeholder="Ek bilgiler…" style="min-height:70px;"></textarea></div>
     </div>
     <div class="modal-ft"><button class="btn btn-ghost" onclick="closeModal('km')">Abbrechen</button><button class="btn btn-primary" onclick="saveKanban()">Speichern ✓</button></div>
   </div>
@@ -1558,6 +1989,45 @@ body{
   </div>
 </div>
 
+
+<!-- Mangel Modal -->
+<div class="modal-ov" id="modal-addMangel">
+  <div class="modal" style="max-width:680px">
+    <div class="modal-hd"><h3>Mangel erfassen <small>Eksik / tespit ekle</small></h3><button class="modal-close" onclick="closeModal('addMangel')">✕</button></div>
+    <div class="modal-body">
+      <input type="hidden" id="mg-id">
+      <div class="fg"><div class="fl">Titel <span class="tr">Başlık</span></div>
+        <input type="text" class="fi" id="mg-title" placeholder="z.B. Tür beschädigt / Wasser im Raum"></div>
+      <div class="fr2">
+        <div class="fg"><div class="fl">Firma</div>
+          <select class="fs" id="mg-firm"><option value="">— Keine Firma</option></select></div>
+        <div class="fg"><div class="fl">Status</div>
+          <select class="fs" id="mg-status">
+            <option value="offen">⚠ Offen</option>
+            <option value="bearbeitung">🛠 In Bearbeitung</option>
+            <option value="erledigt">✓ Erledigt</option>
+          </select></div>
+      </div>
+      <div class="fr2">
+        <div class="fg"><div class="fl">Datum</div><input type="date" class="fi" id="mg-date"></div>
+        <div class="fg"><div class="fl">Deadline</div><input type="date" class="fi" id="mg-deadline"></div>
+      </div>
+      <div class="fr2">
+        <div class="fg"><div class="fl">Verantwortlich <span class="tr">Sorumlu kişi</span></div>
+          <input type="text" class="fi" id="mg-owner" placeholder="Name…"></div>
+        <div class="fg"><div class="fl">Ort / Bereich <span class="tr">Alan</span></div>
+          <input type="text" class="fi" id="mg-area" placeholder="z.B. NSHV Raum"></div>
+      </div>
+      <div class="fg"><div class="fl">Beschreibung <span class="tr">Açıklama</span></div>
+        <textarea class="fta" id="mg-desc" style="min-height:90px;" placeholder="Mangelbeschreibung, gereken aksiyonlar..."></textarea></div>
+      <div class="fg"><div class="fl">Foto verknüpfen <span class="tr">Foto bağla</span></div>
+        <select class="fs" id="mg-photo"><option value="">— Kein Foto</option></select></div>
+    </div>
+    <div class="modal-ft"><button class="btn btn-ghost" onclick="closeModal('addMangel')">Abbrechen</button><button class="btn btn-primary" onclick="saveMangel()">Speichern ✓</button></div>
+  </div>
+</div>
+
+
 <!-- Archive View Modal -->
 <div class="modal-ov" id="modal-viewAr">
   <div class="modal" style="max-width:720px">
@@ -1570,6 +2040,19 @@ body{
   </div>
 </div>
 
+
+<!-- Floating Quick Actions -->
+<div class="fab-wrap" id="fabWrap">
+  <div class="fab-menu" id="fabMenu">
+    <button class="fab-item" onclick="quickAction('photo')"><span class="fi-ico">📸</span><span>Foto</span></button>
+    <button class="fab-item" onclick="quickAction('mangel')"><span class="fi-ico">⚠️</span><span>Mangel</span></button>
+    <button class="fab-item" onclick="quickAction('aufgabe')"><span class="fi-ico">📋</span><span>Aufgabe</span></button>
+    <button class="fab-item" onclick="quickAction('timeline')"><span class="fi-ico">🕘</span><span>Timeline</span></button>
+  </div>
+  <button class="fab-main" id="fabMain" onclick="toggleFab()" aria-label="Quick actions">＋</button>
+</div>
+
+
 <!-- Toast -->
 <div id="toast"><div class="td"></div><span id="toast-msg">OK</span></div>
 
@@ -1579,9 +2062,9 @@ body{
 // ═══════════════════════════════════════════════════
 // CONSTANTS & STATE
 // ═══════════════════════════════════════════════════
-const STORAGE_KEY = 'sero_bau_v3';
+const STORAGE_KEY = 'sero_bau_v4';
 const EVERNOTE_EMAIL = 'seroseroserosero.d6af7df@m.evernote.com';
-const ARCHIVE_KEY = 'sero_bau_archive_v3';
+const ARCHIVE_KEY = 'sero_bau_archive_v4';
 const COLORS = ['#f97316','#3b82f6','#10b981','#f59e0b','#ef4444','#a855f7','#06b6d4','#ec4899'];
 const CT_CFG = {
   leer:     {label:'Leer / Boş',    cls:'ct-s-leer',   fill:'#10b981', pct:5},
@@ -1627,7 +2110,83 @@ let archive = [];     // array of saved reports
 let saveTimer = null;
 let draggingId = null;
 let ctEditId = null;
+
 let currentTheme = 'light';
+let photoDB = null;
+const PHOTO_DB_NAME = 'sero_bau_photo_db_v1';
+const PHOTO_STORE = 'photos';
+
+function openPhotoDB() {
+  return new Promise((resolve, reject) => {
+    if (photoDB) return resolve(photoDB);
+    const req = indexedDB.open(PHOTO_DB_NAME, 1);
+    req.onupgradeneeded = () => {
+      const db = req.result;
+      if (!db.objectStoreNames.contains(PHOTO_STORE)) {
+        db.createObjectStore(PHOTO_STORE, { keyPath: 'id' });
+      }
+    };
+    req.onsuccess = () => {
+      photoDB = req.result;
+      resolve(photoDB);
+    };
+    req.onerror = () => reject(req.error);
+  });
+}
+
+async function idbSavePhoto(photo) {
+  const db = await openPhotoDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(PHOTO_STORE, 'readwrite');
+    tx.objectStore(PHOTO_STORE).put(photo);
+    tx.oncomplete = () => resolve(true);
+    tx.onerror = () => reject(tx.error);
+  });
+}
+
+async function idbGetPhoto(id) {
+  const db = await openPhotoDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(PHOTO_STORE, 'readonly');
+    const req = tx.objectStore(PHOTO_STORE).get(id);
+    req.onsuccess = () => resolve(req.result || null);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+async function idbDeletePhoto(id) {
+  const db = await openPhotoDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(PHOTO_STORE, 'readwrite');
+    tx.objectStore(PHOTO_STORE).delete(id);
+    tx.oncomplete = () => resolve(true);
+    tx.onerror = () => reject(tx.error);
+  });
+}
+
+async function hydratePhotosFromIDB() {
+  if (!S.photos || !S.photos.length) return;
+  for (const p of S.photos) {
+    if (!p.data && p.id) {
+      try {
+        const saved = await idbGetPhoto(p.id);
+        if (saved && saved.data) p.data = saved.data;
+      } catch (e) {}
+    }
+  }
+}
+
+function makePhotoMetaSafe() {
+  const clone = JSON.parse(JSON.stringify(S));
+  clone.photos = (clone.photos || []).map(p => {
+    const q = { ...p };
+    delete q.data;
+    return q;
+  });
+  return clone;
+}
+
+let pendingTimelinePhotoId = null;
 
 function newState() {
   return {
@@ -1647,6 +2206,10 @@ function newState() {
     meetings: [],
     photos: [],
     docs: [],
+    timeline: [],
+    weeklyReports: [],
+    workAreas: [],
+    maengel: [],
   };
 }
 
@@ -1680,7 +2243,8 @@ function deepMerge(target, source) {
 
 function persistState() {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(S));
+    const safeState = makePhotoMetaSafe();
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(safeState));
     localStorage.setItem(ARCHIVE_KEY, JSON.stringify(archive));
     const dot = document.getElementById('saveDot');
     const st = document.getElementById('saveTime');
@@ -1688,16 +2252,7 @@ function persistState() {
     dot.className = 'save-dot';
     st.textContent = pad(now.getHours())+':'+pad(now.getMinutes())+' ✓';
   } catch(e) {
-    if (e.name === 'QuotaExceededError') {
-      // Images too large — save without photo data
-      try {
-        const slim = JSON.parse(JSON.stringify(S));
-        slim.photos = slim.photos.map(p=>({...p, data:''}));
-        slim.docs = slim.docs.map(d=>({...d, data:''}));
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(slim));
-        showToast('Fotos konnten nicht gespeichert werden (Speicher voll)','warn');
-      } catch(e2) { showToast('Speicherfehler!','err'); }
-    } else { showToast('Speicherfehler: '+e.message,'err'); }
+    showToast('Speicherfehler: '+e.message,'err');
   }
 }
 
@@ -1782,170 +2337,41 @@ function syncProjectInfoToTB() {
 }
 
 
-
-function importFirmCSV(inp) {
-  const file = inp.files && inp.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = e => {
-    try {
-      const text = e.target.result.replace(/\r/g, '');
-      const lines = text.split('\n').filter(Boolean);
-      if (lines.length < 2) { showToast('CSV leer oder ungültig','warn'); return; }
-      const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
-      const idx = {
-        name: headers.indexOf('name'),
-        trade: headers.indexOf('trade'),
-        contact: headers.indexOf('contact'),
-        phone: headers.indexOf('phone'),
-        status: headers.indexOf('status'),
-      };
-      if (idx.name === -1) { showToast('CSV braucht mindestens "name" sütunu','warn'); return; }
-      if (!S.contractors) S.contractors = [];
-      let added = 0;
-      for (const line of lines.slice(1)) {
-        const cols = line.split(',').map(v => v.trim());
-        const name = cols[idx.name] || '';
-        if (!name) continue;
-        if (S.contractors.some(c => (c.name || '').toLowerCase() == name.toLowerCase())) continue;
-        S.contractors.push({
-          id:'f_'+Date.now()+'_'+Math.random().toString(36).slice(2,7),
-          name,
-          trade: idx.trade >= 0 ? (cols[idx.trade] || '') : '',
-          contact: idx.contact >= 0 ? (cols[idx.contact] || '') : '',
-          phone: idx.phone >= 0 ? (cols[idx.phone] || '') : '',
-          status: idx.status >= 0 ? ((cols[idx.status] || 'active').toLowerCase()) : 'active',
-          color: COLORS[S.contractors.length % COLORS.length],
-          notes:[]
-        });
-        added += 1;
-      }
-      persistState();
-      renderFirms();
-      renderSigGrid();
-      buildPersonnel();
-      buildGeraete();
-      updateBadges();
-      showToast(`${added} Firmen importiert`,'ok');
-    } catch(err) {
-      showToast('CSV Import fehlgeschlagen','err');
-    }
-  };
-  reader.readAsText(file, 'utf-8');
-  inp.value = '';
+function toggleFab() {
+  document.getElementById('fabWrap')?.classList.toggle('open');
 }
-
-function exportBackup() {
-  try {
-    collectFormToState();
-    const backup = {
-      exportedAt: new Date().toISOString(),
-      version: 1,
-      state: S,
-      archive: archive,
-      theme: currentTheme
-    };
-    const blob = new Blob([JSON.stringify(backup, null, 2)], {type:'application/json'});
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = `SERO_Bautagebuch_Backup_${todayStr()}.json`;
-    a.click();
-    setTimeout(() => URL.revokeObjectURL(a.href), 500);
-    showToast('Backup exportiert','ok');
-  } catch(e) {
-    showToast('Backup Export fehlgeschlagen','err');
+function closeFab() {
+  document.getElementById('fabWrap')?.classList.remove('open');
+}
+document.addEventListener('click', (e) => {
+  const wrap = document.getElementById('fabWrap');
+  if (!wrap) return;
+  if (!wrap.contains(e.target)) closeFab();
+});
+function quickAction(type) {
+  closeFab();
+  if (type === 'photo') {
+    document.getElementById('photoIn')?.click();
+    goPageById('pg-files');
+    return;
+  }
+  if (type === 'mangel') {
+    openModal('addMangel');
+    goPageById('pg-mangel');
+    return;
+  }
+  if (type === 'aufgabe') {
+    openModal('km','today');
+    goPageById('pg-kanban');
+    return;
+  }
+  if (type === 'timeline') {
+    goPageById('pg-tb');
+    setTimeout(()=>document.getElementById('tlText')?.focus(),120);
+    return;
   }
 }
 
-function importBackup(inp) {
-  const file = inp.files && inp.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = e => {
-    try {
-      const data = JSON.parse(e.target.result);
-      if (data.state) S = deepMerge(newState(), data.state);
-      if (Array.isArray(data.archive)) archive = data.archive;
-      persistState();
-      applyStateToForm();
-      if (typeof syncProjectInfoToTB === 'function') syncProjectInfoToTB();
-      buildPersonnel();
-      buildGeraete();
-      renderSigGrid();
-      renderWorkEntries();
-      renderKanban();
-      renderFirms();
-      renderContainers();
-      renderMeetings();
-      renderPhotos();
-      renderDocs();
-      renderArchive();
-      updateBadges();
-      refreshDash();
-      if (data.theme) setTheme(data.theme);
-      showToast('Backup importiert','ok');
-    } catch(err) {
-      showToast('Backup konnte nicht importiert werden','err');
-    }
-  };
-  reader.readAsText(file);
-  inp.value = '';
-}
-
-function loadArchiveIntoCurrent(id) {
-  const ar = archive.find(a => a.id === id);
-  if (!ar || !ar.snap) return;
-  S = deepMerge(newState(), ar.snap);
-  persistState();
-  applyStateToForm();
-  if (typeof syncProjectInfoToTB === 'function') syncProjectInfoToTB();
-  buildPersonnel();
-  buildGeraete();
-  renderSigGrid();
-  renderWorkEntries();
-  renderKanban();
-  renderFirms();
-  renderContainers();
-  renderMeetings();
-  renderPhotos();
-  renderDocs();
-  updateBadges();
-  refreshDash();
-  goPageById('pg-tb');
-  showToast('Bericht geladen: ' + (ar.reportDate || ''), 'ok');
-}
-
-function loadReportByDate() {
-  const date = gv('loadReportDate');
-  if (!date) { showToast('Datum auswählen','warn'); return; }
-  const ar = archive.find(a => a.reportDate === date);
-  if (!ar) { showToast('Kein Bericht für dieses Datum','warn'); return; }
-  loadArchiveIntoCurrent(ar.id);
-}
-
-function startNewDay() {
-  collectFormToState();
-  S.reportDate = todayStr();
-  S.reportNr = autoRNr();
-  S.remarks = '';
-  S.workEntries = [];
-  persistState();
-  applyStateToForm();
-  if (typeof syncProjectInfoToTB === 'function') syncProjectInfoToTB();
-  buildPersonnel();
-  buildGeraete();
-  renderSigGrid();
-  renderWorkEntries();
-  renderKanban();
-  renderFirms();
-  renderContainers();
-  renderMeetings();
-  renderPhotos();
-  renderDocs();
-  updateBadges();
-  refreshDash();
-  showToast('Neuer Tag gestartet: nur Datum & Notlar güncellendi','ok');
-}
 
 // ═══════════════════════════════════════════════════
 // SAVE REPORT TO ARCHIVE
@@ -1974,10 +2400,10 @@ function saveReport() {
   const existIdx = archive.findIndex(a => a.reportDate === entry.reportDate);
   if (existIdx >= 0) {
     archive[existIdx] = entry;
-    showToast('Bericht für den Tag aktualisiert: '+entry.reportDate, 'ok');
+    showToast('Bericht aktualisiert: '+entry.reportDate, 'ok');
   } else {
     archive.unshift(entry);
-    showToast('Neuer Tagesbericht gespeichert: '+entry.reportDate, 'ok');
+    showToast('Bericht archiviert: '+entry.reportDate, 'ok');
   }
   persistState();
   updateBadges();
@@ -1992,8 +2418,10 @@ function formatDateTimeDisplay(d) {
 // ═══════════════════════════════════════════════════
 // INIT
 // ═══════════════════════════════════════════════════
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   loadAll();
+  await openPhotoDB();
+  await hydratePhotosFromIDB();
   // Apply saved theme
   const savedTheme = localStorage.getItem('sero_theme') || 'light';
   setTheme(savedTheme);
@@ -2010,6 +2438,10 @@ document.addEventListener('DOMContentLoaded', () => {
   renderPhotos();
   renderDocs();
   renderArchive();
+  renderTimeline();
+  renderWorkAreas();
+  renderWeeklyReports();
+  renderMaengel();
   updateBadges();
   refreshDash();
   // Date display
@@ -2399,6 +2831,14 @@ function openModal(name, col) {
     const sel = document.getElementById('ag-firm');
     if (sel) sel.innerHTML = '<option value="">— Keine Firma</option>' + (S.contractors||[]).map(c=>`<option value="${esc(c.id)}">${esc(c.name)}</option>`).join('');
   }
+  if (name === 'addMangel') {
+    sv('mg-id',''); sv('mg-title',''); sv('mg-date', todayStr()); sv('mg-deadline','');
+    sv('mg-owner',''); sv('mg-area',''); sv('mg-desc',''); svs('mg-status','offen');
+    const firmSel = document.getElementById('mg-firm');
+    if (firmSel) firmSel.innerHTML = '<option value="">— Keine Firma</option>' + (S.contractors||[]).map(c=>`<option value="${esc(c.id)}">${esc(c.name)}</option>`).join('');
+    const photoSel = document.getElementById('mg-photo');
+    if (photoSel) photoSel.innerHTML = '<option value="">— Kein Foto</option>' + (S.photos||[]).map(p=>`<option value="${esc(p.id)}">${esc((p.caption||p.name||'Foto').slice(0,60))}</option>`).join('');
+  }
   if (name === 'addNote') {
     sv('note-txt',''); sv('note-date', todayStr());
   }
@@ -2462,6 +2902,7 @@ function renderKanban() {
           ${task.time?`<span class="chip chip-t">⏰ ${task.time}</span>`:''}
         </div>
         ${task.note?`<div class="kbc-note">📝 ${esc(task.note)}</div>`:''}
+        ${task.sourceMangelId?`<div class="kbc-note">⚠ Aus Mangel erstellt</div>`:''}
         <div class="kbc-acts">
           ${col!=='today'?`<button class="kbc-mv" title="←" onclick="mvTask('${task.id}','${col}','${col==='done'?'tomorrow':'today'}')">←</button>`:''}
           ${col!=='done'?`<button class="kbc-mv" title="→" onclick="mvTask('${task.id}','${col}','${col==='today'?'tomorrow':'done'}')">→</button>`:''}
@@ -2519,6 +2960,7 @@ function saveFirm() {
 }
 
 function renderFirms() {
+  populateQuickFirmSelect();
   const cont = document.getElementById('firmList');
   if (!cont) return;
   document.getElementById('nb-firms').textContent = (S.contractors||[]).length;
@@ -2734,10 +3176,29 @@ function handleDocs(inp){Array.from(inp.files).forEach(f=>addDoc(f)); inp.value=
 
 function addPhoto(file) {
   const reader=new FileReader();
-  reader.onload=e=>{
+  reader.onload=async e=>{
     if(!S.photos)S.photos=[];
-    S.photos.push({id:'ph_'+Date.now()+'_'+Math.random().toString(36).slice(2),name:file.name,data:e.target.result,date:todayStr()});
-    autoSave(); renderPhotos(); updateBadges();
+    const photo = {
+      id:'ph_'+Date.now()+'_'+Math.random().toString(36).slice(2),
+      name:file.name,
+      data:e.target.result,
+      date:todayStr(),
+      time:new Date().toTimeString().slice(0,5),
+      caption:'',
+      firmId:'',
+      taskId:'',
+      area:'',
+      location:'',
+      note:'',
+      timelineId:''
+    };
+    S.photos.push(photo);
+    try {
+      await idbSavePhoto({ id: photo.id, data: photo.data, name: photo.name, savedAt: new Date().toISOString() });
+      autoSave(); renderPhotos(); updateBadges();
+    } catch(err) {
+      showToast('Foto konnte nicht gespeichert werden','err');
+    }
   };
   reader.readAsDataURL(file);
 }
@@ -2752,19 +3213,163 @@ function addDoc(file) {
   reader.readAsDataURL(file);
 }
 
+
+function getTaskOptions() {
+  const allTasks = [
+    ...((S.kanban?.today||[]).map(t=>({...t,colLabel:'Heute'}))),
+    ...((S.kanban?.tomorrow||[]).map(t=>({...t,colLabel:'Morgen'}))),
+    ...((S.kanban?.done||[]).map(t=>({...t,colLabel:'Erledigt'}))),
+  ];
+  return '<option value="">— Keine Aufgabe</option>' + allTasks.map(t=>`<option value="${esc(t.id)}">${esc(t.title)} (${t.colLabel})</option>`).join('');
+}
+
+function getTimelineOptionsSelected(selected='') {
+  const items = S.timeline || [];
+  return '<option value="">— Kein Tagesereignis</option>' + items.map(t=>`<option value="${esc(t.id)}" ${selected===t.id?'selected':''}>${esc((t.time||'') + ' ' + (t.text||'')).slice(0,80)}</option>`).join('');
+}
+
+function getFirmOptions(selected='') {
+  return '<option value="">— Keine Firma</option>' + (S.contractors||[]).map(c=>`<option value="${esc(c.id)}" ${selected===c.id?'selected':''}>${esc(c.name)}</option>`).join('');
+}
+function getTaskOptionsSelected(selected='') {
+  const allTasks = [
+    ...((S.kanban?.today||[]).map(t=>({...t,colLabel:'Heute'}))),
+    ...((S.kanban?.tomorrow||[]).map(t=>({...t,colLabel:'Morgen'}))),
+    ...((S.kanban?.done||[]).map(t=>({...t,colLabel:'Erledigt'}))),
+  ];
+  return '<option value="">— Keine Aufgabe</option>' + allTasks.map(t=>`<option value="${esc(t.id)}" ${selected===t.id?'selected':''}>${esc(t.title)} (${t.colLabel})</option>`).join('');
+}
+
+
+function createTimelineFromPhoto(photoId) {
+  const p = (S.photos||[]).find(x=>x.id===photoId);
+  if (!p) return;
+  if (!S.timeline) S.timeline = [];
+  S.timeline.unshift({
+    id:'tl_'+Date.now(),
+    time:p.time || new Date().toTimeString().slice(0,5),
+    text:(p.caption || p.note || p.name || 'Fotoereignis'),
+    firmId:p.firmId || ''
+  });
+  renderTimeline();
+  autoSave();
+  showToast('Tagesereignis aus Foto erstellt','ok');
+}
+
+function openTimelinePhotoPicker(timelineId) {
+  pendingTimelinePhotoId = timelineId;
+  const inp = document.getElementById('timelinePhotoIn');
+  if (inp) inp.click();
+}
+
+function handleTimelinePhoto(inp) {
+  const file = inp.files && inp.files[0];
+  if (!file || !pendingTimelinePhotoId) { inp.value = ''; return; }
+  addPhotoLinkedToTimeline(file, pendingTimelinePhotoId);
+  inp.value = '';
+}
+
+function addPhotoLinkedToTimeline(file, timelineId) {
+  const reader=new FileReader();
+  reader.onload=async e=>{
+    if(!S.photos)S.photos=[];
+    const tl = (S.timeline||[]).find(x=>x.id===timelineId);
+    const photo = {
+      id:'ph_'+Date.now()+'_'+Math.random().toString(36).slice(2),
+      name:file.name,
+      data:e.target.result,
+      date:todayStr(),
+      time:new Date().toTimeString().slice(0,5),
+      caption: tl ? (tl.text || '') : '',
+      firmId: tl ? (tl.firmId || '') : '',
+      taskId:'',
+      area:'',
+      location:'',
+      note:'',
+      timelineId: timelineId
+    };
+    S.photos.push(photo);
+    try {
+      await idbSavePhoto({ id: photo.id, data: photo.data, name: photo.name, savedAt: new Date().toISOString() });
+      pendingTimelinePhotoId = null;
+      autoSave();
+      renderPhotos();
+      renderTimeline();
+      updateBadges();
+      showToast('Foto direkt mit Tagesereignis verknüpft','ok');
+    } catch(err) {
+      showToast('Foto konnte nicht gespeichert werden','err');
+    }
+  };
+  reader.readAsDataURL(file);
+}
+
+function setPhotoField(id, field, value) {
+  const p = (S.photos||[]).find(x=>x.id===id);
+  if (!p) return;
+  p[field] = value;
+  autoSave();
+  renderPhotos();
+}
+
 function renderPhotos() {
   const grid=document.getElementById('photoGrid');
+  const manager=document.getElementById('photoManager');
   const cnt=document.getElementById('phCount');
   if(!grid)return;
   grid.innerHTML='';
+  if(manager) manager.innerHTML='';
   if(cnt)cnt.textContent=(S.photos||[]).length+' Fotos';
   (S.photos||[]).forEach(ph=>{
+    const firmName = (S.contractors||[]).find(c=>c.id===ph.firmId)?.name || '';
+    const allTasks = [
+      ...((S.kanban?.today||[])),
+      ...((S.kanban?.tomorrow||[])),
+      ...((S.kanban?.done||[])),
+    ];
+    const taskName = allTasks.find(t=>t.id===ph.taskId)?.title || '';
+    const timelineName = (S.timeline||[]).find(t=>t.id===ph.timelineId);
+    const timelineLabel = timelineName ? `${timelineName.time||''} ${timelineName.text||''}`.trim() : '';
     const t=document.createElement('div'); t.className='ph-thumb';
     t.innerHTML=`<img src="${ph.data}" alt="${esc(ph.name)}" onclick="openLbox('${ph.id}')">
       <div class="ph-name">${esc(ph.name)}</div>
+      <div class="ph-meta">${ph.time||''}${ph.area?' · '+esc(ph.area):''}${firmName?' · '+esc(firmName):''}</div>
       <div class="ph-overlay">🔍</div>
       <button class="ph-del" onclick="event.stopPropagation();delPhoto('${ph.id}')">✕</button>`;
     grid.appendChild(t);
+
+    if (manager) {
+      const card = document.createElement('div');
+      card.className = 'photo-card';
+      card.innerHTML = `
+        <div style="display:grid;grid-template-columns:120px 1fr;gap:10px;align-items:start;">
+          <img src="${ph.data}" alt="${esc(ph.name)}" style="width:120px;height:90px;object-fit:cover;border-radius:8px;border:1px solid var(--border);">
+          <div>
+            <div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:4px;">${esc(ph.name)}</div>
+            <div style="font-size:10px;color:var(--text3);">${ph.date||''} ${ph.time||''}</div>
+            <div class="photo-detail-grid">
+              <input class="fi" type="text" placeholder="Başlık / açıklama" value="${esc(ph.caption||'')}" onchange="setPhotoField('${ph.id}','caption',this.value)">
+              <input class="fi" type="text" placeholder="Alan / bölüm" value="${esc(ph.area||'')}" onchange="setPhotoField('${ph.id}','area',this.value)">
+              <input class="fi" type="text" placeholder="Konum / yer" value="${esc(ph.location||'')}" onchange="setPhotoField('${ph.id}','location',this.value)">
+              <select class="fs" onchange="setPhotoField('${ph.id}','firmId',this.value)">${getFirmOptions(ph.firmId||'')}</select>
+              <select class="fs" onchange="setPhotoField('${ph.id}','taskId',this.value)" style="grid-column:1/-1;">${getTaskOptionsSelected(ph.taskId||'')}</select>
+              <select class="fs" onchange="setPhotoField('${ph.id}','timelineId',this.value)" style="grid-column:1/-1;">${getTimelineOptionsSelected(ph.timelineId||'')}</select>
+              <textarea class="fta" style="grid-column:1/-1;min-height:58px;" placeholder="Detay notu / tespit / eksik..." onchange="setPhotoField('${ph.id}','note',this.value)">${esc(ph.note||'')}</textarea>
+            </div>
+            <div style="margin-top:6px;font-size:10px;color:var(--text3);line-height:1.5;">
+              ${ph.caption?'📝 '+esc(ph.caption):''}
+              ${taskName?` · 📋 ${esc(taskName)}`:''}
+              ${timelineLabel?` · 🕘 ${esc(timelineLabel).slice(0,80)}`:''}
+            </div>
+            <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap;">
+              <button class="btn btn-ghost btn-xs" onclick="createMangelFromPhoto('${ph.id}')">⚠ Mangel aus Foto</button>
+              <button class="btn btn-ghost btn-xs" onclick="createTimelineFromPhoto('${ph.id}')">🕘 Ereignis aus Foto</button>
+            </div>
+          </div>
+        </div>
+      `;
+      manager.appendChild(card);
+    }
   });
 }
 function renderDocs() {
@@ -2783,11 +3388,195 @@ function renderDocs() {
     grid.appendChild(t);
   });
 }
-function delPhoto(id){S.photos=(S.photos||[]).filter(p=>p.id!==id);autoSave();renderPhotos();updateBadges();}
+async function delPhoto(id){S.photos=(S.photos||[]).filter(p=>p.id!==id); try{await idbDeletePhoto(id);}catch(e){} autoSave();renderPhotos();updateBadges();}
 function delDoc(id){S.docs=(S.docs||[]).filter(d=>d.id!==id);autoSave();renderDocs();updateBadges();}
 function openLbox(id){const p=(S.photos||[]).find(x=>x.id===id);if(!p)return;document.getElementById('lbox-img').src=p.data;document.getElementById('lbox').classList.add('open');}
 function closeLbox(){document.getElementById('lbox').classList.remove('open');}
 document.getElementById('lbox')?.addEventListener('click',e=>{if(e.target===e.currentTarget)closeLbox();});
+
+
+
+function createMangelFromPhoto(photoId) {
+  const p = (S.photos||[]).find(x=>x.id===photoId);
+  if (!p) return;
+  openModal('addMangel');
+  sv('mg-id','');
+  sv('mg-title', p.caption || p.name || '');
+  sv('mg-date', p.date || todayStr());
+  sv('mg-deadline','');
+  sv('mg-owner','');
+  sv('mg-area', p.area || p.location || '');
+  sv('mg-desc', p.note || '');
+  const firmSel = document.getElementById('mg-firm');
+  if (firmSel) {
+    firmSel.innerHTML = '<option value="">— Keine Firma</option>' + (S.contractors||[]).map(c=>`<option value="${esc(c.id)}">${esc(c.name)}</option>`).join('');
+    if (p.firmId) firmSel.value = p.firmId;
+  }
+  const photoSel = document.getElementById('mg-photo');
+  if (photoSel) {
+    photoSel.innerHTML = '<option value="">— Kein Foto</option>' + (S.photos||[]).map(ph=>`<option value="${esc(ph.id)}">${esc((ph.caption||ph.name||'Foto').slice(0,60))}</option>`).join('');
+    photoSel.value = p.id;
+  }
+  svs('mg-status','offen');
+}
+
+function editMangel(id) {
+  const m = (S.maengel||[]).find(x=>x.id===id);
+  if (!m) return;
+  openModal('addMangel');
+  sv('mg-id', m.id);
+  sv('mg-title', m.title||'');
+  svs('mg-firm', m.firmId||'');
+  svs('mg-status', m.status||'offen');
+  sv('mg-date', m.date||todayStr());
+  sv('mg-deadline', m.deadline||'');
+  sv('mg-owner', m.owner||'');
+  sv('mg-area', m.area||'');
+  sv('mg-desc', m.desc||'');
+  svs('mg-photo', m.photoId||'');
+}
+
+
+function createKanbanFromMangel(mangelId) {
+  const m = (S.maengel||[]).find(x=>x.id===mangelId);
+  if (!m) return;
+
+  const firm = (S.contractors||[]).find(c=>c.id===m.firmId);
+  if (!S.kanban) S.kanban = {today:[], tomorrow:[], done:[]};
+
+  const existing = [...(S.kanban.today||[]), ...(S.kanban.tomorrow||[]), ...(S.kanban.done||[])]
+    .find(t => t.sourceMangelId === m.id);
+
+  if (existing) {
+    showToast('Für diesen Mangel gibt es schon eine Aufgabe','warn');
+    return;
+  }
+
+  const noteParts = [];
+  if (m.desc) noteParts.push(m.desc);
+  if (m.area) noteParts.push('Bereich: ' + m.area);
+  if (m.deadline) noteParts.push('Deadline: ' + m.deadline);
+  if (m.owner) noteParts.push('Verantwortlich: ' + m.owner);
+
+  const task = {
+    id:'kt_'+Date.now(),
+    title: m.title || 'Mangel Aufgabe',
+    firmId: m.firmId || '',
+    firmName: firm ? firm.name : '',
+    prio: m.deadline ? 'high' : 'mid',
+    time: '',
+    trade: firm?.trade || 'Mangelbearbeitung',
+    note: noteParts.join(' | '),
+    createdAt: new Date().toISOString(),
+    col: 'today',
+    sourceMangelId: m.id
+  };
+
+  S.kanban.today.unshift(task);
+  if (m.status === 'offen') m.status = 'bearbeitung';
+
+  autoSave();
+  renderKanban();
+  renderMaengel();
+  updateBadges();
+  showToast('Kanban-Aufgabe aus Mangel erstellt','ok');
+}
+
+function saveMangel() {
+  const title = gv('mg-title').trim();
+  if (!title) { showToast('Titel eingeben','warn'); return; }
+  if (!S.maengel) S.maengel = [];
+  const id = gv('mg-id') || ('mg_' + Date.now());
+  const item = {
+    id,
+    title,
+    firmId: gv('mg-firm') || '',
+    status: gv('mg-status') || 'offen',
+    date: gv('mg-date') || todayStr(),
+    deadline: gv('mg-deadline') || '',
+    owner: gv('mg-owner') || '',
+    area: gv('mg-area') || '',
+    desc: gv('mg-desc') || '',
+    photoId: gv('mg-photo') || ''
+  };
+  const idx = S.maengel.findIndex(x=>x.id===id);
+  if (idx >= 0) S.maengel[idx] = item;
+  else S.maengel.unshift(item);
+  closeModal('addMangel');
+  renderMaengel();
+  autoSave();
+  showToast('Mangel gespeichert','ok');
+}
+
+function delMangel(id) {
+  S.maengel = (S.maengel||[]).filter(x=>x.id!==id);
+  renderMaengel();
+  autoSave();
+}
+
+function setMangelStatus(id, status) {
+  const m = (S.maengel||[]).find(x=>x.id===id);
+  if (!m) return;
+  m.status = status;
+  renderMaengel();
+  autoSave();
+}
+
+function renderMaengel() {
+  const box = document.getElementById('mangelList');
+  const firmFilter = document.getElementById('mangelFilterFirm');
+  if (firmFilter) {
+    const current = firmFilter.value;
+    firmFilter.innerHTML = '<option value="">Alle Firmen</option>' + (S.contractors||[]).map(c=>`<option value="${esc(c.id)}">${esc(c.name)}</option>`).join('');
+    if (current) firmFilter.value = current;
+  }
+  if (!box) return;
+  let rows = [...(S.maengel||[])];
+  const q = (gv('mangelSearch')||'').toLowerCase();
+  const st = gv('mangelFilterStatus')||'';
+  const ff = gv('mangelFilterFirm')||'';
+  if (q) rows = rows.filter(m => ((m.title||'') + ' ' + (m.desc||'') + ' ' + (m.area||'') + ' ' + (m.owner||'')).toLowerCase().includes(q));
+  if (st) rows = rows.filter(m => m.status === st);
+  if (ff) rows = rows.filter(m => m.firmId === ff);
+
+  document.getElementById('nb-mangel').textContent = (S.maengel||[]).length;
+
+  if (!rows.length) {
+    box.innerHTML = '<div class="empty-state"><div class="ei">⚠️</div><h4>Keine Mängel</h4><p>Tespit veya eksik ekle</p></div>';
+    return;
+  }
+  box.innerHTML = '';
+  rows.forEach(m => {
+    const firmName = (S.contractors||[]).find(c=>c.id===m.firmId)?.name || '';
+    const photo = (S.photos||[]).find(p=>p.id===m.photoId);
+    const cls = m.status === 'erledigt' ? 'mg-erledigt' : (m.status === 'bearbeitung' ? 'mg-bearbeitung' : 'mg-offen');
+    const label = m.status === 'erledigt' ? 'Erledigt' : (m.status === 'bearbeitung' ? 'In Bearbeitung' : 'Offen');
+    const card = document.createElement('div');
+    card.className = 'mangel-card';
+    card.innerHTML = `
+      <div class="mangel-head">
+        <div>
+          <div class="mangel-title">${esc(m.title)}</div>
+          <div class="mangel-meta">
+            ${m.date ? '📅 ' + esc(m.date) : ''}${m.deadline ? ' · ⏳ ' + esc(m.deadline) : ''}${firmName ? ' · 🏢 ' + esc(firmName) : ''}${m.owner ? ' · 👤 ' + esc(m.owner) : ''}${m.area ? ' · 📍 ' + esc(m.area) : ''}
+          </div>
+        </div>
+        <span class="mangel-badge ${cls}">${label}</span>
+      </div>
+      ${m.desc ? `<div class="mangel-desc">${esc(m.desc)}</div>` : ''}
+      ${photo ? `<div class="mangel-photo-ref">📸 Foto: ${esc((photo.caption||photo.name||'Foto').slice(0,70))}</div>` : ''}
+      <div class="mangel-actions">
+        <button class="btn btn-ghost btn-xs" onclick="editMangel('${m.id}')">Bearbeiten</button>
+        <button class="btn btn-ghost btn-xs" onclick="setMangelStatus('${m.id}','offen')">Offen</button>
+        <button class="btn btn-ghost btn-xs" onclick="setMangelStatus('${m.id}','bearbeitung')">In Bearbeitung</button>
+        <button class="btn btn-ghost btn-xs" onclick="setMangelStatus('${m.id}','erledigt')">Erledigt</button>
+        <button class="btn btn-primary btn-xs" onclick="createKanbanFromMangel('${m.id}')">📋 Aufgabe</button>
+        <button class="btn-icon" style="width:26px;height:26px;" onclick="delMangel('${m.id}')">✕</button>
+      </div>
+    `;
+    box.appendChild(card);
+  });
+}
 
 // ═══════════════════════════════════════════════════
 // ARCHIVE
@@ -2974,6 +3763,7 @@ function updateBadges() {
   document.getElementById('nb-ct').textContent=(S.containers||[]).length;
   document.getElementById('nb-meet').textContent=(S.meetings||[]).length;
   document.getElementById('nb-files').textContent=(S.photos||[]).length+(S.docs||[]).length;
+  const nbm = document.getElementById('nb-mangel'); if (nbm) nbm.textContent=(S.maengel||[]).length;
   document.getElementById('nb-archive').textContent=archive.length;
 }
 
@@ -2997,12 +3787,7 @@ function exportExcel(overrideDate) {
       ['Temp. min:',(S.tempMin||'—')+'°C'],['Temp. max:',(S.tempMax||'—')+'°C'],
       ['Wind:',S.wind||'—'],['Boden:',S.boden||'—'],
       [''],['Fortschritt:',(S.progress||0)+'%'],
-      [''],
-      ['Personal gesamt:', Object.values(S.personnelCounts||{}).reduce((a,b)=>a+b,0)],
-      ['Geräte aktiv:', (S.geraete||[]).filter(g=>g.count>0).length],
-      ['Offene Kanban Aufgaben:', ((S.kanban?.today||[]).length + (S.kanban?.tomorrow||[]).length)],
-      [''],
-      ['Bemerkungen:',S.remarks||'—'],
+      [''],['Bemerkungen:',S.remarks||'—'],
     ];
     const ws1=XLSX.utils.aoa_to_sheet(s1);ws1['!cols']=[{wch:22},{wch:36}];
     XLSX.utils.book_append_sheet(wb,ws1,'Deckblatt');
@@ -3022,12 +3807,9 @@ function exportExcel(overrideDate) {
 
     // Geräte
     if((S.geraete||[]).some(g=>g.count>0)){
-      const s2b=[['Gerät','Türkisch','Anzahl','Stunden','Marke','Modell','Firma','Notiz'],
-        ...(S.geraete||[]).filter(g=>g.count>0).map(g=>[
-          g.de,g.tr||'',g.count,g.hours||0,g.brand||'',g.model||'',
-          (S.contractors||[]).find(c=>c.id===g.firmId)?.name||'',g.note||''
-        ])];
-      const ws2b=XLSX.utils.aoa_to_sheet(s2b);ws2b['!cols']=[{wch:20},{wch:16},{wch:10},{wch:12},{wch:14},{wch:14},{wch:20},{wch:30}];
+      const s2b=[['Gerät','Türkisch','Anzahl','Stunden'],
+        ...(S.geraete||[]).filter(g=>g.count>0).map(g=>[g.de,g.tr||'',g.count,g.hours||0])];
+      const ws2b=XLSX.utils.aoa_to_sheet(s2b);ws2b['!cols']=[{wch:20},{wch:16},{wch:10},{wch:12}];
       XLSX.utils.book_append_sheet(wb,ws2b,'Geräte');
     }
 
@@ -3044,9 +3826,9 @@ function exportExcel(overrideDate) {
       ...(S.kanban?.tomorrow||[]).map(t=>({...t,colLabel:'Morgen'})),
       ...(S.kanban?.done||[]).map(t=>({...t,colLabel:'Erledigt'}))];
     if(allTasks.length>0){
-      const s4=[['Spalte','Aufgabe','Firma','Priorität','Startzeit','Gewerk','Notiz','Erfasst am'],
-        ...allTasks.map(t=>[t.colLabel,t.title,t.firmName||'',t.prio,t.time||'',t.trade||'',t.note||'',t.createdAt||''])];
-      const ws4=XLSX.utils.aoa_to_sheet(s4);ws4['!cols']=[{wch:10},{wch:30},{wch:20},{wch:10},{wch:10},{wch:16},{wch:30},{wch:22}];
+      const s4=[['Spalte','Aufgabe','Firma','Priorität','Uhrzeit','Gewerk','Notiz'],
+        ...allTasks.map(t=>[t.colLabel,t.title,t.firmName||'',t.prio,t.time||'',t.trade||'',t.note||''])];
+      const ws4=XLSX.utils.aoa_to_sheet(s4);ws4['!cols']=[{wch:10},{wch:30},{wch:20},{wch:10},{wch:8},{wch:16},{wch:28}];
       XLSX.utils.book_append_sheet(wb,ws4,'Kanban');
     }
 
@@ -3075,6 +3857,53 @@ function exportExcel(overrideDate) {
         ...(S.meetings||[]).map(m=>[m.date,m.time||'',m.title,m.type,m.loc||'',(m.attendees||[]).join(', '),m.agenda||'',m.decisions||'',m.next||''])];
       const ws7=XLSX.utils.aoa_to_sheet(s7);ws7['!cols']=[{wch:12},{wch:6},{wch:26},{wch:14},{wch:16},{wch:28},{wch:36},{wch:36},{wch:12}];
       XLSX.utils.book_append_sheet(wb,ws7,'Besprechungen');
+    }
+
+    // Tageschronologie
+    if((S.timeline||[]).length>0){
+      const s8=[['Zeit','Eintrag','Firma'],
+        ...(S.timeline||[]).map(t=>[t.time||'', t.text||'', (S.contractors||[]).find(c=>c.id===t.firmId)?.name||''])];
+      const ws8=XLSX.utils.aoa_to_sheet(s8);ws8['!cols']=[{wch:10},{wch:50},{wch:24}];
+      XLSX.utils.book_append_sheet(wb,ws8,'Tageschronologie');
+    }
+
+    // Bereiche
+    if((S.workAreas||[]).length>0){
+      const s9=[['Arbeitsbereiche'], ...(S.workAreas||[]).map(a=>[a])];
+      const ws9=XLSX.utils.aoa_to_sheet(s9);ws9['!cols']=[{wch:30}];
+      XLSX.utils.book_append_sheet(wb,ws9,'Bereiche');
+    }
+
+    // Fotos
+    if((S.photos||[]).length>0){
+      const allTasks = [
+        ...((S.kanban?.today||[])),
+        ...((S.kanban?.tomorrow||[])),
+        ...((S.kanban?.done||[])),
+      ];
+      const s10=[['Datei','Datum','Zeit','Başlık','Alan','Konum','Firma','Görev','Tagesereignis','Notiz'],
+        ...(S.photos||[]).map(p=>[
+          p.name||'',p.date||'',p.time||'',p.caption||'',p.area||'',p.location||'',
+          (S.contractors||[]).find(c=>c.id===p.firmId)?.name||'',
+          allTasks.find(t=>t.id===p.taskId)?.title||'',
+          ((S.timeline||[]).find(t=>t.id===p.timelineId)?.time||'') + ' ' + ((S.timeline||[]).find(t=>t.id===p.timelineId)?.text||''),
+          p.note||''
+        ])];
+      const ws10=XLSX.utils.aoa_to_sheet(s10);ws10['!cols']=[{wch:24},{wch:12},{wch:8},{wch:24},{wch:18},{wch:18},{wch:18},{wch:24},{wch:30},{wch:32}];
+      XLSX.utils.book_append_sheet(wb,ws10,'Fotos');
+    }
+
+    // Mängel
+    if((S.maengel||[]).length>0){
+      const s11=[['Titel','Status','Datum','Deadline','Firma','Verantwortlich','Bereich','Beschreibung','Foto'],
+        ...(S.maengel||[]).map(m=>[
+          m.title||'',m.status||'',m.date||'',m.deadline||'',
+          (S.contractors||[]).find(c=>c.id===m.firmId)?.name||'',
+          m.owner||'',m.area||'',m.desc||'',
+          (S.photos||[]).find(p=>p.id===m.photoId)?.name||''
+        ])];
+      const ws11=XLSX.utils.aoa_to_sheet(s11);ws11['!cols']=[{wch:24},{wch:14},{wch:12},{wch:12},{wch:18},{wch:18},{wch:18},{wch:38},{wch:22}];
+      XLSX.utils.book_append_sheet(wb,ws11,'Maengel');
     }
 
     XLSX.writeFile(wb,`SERO_Bautagebuch_${S.projectNr||'Projekt'}_${date}.xlsx`);
