@@ -1816,7 +1816,7 @@ body{
   <div class="card" style="margin-bottom:14px;">
     <div class="card-body">
       <div style="font-size:12px;color:var(--text3);margin-bottom:10px;">
-        Gewerk kodları sistemde hazır yüklüdür. Burada sadece alt firma / Nachunternehmer eklemen yeterli.
+        Gewerk kodları sistemde hazır yüklüdür. Burada sadece alt firma / Nachunternehmer eklemen yeterli. Liste otomatik gelir.
       </div>
       <div class="fr3">
         <input type="text" class="fi" id="gwSearch" placeholder="🔍 Suchen…" oninput="renderGewerke()">
@@ -2261,7 +2261,15 @@ body{
             <option value="done">✓ Abgeschlossen</option>
           </select></div>
       </div>
-      <div class="fg"><div class="fl">Notiz</div><textarea class="fta" id="nu-note" style="min-height:70px;" placeholder="Açıklama"></textarea></div>
+      <div class="fr2">
+        <div class="fg"><div class="fl">Baustelle Ansprechpartner</div><input type="text" class="fi" id="nu-site-contact" placeholder="Şantiye sorumlusu"></div>
+        <div class="fg"><div class="fl">Bestellung / Auftrag</div><input type="text" class="fi" id="nu-order" placeholder="Sipariş / Auftrag"></div>
+      </div>
+      <div class="fr2">
+        <div class="fg"><div class="fl">LV Nummer</div><input type="text" class="fi" id="nu-lv" placeholder="LV no"></div>
+        <div class="fg"><div class="fl">Nachtrag</div><input type="text" class="fi" id="nu-nachtrag" placeholder="Nachtrag bilgisi"></div>
+      </div>
+      <div class="fg"><div class="fl">Firma Notları</div><textarea class="fta" id="nu-note" style="min-height:90px;" placeholder="Açıklama / firma notları"></textarea></div>
     </div>
     <div class="modal-ft"><button class="btn btn-ghost" onclick="closeModal('addNU')">Abbrechen</button><button class="btn btn-primary" onclick="saveNU()">Speichern ✓</button></div>
   </div>
@@ -2549,6 +2557,7 @@ function loadAll() {
       archive = makeArchiveSafeForStorage(JSON.parse(rawAr));
     }
     ensurePresetGewerke();
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(makeStateSafeForStorage(S))); } catch(e2) {}
   } catch(e) { console.warn('Load error', e); }
 }
 
@@ -2826,6 +2835,186 @@ function loadReportByDate() {
   if (!ar) { showToast('Kein Bericht für dieses Datum','warn'); return; }
   loadArchiveIntoCurrent(ar.id);
 }
+
+
+/* timeline/workarea runtime fixes inserted below */
+function populateQuickFirmSelect() {
+  const sel = document.getElementById('tlFirmQuick');
+  if (!sel) return;
+  sel.innerHTML = '<option value="">— Firma wählen</option>' + (S.contractors||[]).map(c=>`<option value="${esc(c.id)}">${esc(c.name)}</option>`).join('');
+}
+
+function addWorkArea() {
+  const val = gv('waInput').trim();
+  if (!val) { showToast('Bereich eingeben','warn'); return; }
+  if (!S.workAreas) S.workAreas = [];
+  if (!S.workAreas.includes(val)) S.workAreas.push(val);
+  sv('waInput','');
+  renderWorkAreas();
+  autoSave();
+}
+
+function delWorkArea(idx) {
+  S.workAreas = (S.workAreas || []).filter((_, i) => i !== idx);
+  renderWorkAreas();
+  autoSave();
+}
+
+function renderWorkAreas() {
+  const box = document.getElementById('workAreaTags');
+  if (!box) return;
+  const areas = S.workAreas || [];
+  if (!areas.length) {
+    box.innerHTML = '<span style="font-size:12px;color:var(--text3);">Noch keine Bereiche gewählt</span>';
+    return;
+  }
+  box.innerHTML = areas.map((a,i)=>`<span class="wa-tag">📍 ${esc(a)} <button type="button" onclick="delWorkArea(${i})">✕</button></span>`).join('');
+}
+
+function addTimelineEntry() {
+  const now = new Date();
+  const t = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+  if (!S.timeline) S.timeline = [];
+  S.timeline.unshift({ id:'tl_'+Date.now(), time:t, text:'', firmId:'', nuCode:(window.currentNUCode || '') });
+  renderTimeline();
+  autoSave();
+}
+
+function quickAddTimeline() {
+  const text = gv('tlText').trim();
+  const time = gv('tlTime') || '';
+  const firmId = gv('tlFirmQuick') || '';
+  if (!text) { showToast('Text eingeben','warn'); return; }
+  if (!S.timeline) S.timeline = [];
+  S.timeline.unshift({
+    id:'tl_'+Date.now(),
+    time,
+    text,
+    firmId,
+    nuCode:(window.currentNUCode || '')
+  });
+  sv('tlText','');
+  renderTimeline();
+  autoSave();
+}
+
+function setTimelineField(id, field, value) {
+  const row = (S.timeline||[]).find(x=>x.id===id);
+  if (!row) return;
+  row[field] = value;
+  autoSave();
+}
+
+function delTimelineEntry(id) {
+  S.timeline = (S.timeline || []).filter(x => x.id !== id);
+  renderTimeline();
+  autoSave();
+}
+
+function createMangelFromTimeline(timelineId) {
+  const tl = (S.timeline||[]).find(x=>x.id===timelineId);
+  if (!tl) return;
+  openModal('addMangel');
+  sv('mg-id','');
+  sv('mg-title', tl.text || 'Mangel');
+  sv('mg-date', todayStr());
+  sv('mg-deadline','');
+  sv('mg-owner','');
+  sv('mg-area','');
+  sv('mg-desc', tl.text || '');
+  const firmSel = document.getElementById('mg-firm');
+  if (firmSel) {
+    firmSel.innerHTML = '<option value="">— Keine Firma</option>' + (S.contractors||[]).map(c=>`<option value="${esc(c.id)}">${esc(c.name)}</option>`).join('');
+    if (tl.firmId) firmSel.value = tl.firmId;
+  }
+  const photoSel = document.getElementById('mg-photo');
+  if (photoSel) {
+    const linkedPhotos = (S.photos||[]).filter(p=>p.timelineId===timelineId);
+    photoSel.innerHTML = '<option value="">— Kein Foto</option>' + (S.photos||[]).map(ph=>`<option value="${esc(ph.id)}">${esc((ph.caption||ph.name||'Foto').slice(0,60))}</option>`).join('');
+    if (linkedPhotos[0]) photoSel.value = linkedPhotos[0].id;
+  }
+  svs('mg-status','offen');
+}
+
+function createTaskFromTimeline(timelineId) {
+  const tl = (S.timeline||[]).find(x=>x.id===timelineId);
+  if (!tl) return;
+  if (!S.kanban) S.kanban = {today:[], tomorrow:[], done:[]};
+  const firm = (S.contractors||[]).find(c=>c.id===tl.firmId);
+  S.kanban.today.unshift({
+    id:'kt_'+Date.now(),
+    title: tl.text || 'Aufgabe',
+    firmId: tl.firmId || '',
+    firmName: firm ? firm.name : '',
+    prio:'mid',
+    time: tl.time || '',
+    trade: firm?.trade || '',
+    note: 'Aus Timeline erstellt',
+    createdAt: new Date().toISOString(),
+    col:'today',
+    timelineId: timelineId,
+    nuCode: tl.nuCode || (window.currentNUCode || '')
+  });
+  renderKanban();
+  autoSave();
+  showToast('Aufgabe aus Timeline erstellt','ok');
+}
+
+function renderTimeline() {
+  const list = document.getElementById('timelineList');
+  const empty = document.getElementById('timelineEmpty');
+  populateQuickFirmSelect();
+  if (!list) return;
+  const items = S.timeline || [];
+  list.innerHTML = '';
+  list.className = 'timeline-list-wrap';
+  if (!items.length) {
+    if (empty) empty.style.display = 'block';
+    return;
+  }
+  if (empty) empty.style.display = 'none';
+  const base = '<option value="">— Keine Firma</option>' + (S.contractors||[]).map(c=>`<option value="${esc(c.id)}">${esc(c.name)}</option>`).join('');
+  items.forEach(it => {
+    const linkedPhotos = (S.photos||[]).filter(p=>p.timelineId===it.id);
+    const linkedMaengel = (S.maengel||[]).filter(m=>{
+      const p = (S.photos||[]).find(ph=>ph.id===m.photoId);
+      return p && p.timelineId === it.id;
+    });
+    const linkedTasks = [...(S.kanban?.today||[]), ...(S.kanban?.tomorrow||[]), ...(S.kanban?.done||[])]
+      .filter(t => t.timelineId === it.id);
+    let opts = base;
+    if (it.firmId) opts = opts.replace(`value="${it.firmId}"`, `value="${it.firmId}" selected`);
+    const firmName = (S.contractors||[]).find(c=>c.id===it.firmId)?.name || '';
+    const card = document.createElement('div');
+    card.className = 'timeline-event-card';
+    card.innerHTML = `
+      <div class="timeline-event-top">
+        <div class="timeline-time-badge">🕘 ${esc(it.time||'--:--')}</div>
+        <div class="timeline-main-text">${esc(it.text||'')}</div>
+      </div>
+      <div class="timeline-meta-row">
+        ${firmName ? `<span class="timeline-meta-chip">🏢 ${esc(firmName)}</span>` : ''}
+        ${it.nuCode ? `<span class="timeline-meta-chip">📁 ${esc(it.nuCode)}</span>` : ''}
+        <span class="timeline-meta-chip">📸 ${linkedPhotos.length} Fotos</span>
+        <span class="timeline-meta-chip">⚠️ ${linkedMaengel.length} Mängel</span>
+        <span class="timeline-meta-chip">📋 ${linkedTasks.length} Aufgaben</span>
+      </div>
+      ${linkedPhotos.length ? `<div class="timeline-photo-list">${linkedPhotos.map(p=>`<span class="timeline-photo-chip">📷 ${esc((p.caption||p.name||'Foto').slice(0,28))}</span>`).join('')}</div>` : ''}
+      <div class="timeline-link-row">
+        <textarea class="fta" style="min-height:64px;" placeholder="Ereignis / olay..." onchange="setTimelineField('${it.id}','text',this.value)">${esc(it.text||'')}</textarea>
+        <select class="fs" onchange="setTimelineField('${it.id}','firmId',this.value)">${opts}</select>
+      </div>
+      <div class="timeline-card-actions">
+        <button class="timeline-photo-btn" onclick="openTimelinePhotoPicker('${it.id}')">📸 Foto direkt anhängen</button>
+        <button class="btn btn-ghost btn-xs" onclick="createMangelFromTimeline('${it.id}')">⚠️ Mangel</button>
+        <button class="btn btn-ghost btn-xs" onclick="createTaskFromTimeline('${it.id}')">📋 Aufgabe</button>
+        <button class="btn-icon" onclick="delTimelineEntry('${it.id}')">✕</button>
+      </div>
+    `;
+    list.appendChild(card);
+  });
+}
+
 
 // ═══════════════════════════════════════════════════
 // SAVE REPORT TO ARCHIVE
@@ -3294,7 +3483,9 @@ function openModal(name, col) {
     sv('gw-id',''); sv('gw-code',''); sv('gw-name-de',''); sv('gw-name-tr',''); sv('gw-note',''); svs('gw-status','active');
   }
   if (name === 'addNU') {
-    sv('nu-id',''); sv('nu-code',''); sv('nu-name',''); sv('nu-contact',''); sv('nu-phone',''); sv('nu-email',''); sv('nu-note',''); svs('nu-status','active');
+    sv('nu-id',''); sv('nu-code',''); sv('nu-name',''); sv('nu-contact',''); sv('nu-phone',''); sv('nu-email',''); sv('nu-note','');
+    sv('nu-site-contact',''); sv('nu-order',''); sv('nu-lv',''); sv('nu-nachtrag','');
+    svs('nu-status','active');
     populateGewerkSelect();
   }
   if (name === 'addMangel') {
@@ -4187,6 +4378,10 @@ function saveNU() {
     contact: gv('nu-contact') || '',
     phone: gv('nu-phone') || '',
     email: gv('nu-email') || '',
+    siteContact: gv('nu-site-contact') || '',
+    order: gv('nu-order') || '',
+    lvNumber: gv('nu-lv') || '',
+    nachtrag: gv('nu-nachtrag') || '',
     status: gv('nu-status') || 'active',
     note: gv('nu-note') || ''
   };
@@ -4212,7 +4407,10 @@ function editNU(gewerkId, nuId) {
   if (!g || !nu) return;
   openModal('addNU');
   populateGewerkSelect();
-  sv('nu-id', nu.id); svs('nu-gewerk', g.id); sv('nu-code', nu.code||''); sv('nu-name', nu.name||''); sv('nu-contact', nu.contact||''); sv('nu-phone', nu.phone||''); sv('nu-email', nu.email||''); sv('nu-note', nu.note||''); svs('nu-status', nu.status||'active');
+  sv('nu-id', nu.id); svs('nu-gewerk', g.id); sv('nu-code', nu.code||''); sv('nu-name', nu.name||'');
+  sv('nu-contact', nu.contact||''); sv('nu-phone', nu.phone||''); sv('nu-email', nu.email||'');
+  sv('nu-site-contact', nu.siteContact||''); sv('nu-order', nu.order||''); sv('nu-lv', nu.lvNumber||''); sv('nu-nachtrag', nu.nachtrag||'');
+  sv('nu-note', nu.note||''); svs('nu-status', nu.status||'active');
 }
 
 function delGewerk(id) {
@@ -4276,7 +4474,16 @@ function renderGewerke() {
               <div class="nu-top">
                 <div>
                   <div class="nu-title">📂 ${esc(n.code)} ${esc(n.name)}</div>
-                  <div class="nu-meta">${n.contact?`👤 ${esc(n.contact)} · `:''}${n.phone?`☎ ${esc(n.phone)} · `:''}${n.email?`✉ ${esc(n.email)} · `:''}${n.note?esc(n.note):''}</div>
+                  <div class="nu-meta">
+                    ${n.contact?`👤 ${esc(n.contact)} · `:''}
+                    ${n.phone?`☎ ${esc(n.phone)} · `:''}
+                    ${n.email?`✉ ${esc(n.email)} · `:''}
+                    ${n.siteContact?`🏗 ${esc(n.siteContact)} · `:''}
+                    ${n.order?`📦 ${esc(n.order)} · `:''}
+                    ${n.lvNumber?`# ${esc(n.lvNumber)} · `:''}
+                    ${n.nachtrag?`➕ ${esc(n.nachtrag)} · `:''}
+                    ${n.note?esc(n.note):''}
+                  </div>
                 </div>
                 <div style="display:flex;gap:8px;align-items:center;">
                   <span class="mangel-badge ${n.status==='done'?'mg-erledigt':(n.status==='pause'?'mg-bearbeitung':'')}">${n.status==='done'?'Abgeschlossen':(n.status==='pause'?'Pause':'Aktiv')}</span>
@@ -4291,6 +4498,13 @@ function renderGewerke() {
                 <div class="nu-mini"><div class="n">${c.geraete}</div><div class="l">Geräte</div></div>
                 <div class="nu-mini"><div class="n">${c.timeline}</div><div class="l">Timeline</div></div>
               </div>
+              ${(n.note || n.order || n.lvNumber || n.nachtrag) ? `
+                <div style="margin-top:10px;padding:10px 12px;background:#fff;border:1px solid var(--border);border-radius:12px;font-size:11px;color:var(--text2);line-height:1.7;">
+                  ${n.order ? `<div><strong>Bestellung:</strong> ${esc(n.order)}</div>` : ''}
+                  ${n.lvNumber ? `<div><strong>LV Nummer:</strong> ${esc(n.lvNumber)}</div>` : ''}
+                  ${n.nachtrag ? `<div><strong>Nachtrag:</strong> ${esc(n.nachtrag)}</div>` : ''}
+                  ${n.note ? `<div><strong>Firma Notları:</strong> ${esc(n.note)}</div>` : ''}
+                </div>` : ''}
               <div class="nu-actions">
                 <button class="btn btn-ghost btn-xs" onclick="applyNUToQuickContext('${n.code}','${n.name}')">Als Kontext wählen</button>
               </div>
@@ -4782,12 +4996,12 @@ function exportExcel(overrideDate) {
 
     // Gewerke & Nachunternehmer
     if((S.gewerke||[]).length>0){
-      const s12=[['Gewerk-Code','Gewerk DE','Gewerk TR','NU-Code','Nachunternehmer','Kontakt','Telefon','E-Mail','Status','Notiz']];
+      const s12=[['Gewerk-Code','Gewerk DE','Gewerk TR','NU-Code','Nachunternehmer','Kontakt','Telefon','E-Mail','Baustelle Ansprechpartner','Bestellung','LV Nummer','Nachtrag','Status','Notiz']];
       (S.gewerke||[]).forEach(g=>{
-        if(!(g.nus||[]).length) s12.push([g.code||'',g.nameDe||'',g.nameTr||'','','','','','','',g.note||'']);
-        else (g.nus||[]).forEach(n=>s12.push([g.code||'',g.nameDe||'',g.nameTr||'',n.code||'',n.name||'',n.contact||'',n.phone||'',n.email||'',n.status||'',n.note||'']));
+        if(!(g.nus||[]).length) s12.push([g.code||'',g.nameDe||'',g.nameTr||'','','','','','','','','','','',g.note||'']);
+        else (g.nus||[]).forEach(n=>s12.push([g.code||'',g.nameDe||'',g.nameTr||'',n.code||'',n.name||'',n.contact||'',n.phone||'',n.email||'',n.siteContact||'',n.order||'',n.lvNumber||'',n.nachtrag||'',n.status||'',n.note||'']));
       });
-      const ws12=XLSX.utils.aoa_to_sheet(s12);ws12['!cols']=[{wch:12},{wch:28},{wch:24},{wch:12},{wch:26},{wch:18},{wch:16},{wch:24},{wch:14},{wch:28}];
+      const ws12=XLSX.utils.aoa_to_sheet(s12);ws12['!cols']=[{wch:12},{wch:28},{wch:24},{wch:12},{wch:26},{wch:18},{wch:16},{wch:24},{wch:22},{wch:20},{wch:14},{wch:18},{wch:14},{wch:30}];
       XLSX.utils.book_append_sheet(wb,ws12,'Gewerke');
     }
 
