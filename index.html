@@ -6,262 +6,426 @@
 <title>SERO Bautagebuch</title>
 
 <style>
+
 body{
-font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text",Roboto,sans-serif;
-background:#f5f6f8;
+font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto;
 margin:0;
-padding:20px;
-color:#111;
+background:#f5f6f7;
 }
 
-h2{margin-top:30px}
-
-.card{
+header{
 background:white;
-padding:16px;
-border-radius:14px;
-margin-bottom:14px;
-box-shadow:0 2px 6px rgba(0,0,0,.05);
+padding:14px;
+box-shadow:0 2px 6px rgba(0,0,0,.08);
 }
 
-button{
-padding:8px 14px;
-border:none;
-border-radius:10px;
-background:#007aff;
-color:white;
+.context{
+font-size:14px;
+color:#444;
+display:flex;
+gap:18px;
+flex-wrap:wrap;
+}
+
+.sidebar{
+position:fixed;
+left:0;
+top:0;
+bottom:0;
+width:260px;
+background:white;
+overflow:auto;
+border-right:1px solid #ddd;
+}
+
+.content{
+margin-left:260px;
+padding:20px;
+}
+
+.gewerk{
+padding:8px 12px;
 cursor:pointer;
 }
 
-input,select,textarea{
-width:100%;
-padding:8px;
-border-radius:8px;
-border:1px solid #ddd;
-margin-top:4px;
-margin-bottom:10px;
+.gewerk:hover{
+background:#f0f0f0;
 }
 
-.timeline-card{
+.firma{
+padding-left:26px;
+font-size:14px;
+cursor:pointer;
+}
+
+.quick-entry{
+width:100%;
+padding:12px;
+font-size:16px;
+border-radius:8px;
+border:1px solid #ccc;
+margin-bottom:20px;
+}
+
+.timeline-item{
 background:white;
 padding:12px;
-border-radius:12px;
+border-radius:10px;
 margin-bottom:10px;
-border-left:4px solid #007aff;
+box-shadow:0 1px 4px rgba(0,0,0,.08);
 }
 
-.small{
-font-size:12px;
-color:#777;
+button{
+padding:8px 12px;
+border:none;
+background:black;
+color:white;
+border-radius:6px;
+cursor:pointer;
 }
+
 </style>
 </head>
 
 <body>
 
-<h1>SERO Bautagebuch</h1>
+<div class="sidebar" id="sidebar"></div>
 
-<div class="card">
-<h2>Arbeitsbereiche</h2>
+<div class="content">
 
-<input id="areaInput" placeholder="Arbeitsbereich hinzufügen">
-<button onclick="addArea()">Hinzufügen</button>
+<header>
+<div class="context" id="contextBar"></div>
+</header>
 
-<div id="areaList"></div>
-</div>
+<br>
 
-<div class="card">
-<h2>Nachunternehmer hinzufügen</h2>
+<input
+class="quick-entry"
+id="quickEntry"
+placeholder="+ Neuer Eintrag schreiben..."
+>
 
-<select id="gewerkSelect"></select>
+<div id="timeline"></div>
 
-<input id="nuCode" placeholder="NU Code (z.B. 902.01)">
-<input id="nuName" placeholder="Firma Name">
-
-<button onclick="addNU()">Speichern</button>
-
-<div id="nuList"></div>
-</div>
-
-<div class="card">
-<h2>Tageschronologie</h2>
-
-<input type="time" id="timeInput">
-
-<select id="timelineGewerk"></select>
-
-<select id="timelineFirma"></select>
-
-<textarea id="timelineText" placeholder="Ereignis..."></textarea>
-
-<button onclick="addTimeline()">Event speichern</button>
-
-<div id="timelineList"></div>
 </div>
 
 <script>
 
-const GEWERKE = [
-["901","Erdarbeiten"],
-["902","Betonarbeiten"],
-["903","Hallensohle"],
-["904","Abdichtung"],
-["905","Industrieboden"],
-["906","Mauerwerk"],
-["908","Fertigteile"],
-["910","Tore / Türen"],
-["911","Lichtbandwand"],
-["912","Dach"],
-["913","Lichtkuppeln"],
-["915","Brandschutz"],
-["916","Innenausbau"],
-["918","Maler"],
-["919","Fliesen"],
-["921","Elektro"],
-["923","HKLS"],
-["927","Schlosser"],
-["928","Baustelleneinrichtung"],
-["930","Aufzug"],
-["934","Außenanlagen"]
-];
+/* ---------- CORE STATE ---------- */
 
-let state = JSON.parse(localStorage.getItem("sero_v1")) || {
-areas:[],
-firmen:[],
-timeline:[]
-};
+let appState =
+JSON.parse(localStorage.getItem("sero_state"))
+|| createInitialState()
 
-function save(){
-localStorage.setItem("sero_v1",JSON.stringify(state));
+
+function createInitialState(){
+
+return {
+
+project:{
+name:"GI0447",
+ort:"Bergkamen",
+nummer:"GI0447"
+},
+
+gewerke: PRESET_GEWERKE.map(name=>{
+
+let code=name.split(" ")[0]
+
+return{
+code,
+name,
+firmen:[]
 }
 
-function initGewerkSelect(){
+}),
 
-const sel=document.getElementById("gewerkSelect");
-const sel2=document.getElementById("timelineGewerk");
+timeline:[],
 
-GEWERKE.forEach(g=>{
-let o=document.createElement("option");
-o.value=g[0];
-o.text=g[0]+" "+g[1];
-sel.appendChild(o);
-
-let o2=document.createElement("option");
-o2.value=g[0];
-o2.text=g[0]+" "+g[1];
-sel2.appendChild(o2);
-});
+context:{
+gewerk:null,
+firma:null,
+bereich:null,
+datum:new Date().toISOString().slice(0,10)
 }
 
-function addArea(){
-let val=document.getElementById("areaInput").value;
-if(!val)return;
-state.areas.push(val);
-save();
-renderAreas();
 }
 
-function renderAreas(){
-let box=document.getElementById("areaList");
-box.innerHTML="";
-state.areas.forEach(a=>{
-let div=document.createElement("div");
-div.innerText="📍 "+a;
-box.appendChild(div);
-});
 }
 
-function addNU(){
 
-let code=document.getElementById("nuCode").value;
-let name=document.getElementById("nuName").value;
-let gewerk=document.getElementById("gewerkSelect").value;
+/* ---------- PRESET GEWERKE ---------- */
 
-if(!code||!name)return;
+const PRESET_GEWERKE = [
 
-state.firmen.push({code,name,gewerk});
-save();
-renderNU();
+"100 Stahlbau",
+"400 Fassade",
+"901 Erd- und Entwässerungsarbeiten",
+"902 Beton- und Stahlbetonarbeiten",
+"903 Hallensohle",
+"904 Bauwerksabdichtung",
+"905 Industriefußboden Estrich",
+"906 Mauerwerksarbeiten",
+"908 Betonfertigteile",
+"910 Tore, Türen, Überladebrücken",
+"911 Lichtbandwand",
+"912 Dacheindeckung",
+"913 Lichtkuppeln",
+"914 Blechverlegearbeiten (906+936)",
+"915 Brandschutz",
+"916 Innenausbau",
+"917 Sonnenschutz",
+"918 Malerarbeiten",
+"919 Fliesenarbeiten",
+"920 Bodenbeläge",
+"921 Elektro (840–860+880)",
+"922 Löschanlagen (875)",
+"923 HKLS (811–830)",
+"925 Ingenieurleistungen (1870)",
+"927 Schlosserarbeiten",
+"928 Baustelleneinrichtung",
+"930 Aufzugsanlage",
+"934 Außenanlagen"
+
+]
+
+
+/* ---------- SAVE ---------- */
+
+function saveState(){
+
+localStorage.setItem(
+"sero_state",
+JSON.stringify(appState)
+)
+
 }
 
-function renderNU(){
 
-let box=document.getElementById("nuList");
-box.innerHTML="";
+/* ---------- SIDEBAR ---------- */
 
-state.firmen.forEach(f=>{
-let div=document.createElement("div");
-div.innerText=f.code+" "+f.name+" ("+f.gewerk+")";
-box.appendChild(div);
-});
+function renderSidebar(){
 
-renderFirmaDropdown();
+let html=""
+
+appState.gewerke.forEach(g=>{
+
+html+=`
+<div class="gewerk"
+onclick="selectGewerk('${g.code}')">
+
+📁 ${g.name}
+
+</div>
+`
+
+g.firmen.forEach(f=>{
+
+html+=`
+<div class="firma"
+onclick="selectFirma('${f.code}')">
+
+🏢 ${f.code} ${f.name}
+
+</div>
+`
+
+})
+
+html+=`
+<div class="firma"
+onclick="addFirma('${g.code}')">
+
+➕ Firma hinzufügen
+
+</div>
+`
+
+})
+
+document.getElementById("sidebar").innerHTML=html
+
 }
 
-function renderFirmaDropdown(){
 
-let sel=document.getElementById("timelineFirma");
-sel.innerHTML="";
+/* ---------- GEWERK SELECT ---------- */
 
-let gw=document.getElementById("timelineGewerk").value;
+function selectGewerk(code){
 
-state.firmen
-.filter(f=>f.gewerk===gw)
-.forEach(f=>{
-let o=document.createElement("option");
-o.value=f.code;
-o.text=f.code+" "+f.name;
-sel.appendChild(o);
-});
+appState.context.gewerk=code
+appState.context.firma=null
+
+renderContext()
+
 }
 
-document.getElementById("timelineGewerk")
-.addEventListener("change",renderFirmaDropdown);
 
-function addTimeline(){
+/* ---------- FIRMA ADD ---------- */
 
-let time=document.getElementById("timeInput").value;
+function addFirma(gewerkCode){
 
-if(!time){
-let now=new Date();
-time=now.getHours()+":"+now.getMinutes();
+let name=prompt("Firmenname eingeben")
+
+if(!name)return
+
+let gewerk=
+appState.gewerke.find(g=>g.code==gewerkCode)
+
+let next=
+gewerk.firmen.length+1
+
+let code=
+gewerkCode+"."+
+String(next).padStart(2,"0")
+
+gewerk.firmen.push({
+
+code,
+name
+
+})
+
+saveState()
+renderSidebar()
+
 }
 
-let gewerk=document.getElementById("timelineGewerk").value;
-let firma=document.getElementById("timelineFirma").value;
-let text=document.getElementById("timelineText").value;
 
-if(!text)return;
+/* ---------- FIRMA SELECT ---------- */
 
-state.timeline.push({time,gewerk,firma,text});
-save();
-renderTimeline();
+function selectFirma(code){
+
+appState.context.firma=code
+renderContext()
+
 }
+
+
+/* ---------- CONTEXT ---------- */
+
+function renderContext(){
+
+let c=appState.context
+
+document.getElementById("contextBar").innerHTML=`
+
+Projekt: ${appState.project.name}
+
+Gewerk: ${c.gewerk||"-"}
+
+Firma: ${c.firma||"-"}
+
+Datum: ${c.datum}
+
+`
+
+}
+
+
+/* ---------- QUICK ENTRY ---------- */
+
+document
+.getElementById("quickEntry")
+.addEventListener("keypress",e=>{
+
+if(e.key!="Enter")return
+
+let text=e.target.value.trim()
+
+if(!text)return
+
+parseCommand(text)
+
+e.target.value=""
+
+})
+
+
+/* ---------- COMMAND PARSER ---------- */
+
+function parseCommand(text){
+
+if(text.startsWith("!m"))
+return addTimeline(text.slice(2),"MANGEL")
+
+if(text.startsWith("!a"))
+return addTimeline(text.slice(2),"AUFGABE")
+
+if(text.startsWith("!f"))
+return addTimeline(text.slice(2),"FOTO")
+
+if(text.startsWith("!g"))
+return addTimeline(text.slice(2),"GERÄT")
+
+if(text.startsWith("!c"))
+return addTimeline(text.slice(2),"CONTAINER")
+
+if(text.startsWith("!b"))
+return addTimeline(text.slice(2),"BESPRECHUNG")
+
+addTimeline(text,"TIMELINE")
+
+}
+
+
+/* ---------- ADD TIMELINE ---------- */
+
+function addTimeline(text,type){
+
+appState.timeline.unshift({
+
+text,
+type,
+
+gewerk:
+appState.context.gewerk,
+
+firma:
+appState.context.firma,
+
+datum:
+new Date().toISOString(),
+
+})
+
+saveState()
+
+renderTimeline()
+
+}
+
+
+/* ---------- RENDER TIMELINE ---------- */
 
 function renderTimeline(){
 
-let box=document.getElementById("timelineList");
-box.innerHTML="";
+let html=""
 
-state.timeline.reverse().forEach(t=>{
+appState.timeline.forEach(t=>{
 
-let div=document.createElement("div");
-div.className="timeline-card";
+html+=`
 
-div.innerHTML=
-"<b>"+t.time+"</b><br>"+
-"<span class='small'>"+t.gewerk+" "+t.firma+"</span><br>"+
-t.text;
+<div class="timeline-item">
 
-box.appendChild(div);
+<b>${t.type}</b><br>
+${t.text}
 
-});
+</div>
+
+`
+
+})
+
+document.getElementById("timeline").innerHTML=html
+
 }
 
-initGewerkSelect();
-renderAreas();
-renderNU();
-renderTimeline();
+
+/* ---------- INIT ---------- */
+
+renderSidebar()
+renderContext()
+renderTimeline()
 
 </script>
 
