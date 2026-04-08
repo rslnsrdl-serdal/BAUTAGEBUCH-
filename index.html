@@ -1343,7 +1343,13 @@ body{
           <input type="file" id="backupIn" accept=".json" style="display:none" onchange="importBackup(this)">
           <button class="btn btn-ghost" onclick="document.getElementById('backupIn').click()">⬆ Backup importieren</button>
         </div>
-        <p style="font-size:12px;color:var(--text3);margin-top:10px;">Tüm günlük kayıtlar, arşiv, personel, cihazlar ve toplantılar JSON olarak dışa alınabilir.</p>
+        <div class="divider"></div>
+        <div class="fg">
+          <div class="fl">Firmen per CSV importieren <span class="tr">CSV ile firma yükle</span></div>
+          <input type="file" id="firmCsvIn" accept=".csv,text/csv" style="display:none" onchange="importFirmCSV(this)">
+          <button class="btn btn-ghost" onclick="document.getElementById('firmCsvIn').click()">🏢 CSV importieren</button>
+        </div>
+        <p style="font-size:12px;color:var(--text3);margin-top:10px;">CSV sütunları: name, trade, contact, phone, status. Tüm günlük kayıtlar, arşiv, personel, cihazlar ve toplantılar JSON olarak dışa alınabilir.</p>
       </div>
     </div>
 
@@ -1394,10 +1400,10 @@ body{
           <select class="fs" id="km-prio"><option value="high">🔴 Hoch</option><option value="mid" selected>🟡 Mittel</option><option value="low">🟢 Niedrig</option></select></div>
       </div>
       <div class="fr2">
-        <div class="fg"><div class="fl">Uhrzeit <span class="tr">Saat</span></div><input type="time" class="fi" id="km-time"></div>
+        <div class="fg"><div class="fl">Startzeit <span class="tr">Giriş saati</span></div><input type="time" class="fi" id="km-time"></div>
         <div class="fg"><div class="fl">Gewerk <span class="tr">İş Türü</span></div><input type="text" class="fi" id="km-trade" placeholder="Betonarbeiten…"></div>
       </div>
-      <div class="fg"><div class="fl">Notiz <span class="tr">Not</span></div><textarea class="fta" id="km-note" placeholder="Ek bilgiler…" style="min-height:70px;"></textarea></div>
+      <div class="fg"><div class="fl">Notiz <span class="tr">Görev Notu</span></div><textarea class="fta" id="km-note" placeholder="Ek bilgiler, takip notu, yapılacak detaylar…" style="min-height:90px;"></textarea></div>
     </div>
     <div class="modal-ft"><button class="btn btn-ghost" onclick="closeModal('km')">Abbrechen</button><button class="btn btn-primary" onclick="saveKanban()">Speichern ✓</button></div>
   </div>
@@ -1776,6 +1782,59 @@ function syncProjectInfoToTB() {
 }
 
 
+
+function importFirmCSV(inp) {
+  const file = inp.files && inp.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const text = e.target.result.replace(/\r/g, '');
+      const lines = text.split('\n').filter(Boolean);
+      if (lines.length < 2) { showToast('CSV leer oder ungültig','warn'); return; }
+      const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
+      const idx = {
+        name: headers.indexOf('name'),
+        trade: headers.indexOf('trade'),
+        contact: headers.indexOf('contact'),
+        phone: headers.indexOf('phone'),
+        status: headers.indexOf('status'),
+      };
+      if (idx.name === -1) { showToast('CSV braucht mindestens "name" sütunu','warn'); return; }
+      if (!S.contractors) S.contractors = [];
+      let added = 0;
+      for (const line of lines.slice(1)) {
+        const cols = line.split(',').map(v => v.trim());
+        const name = cols[idx.name] || '';
+        if (!name) continue;
+        if (S.contractors.some(c => (c.name || '').toLowerCase() == name.toLowerCase())) continue;
+        S.contractors.push({
+          id:'f_'+Date.now()+'_'+Math.random().toString(36).slice(2,7),
+          name,
+          trade: idx.trade >= 0 ? (cols[idx.trade] || '') : '',
+          contact: idx.contact >= 0 ? (cols[idx.contact] || '') : '',
+          phone: idx.phone >= 0 ? (cols[idx.phone] || '') : '',
+          status: idx.status >= 0 ? ((cols[idx.status] || 'active').toLowerCase()) : 'active',
+          color: COLORS[S.contractors.length % COLORS.length],
+          notes:[]
+        });
+        added += 1;
+      }
+      persistState();
+      renderFirms();
+      renderSigGrid();
+      buildPersonnel();
+      buildGeraete();
+      updateBadges();
+      showToast(`${added} Firmen importiert`,'ok');
+    } catch(err) {
+      showToast('CSV Import fehlgeschlagen','err');
+    }
+  };
+  reader.readAsText(file, 'utf-8');
+  inp.value = '';
+}
+
 function exportBackup() {
   try {
     collectFormToState();
@@ -1865,17 +1924,11 @@ function loadReportByDate() {
 }
 
 function startNewDay() {
-  const keepProjectNr = S.projectNr || '';
-  const keepProjectName = S.projectName || '';
-  const keepBauleiter = S.bauleiter || '';
-  const keepStandort = S.standort || '';
-  S = newState();
-  S.projectNr = keepProjectNr;
-  S.projectName = keepProjectName;
-  S.bauleiter = keepBauleiter;
-  S.standort = keepStandort;
+  collectFormToState();
   S.reportDate = todayStr();
   S.reportNr = autoRNr();
+  S.remarks = '';
+  S.workEntries = [];
   persistState();
   applyStateToForm();
   if (typeof syncProjectInfoToTB === 'function') syncProjectInfoToTB();
@@ -1891,7 +1944,7 @@ function startNewDay() {
   renderDocs();
   updateBadges();
   refreshDash();
-  showToast('Neuer Tag gestartet','ok');
+  showToast('Neuer Tag gestartet: nur Datum & Notlar güncellendi','ok');
 }
 
 // ═══════════════════════════════════════════════════
@@ -2369,6 +2422,7 @@ function saveKanban() {
     time: gv('km-time'),
     trade: gv('km-trade'),
     note: gv('km-note'),
+    createdAt: new Date().toISOString(),
     col,
   };
   if (!S.kanban) S.kanban={today:[],tomorrow:[],done:[]};
@@ -2407,7 +2461,7 @@ function renderKanban() {
           ${task.trade?`<span class="chip chip-t">${esc(task.trade)}</span>`:''}
           ${task.time?`<span class="chip chip-t">⏰ ${task.time}</span>`:''}
         </div>
-        ${task.note?`<div class="kbc-note">${esc(task.note)}</div>`:''}
+        ${task.note?`<div class="kbc-note">📝 ${esc(task.note)}</div>`:''}
         <div class="kbc-acts">
           ${col!=='today'?`<button class="kbc-mv" title="←" onclick="mvTask('${task.id}','${col}','${col==='done'?'tomorrow':'today'}')">←</button>`:''}
           ${col!=='done'?`<button class="kbc-mv" title="→" onclick="mvTask('${task.id}','${col}','${col==='today'?'tomorrow':'done'}')">→</button>`:''}
@@ -2943,7 +2997,12 @@ function exportExcel(overrideDate) {
       ['Temp. min:',(S.tempMin||'—')+'°C'],['Temp. max:',(S.tempMax||'—')+'°C'],
       ['Wind:',S.wind||'—'],['Boden:',S.boden||'—'],
       [''],['Fortschritt:',(S.progress||0)+'%'],
-      [''],['Bemerkungen:',S.remarks||'—'],
+      [''],
+      ['Personal gesamt:', Object.values(S.personnelCounts||{}).reduce((a,b)=>a+b,0)],
+      ['Geräte aktiv:', (S.geraete||[]).filter(g=>g.count>0).length],
+      ['Offene Kanban Aufgaben:', ((S.kanban?.today||[]).length + (S.kanban?.tomorrow||[]).length)],
+      [''],
+      ['Bemerkungen:',S.remarks||'—'],
     ];
     const ws1=XLSX.utils.aoa_to_sheet(s1);ws1['!cols']=[{wch:22},{wch:36}];
     XLSX.utils.book_append_sheet(wb,ws1,'Deckblatt');
@@ -2963,9 +3022,12 @@ function exportExcel(overrideDate) {
 
     // Geräte
     if((S.geraete||[]).some(g=>g.count>0)){
-      const s2b=[['Gerät','Türkisch','Anzahl','Stunden'],
-        ...(S.geraete||[]).filter(g=>g.count>0).map(g=>[g.de,g.tr||'',g.count,g.hours||0])];
-      const ws2b=XLSX.utils.aoa_to_sheet(s2b);ws2b['!cols']=[{wch:20},{wch:16},{wch:10},{wch:12}];
+      const s2b=[['Gerät','Türkisch','Anzahl','Stunden','Marke','Modell','Firma','Notiz'],
+        ...(S.geraete||[]).filter(g=>g.count>0).map(g=>[
+          g.de,g.tr||'',g.count,g.hours||0,g.brand||'',g.model||'',
+          (S.contractors||[]).find(c=>c.id===g.firmId)?.name||'',g.note||''
+        ])];
+      const ws2b=XLSX.utils.aoa_to_sheet(s2b);ws2b['!cols']=[{wch:20},{wch:16},{wch:10},{wch:12},{wch:14},{wch:14},{wch:20},{wch:30}];
       XLSX.utils.book_append_sheet(wb,ws2b,'Geräte');
     }
 
@@ -2982,9 +3044,9 @@ function exportExcel(overrideDate) {
       ...(S.kanban?.tomorrow||[]).map(t=>({...t,colLabel:'Morgen'})),
       ...(S.kanban?.done||[]).map(t=>({...t,colLabel:'Erledigt'}))];
     if(allTasks.length>0){
-      const s4=[['Spalte','Aufgabe','Firma','Priorität','Uhrzeit','Gewerk','Notiz'],
-        ...allTasks.map(t=>[t.colLabel,t.title,t.firmName||'',t.prio,t.time||'',t.trade||'',t.note||''])];
-      const ws4=XLSX.utils.aoa_to_sheet(s4);ws4['!cols']=[{wch:10},{wch:30},{wch:20},{wch:10},{wch:8},{wch:16},{wch:28}];
+      const s4=[['Spalte','Aufgabe','Firma','Priorität','Startzeit','Gewerk','Notiz','Erfasst am'],
+        ...allTasks.map(t=>[t.colLabel,t.title,t.firmName||'',t.prio,t.time||'',t.trade||'',t.note||'',t.createdAt||''])];
+      const ws4=XLSX.utils.aoa_to_sheet(s4);ws4['!cols']=[{wch:10},{wch:30},{wch:20},{wch:10},{wch:10},{wch:16},{wch:30},{wch:22}];
       XLSX.utils.book_append_sheet(wb,ws4,'Kanban');
     }
 
