@@ -1306,6 +1306,11 @@ body{
   .photo-detail-grid{grid-template-columns:1fr;}
 }
 @media(max-width:600px){
+  #pg-settings > div[style*="grid-template-columns:1fr 1fr"]{
+    display:grid !important;
+    grid-template-columns:1fr !important;
+    gap:10px !important;
+  }
   .fab-wrap{right:14px; bottom:14px;}
   .fab-main{width:56px;height:56px;}
   .main{padding-bottom:96px;}
@@ -1428,6 +1433,7 @@ body{
         <span class="save-time" id="saveTime">Kayıtlı</span>
       </div>
       <button class="theme-toggle" id="themeBtn" onclick="toggleTheme()" title="Tema değiştir">🌙</button>
+      <button class="theme-toggle" onclick="goPageById('pg-settings')" title="Ayarlar">⚙️</button>
       <button class="btn btn-excel btn-sm" onclick="exportExcel()">📊 Excel</button>
     </div>
   </div>
@@ -1442,6 +1448,7 @@ body{
       <button class="nav-tab" data-page="pg-files" onclick="goPage(this)"><span class="ti">📂</span>Dateien <span class="nav-badge" id="nb-files">0</span></button>
       <button class="nav-tab" data-page="pg-mangel" onclick="goPage(this)"><span class="ti">⚠️</span>Mängel <span class="nav-badge" id="nb-mangel">0</span></button>
       <button class="nav-tab" data-page="pg-archive" onclick="goPage(this)"><span class="ti">🗃</span>Archiv <span class="nav-badge" id="nb-archive">0</span></button>
+      <button class="nav-tab" data-page="pg-settings" onclick="goPage(this)"><span class="ti">⚙️</span>Einstellungen</button>
     </div>
   </div>
 </header>
@@ -1811,6 +1818,62 @@ body{
   </div>
   <div id="archiveList"><div class="empty-state"><div class="ei">🗃</div><h4>Kein Archiv</h4><p>"Bericht speichern" ile rapor kaydet</p></div></div>
 </div>
+
+
+<!-- ═══════════ PAGE: SETTINGS ═══════════ -->
+<div class="page" id="pg-settings">
+  <div class="sh">
+    <h2>Einstellungen <span class="sub">Ayarlar</span></h2>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+    <div class="card">
+      <div class="card-hd"><div class="card-hd-l"><div class="ci ci-b">💾</div><h3>Backup & Wiederherstellung <small>Yedek / Geri Yükleme</small></h3></div></div>
+      <div class="card-body">
+        <div class="fg">
+          <div class="fl">Komplett-Backup exportieren</div>
+          <button class="btn btn-primary" onclick="exportBackup()">⬇ JSON Backup exportieren</button>
+        </div>
+        <div class="divider"></div>
+        <div class="fg">
+          <div class="fl">Backup importieren</div>
+          <input type="file" id="backupIn" accept=".json,application/json" style="display:none" onchange="importBackup(this)">
+          <button class="btn btn-ghost" onclick="document.getElementById('backupIn').click()">⬆ JSON Backup importieren</button>
+        </div>
+        <p style="font-size:12px;color:var(--text3);margin-top:10px;">
+          Sichert Tagesberichte, Archiv, Kanban, Fotos, Mängel, Firmen, Geräte und Timeline.
+        </p>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-hd"><div class="card-hd-l"><div class="ci ci-o">🗓</div><h3>Tagesauswahl <small>Gün seçimi</small></h3></div></div>
+      <div class="card-body">
+        <div class="fg">
+          <div class="fl">Bericht nach Datum laden</div>
+          <input type="date" class="fi" id="loadReportDate">
+        </div>
+        <div class="fg" style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="btn btn-primary" onclick="loadReportByDate()">Tag laden</button>
+          <button class="btn btn-ghost" onclick="startNewDay()">Neuen Tag beginnen</button>
+        </div>
+        <p style="font-size:12px;color:var(--text3);margin-top:10px;">
+          Belirli bir günü arşivden açabilir veya yeni güne geçebilirsin.
+        </p>
+      </div>
+    </div>
+
+    <div class="card" style="grid-column:1/-1;">
+      <div class="card-hd"><div class="card-hd-l"><div class="ci ci-g">🧠</div><h3>Speicherstatus <small>Depolama durumu</small></h3></div></div>
+      <div class="card-body">
+        <p style="font-size:12px;color:var(--text2);line-height:1.7;">
+          Fotoğraflar artık <strong>IndexedDB</strong> içinde tutulur. Bu, eski localStorage yöntemine göre çok daha güvenlidir.
+          Eski sürümden kalan şişmiş arşiv kayıtları bu sürümde otomatik olarak hafifletilir.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
 
 </div><!-- /main -->
 
@@ -2221,11 +2284,13 @@ function loadAll() {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) {
       const loaded = JSON.parse(raw);
-      // deep merge to not lose new state keys
       S = deepMerge(newState(), loaded);
+      S = makeStateSafeForStorage(S);
     }
     const rawAr = localStorage.getItem(ARCHIVE_KEY);
-    if (rawAr) archive = JSON.parse(rawAr);
+    if (rawAr) {
+      archive = makeArchiveSafeForStorage(JSON.parse(rawAr));
+    }
   } catch(e) { console.warn('Load error', e); }
 }
 
@@ -2243,14 +2308,15 @@ function deepMerge(target, source) {
 
 function persistState() {
   try {
-    const safeState = makePhotoMetaSafe();
+    const safeState = makeStateSafeForStorage(S);
+    const safeArchive = makeArchiveSafeForStorage(archive);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(safeState));
-    localStorage.setItem(ARCHIVE_KEY, JSON.stringify(archive));
+    localStorage.setItem(ARCHIVE_KEY, JSON.stringify(safeArchive));
     const dot = document.getElementById('saveDot');
     const st = document.getElementById('saveTime');
     const now = new Date();
-    dot.className = 'save-dot';
-    st.textContent = pad(now.getHours())+':'+pad(now.getMinutes())+' ✓';
+    if (dot) dot.className = 'save-dot';
+    if (st) st.textContent = pad(now.getHours())+':'+pad(now.getMinutes())+' ✓';
   } catch(e) {
     showToast('Speicherfehler: '+e.message,'err');
   }
@@ -2373,13 +2439,140 @@ function quickAction(type) {
 }
 
 
+
+function makeStateSafeForStorage(stateObj) {
+  const clone = JSON.parse(JSON.stringify(stateObj));
+  clone.photos = (clone.photos || []).map(p => {
+    const q = { ...p };
+    delete q.data;
+    return q;
+  });
+  clone.docs = (clone.docs || []).map(d => {
+    const q = { ...d };
+    delete q.data;
+    return q;
+  });
+  return clone;
+}
+
+function makeArchiveSafeForStorage(archiveArr) {
+  return (archiveArr || []).map(entry => {
+    const clone = JSON.parse(JSON.stringify(entry));
+    if (clone.snap) clone.snap = makeStateSafeForStorage(clone.snap);
+    return clone;
+  });
+}
+
+async function exportBackup() {
+  try {
+    collectFormToState();
+    await hydratePhotosFromIDB();
+    const backup = {
+      exportedAt: new Date().toISOString(),
+      version: 3,
+      state: S,
+      archive: archive,
+      theme: currentTheme
+    };
+    const blob = new Blob([JSON.stringify(backup, null, 2)], {type:'application/json'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `SERO_Bautagebuch_Backup_${todayStr()}.json`;
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 500);
+    showToast('Backup exportiert','ok');
+  } catch(e) {
+    showToast('Backup Export fehlgeschlagen','err');
+  }
+}
+
+function importBackup(inp) {
+  const file = inp.files && inp.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = async e => {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (data.state) S = deepMerge(newState(), data.state);
+      if (Array.isArray(data.archive)) archive = data.archive;
+      await openPhotoDB();
+      for (const p of (S.photos || [])) {
+        if (p.id && p.data) {
+          try { await idbSavePhoto({ id: p.id, data: p.data, name: p.name || '', savedAt: new Date().toISOString() }); } catch(err) {}
+        }
+      }
+      persistState();
+      applyStateToForm();
+      if (typeof syncProjectInfoToTB === 'function') syncProjectInfoToTB();
+      buildPersonnel();
+      buildGeraete();
+      renderSigGrid();
+      renderWorkEntries();
+      renderKanban();
+      renderFirms();
+      renderContainers();
+      renderMeetings();
+      renderPhotos();
+      renderDocs();
+      renderArchive();
+      renderTimeline();
+      renderWorkAreas();
+      renderWeeklyReports();
+      renderMaengel();
+      updateBadges();
+      refreshDash();
+      if (data.theme) setTheme(data.theme);
+      showToast('Backup importiert','ok');
+    } catch(err) {
+      showToast('Backup konnte nicht importiert werden','err');
+    }
+  };
+  reader.readAsText(file);
+  inp.value = '';
+}
+
+function loadArchiveIntoCurrent(id) {
+  const ar = archive.find(a => a.id === id);
+  if (!ar || !ar.snap) return;
+  S = deepMerge(newState(), ar.snap);
+  persistState();
+  applyStateToForm();
+  if (typeof syncProjectInfoToTB === 'function') syncProjectInfoToTB();
+  buildPersonnel();
+  buildGeraete();
+  renderSigGrid();
+  renderWorkEntries();
+  renderKanban();
+  renderFirms();
+  renderContainers();
+  renderMeetings();
+  renderPhotos();
+  renderDocs();
+  renderTimeline();
+  renderWorkAreas();
+  renderWeeklyReports();
+  renderMaengel();
+  updateBadges();
+  refreshDash();
+  goPageById('pg-tb');
+  showToast('Bericht geladen: ' + (ar.reportDate || ''), 'ok');
+}
+
+function loadReportByDate() {
+  const date = gv('loadReportDate');
+  if (!date) { showToast('Datum auswählen','warn'); return; }
+  const ar = archive.find(a => a.reportDate === date);
+  if (!ar) { showToast('Kein Bericht für dieses Datum','warn'); return; }
+  loadArchiveIntoCurrent(ar.id);
+}
+
 // ═══════════════════════════════════════════════════
 // SAVE REPORT TO ARCHIVE
 // ═══════════════════════════════════════════════════
 function saveReport() {
   collectFormToState();
   const now = new Date();
-  const snap = JSON.parse(JSON.stringify(S));
+  const snap = makeStateSafeForStorage(S);
   const id = 'ar_' + now.getTime();
   const entry = {
     id,
@@ -2392,18 +2585,17 @@ function saveReport() {
     bauleiter: S.bauleiter || '—',
     weather: S.weather || '—',
     progress: S.progress || 0,
-    totalPersonnel: Object.values(S.personnelCounts).reduce((a,b)=>a+b,0),
-    workCount: S.workEntries.length,
+    totalPersonnel: Object.values(S.personnelCounts || {}).reduce((a,b)=>a+b,0),
+    workCount: (S.workEntries || []).length,
     snap,
   };
-  // Update or add: if same reportDate exists, update it
   const existIdx = archive.findIndex(a => a.reportDate === entry.reportDate);
   if (existIdx >= 0) {
     archive[existIdx] = entry;
-    showToast('Bericht aktualisiert: '+entry.reportDate, 'ok');
+    showToast('Bericht für den Tag aktualisiert: '+entry.reportDate, 'ok');
   } else {
     archive.unshift(entry);
-    showToast('Bericht archiviert: '+entry.reportDate, 'ok');
+    showToast('Neuer Tagesbericht gespeichert: '+entry.reportDate, 'ok');
   }
   persistState();
   updateBadges();
