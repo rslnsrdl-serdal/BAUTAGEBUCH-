@@ -1249,105 +1249,6 @@ body{
   border-color:rgba(0,122,255,0.10);
 }
 
-
-/* Timeline event cards */
-.timeline-list-wrap{display:flex;flex-direction:column;gap:12px;}
-.timeline-event-card{
-  background:#fff;border:1px solid var(--border);border-radius:18px;
-  box-shadow:var(--shadow);padding:14px 14px 12px;
-}
-.timeline-event-top{
-  display:flex;justify-content:space-between;gap:12px;align-items:flex-start;margin-bottom:8px;
-}
-.timeline-time-badge{
-  min-width:72px;display:flex;align-items:center;justify-content:center;
-  padding:8px 10px;border-radius:12px;background:rgba(0,122,255,0.10);
-  color:var(--accent);font-weight:700;font-size:13px;
-}
-.timeline-main-text{
-  flex:1;font-size:14px;font-weight:600;color:var(--text);line-height:1.45;
-}
-.timeline-meta-row{
-  display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 10px;
-}
-.timeline-meta-chip{
-  display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;
-  background:var(--bg4);border:1px solid var(--border);font-size:11px;color:var(--text2);
-}
-.timeline-card-actions{
-  display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;
-}
-.timeline-link-row{
-  display:grid;grid-template-columns:1fr 180px;gap:8px;margin-top:8px;
-}
-.timeline-link-row textarea,.timeline-link-row select,.timeline-link-row input{min-height:auto !important;}
-/* Work area display */
-#workAreaTags{display:flex;flex-wrap:wrap;gap:8px;min-height:20px;}
-.wa-tag{
-  display:inline-flex !important;align-items:center;gap:6px;
-  padding:7px 12px;border-radius:999px;background:#eef5ff;
-  border:1px solid rgba(0,122,255,0.10);font-size:11px;color:#0066d6;
-}
-.wa-tag button{border:none;background:none;color:#ff3b30;cursor:pointer;font-size:11px;}
-/* Better task cards */
-.kbc{
-  display:flex;flex-direction:column;gap:8px;
-}
-.kbc-source{
-  font-size:10px;color:var(--text3);background:#f6f8fb;border:1px solid var(--border);
-  border-radius:999px;padding:5px 9px;display:inline-flex;align-items:center;gap:6px;align-self:flex-start;
-}
-.kbc-deadline{
-  font-size:10px;color:#c77700;background:rgba(255,159,10,0.12);border-radius:999px;padding:5px 9px;display:inline-flex;align-items:center;gap:6px;
-}
-@media(max-width:760px){
-  .timeline-event-top{flex-direction:column;}
-  .timeline-link-row{grid-template-columns:1fr;}
-}
-
-
-/* Gewerke tree */
-.gewerk-folder{
-  background:#fff;border:1px solid var(--border);border-radius:18px;
-  box-shadow:var(--shadow);margin-bottom:12px;overflow:hidden;
-}
-.gewerk-head{
-  display:flex;align-items:center;justify-content:space-between;gap:12px;
-  padding:14px 16px;cursor:pointer;
-}
-.gewerk-title-wrap{display:flex;align-items:flex-start;gap:12px;min-width:0;flex:1;}
-.gewerk-folder-icon{
-  width:42px;height:42px;border-radius:12px;background:#eef5ff;color:var(--accent);
-  display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;
-}
-.gewerk-title{font-size:15px;font-weight:700;color:var(--text);line-height:1.3;}
-.gewerk-sub{font-size:11px;color:var(--text3);margin-top:3px;line-height:1.5;}
-.gewerk-counts{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px;}
-.gw-chip{
-  display:inline-flex;align-items:center;gap:6px;padding:5px 8px;border-radius:999px;
-  background:#f6f8fb;border:1px solid var(--border);font-size:10px;color:var(--text2);
-}
-.gewerk-body{display:none;padding:0 16px 16px;border-top:1px solid var(--border);}
-.gewerk-body.open{display:block;}
-.nu-row{
-  background:var(--bg3);border:1px solid var(--border);border-radius:14px;padding:12px;margin-top:10px;
-}
-.nu-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;}
-.nu-title{font-size:14px;font-weight:700;color:var(--text);}
-.nu-meta{font-size:10px;color:var(--text3);margin-top:4px;line-height:1.6;}
-.nu-grid{
-  display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin-top:10px;
-}
-.nu-mini{
-  background:#fff;border:1px solid var(--border);border-radius:12px;padding:10px;text-align:center;
-}
-.nu-mini .n{font-size:18px;font-weight:700;color:var(--text);}
-.nu-mini .l{font-size:10px;color:var(--text3);margin-top:4px;}
-.nu-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;}
-@media(max-width:900px){
-  .nu-grid{grid-template-columns:repeat(2,minmax(0,1fr));}
-}
-
 /* Floating action button */
 .fab-wrap{
   position:fixed;
@@ -1541,7 +1442,7 @@ body{
       <button class="nav-tab active" data-page="pg-dash" onclick="goPage(this)"><span class="ti">🏠</span>Dashboard</button>
       <button class="nav-tab" data-page="pg-kanban" onclick="goPage(this)"><span class="ti">📋</span>Kanban <span class="nav-badge" id="nb-kanban">0</span></button>
       <button class="nav-tab" data-page="pg-tb" onclick="goPage(this)"><span class="ti">📝</span>Tagesbericht</button>
-      <button class="nav-tab" data-page="pg-gewerke" onclick="goPage(this)"><span class="ti">📁</span>Gewerke <span class="nav-badge" id="nb-gewerke">0</span><span class="nav-badge" id="nb-firms" style="display:none">0</span></button>
+      <button class="nav-tab" data-page="pg-firms" onclick="goPage(this)"><span class="ti">🏢</span>Firmen <span class="nav-badge" id="nb-firms">0</span></button>
       <button class="nav-tab" data-page="pg-ct" onclick="goPage(this)"><span class="ti">🗑</span>Container <span class="nav-badge" id="nb-ct">0</span></button>
       <button class="nav-tab" data-page="pg-meet" onclick="goPage(this)"><span class="ti">📅</span>Besprechungen <span class="nav-badge" id="nb-meet">0</span></button>
       <button class="nav-tab" data-page="pg-files" onclick="goPage(this)"><span class="ti">📂</span>Dateien <span class="nav-badge" id="nb-files">0</span></button>
@@ -1584,7 +1485,7 @@ body{
     <div class="card">
       <div class="card-hd">
         <div class="card-hd-l"><div class="ci ci-b">📋</div><h3>Letzte Firmennotes <small>Son firma notları</small></h3></div>
-        <button class="btn btn-ghost btn-xs" onclick="goPageById('pg-gewerke')">Alle →</button>
+        <button class="btn btn-ghost btn-xs" onclick="goPageById('pg-firms')">Alle →</button>
       </div>
       <div class="card-body" id="dash-notes" style="max-height:180px;overflow-y:auto;"></div>
     </div>
@@ -1804,53 +1705,14 @@ body{
   </div>
 </div>
 
-
-<!-- ═══════════ PAGE: GEWERKE ═══════════ -->
-<div class="page" id="pg-gewerke">
-  <div class="sh">
-    <h2>Gewerke & Nachunternehmer <span class="sub">Gewerk klasörleri ve firmalar</span></h2>
-    <div class="sh-act">
-      <button class="btn btn-primary" onclick="openModal('addNU')">+ Nachunternehmer</button>
-    </div>
-  </div>
-  <div class="card" style="margin-bottom:14px;">
-    <div class="card-body">
-      <div style="font-size:12px;color:var(--text3);margin-bottom:10px;">
-        Gewerk kodları sistemde hazır yüklüdür. Burada sadece alt firma / Nachunternehmer eklemen yeterli. Liste otomatik gelir.
-      </div>
-      <div class="fr3">
-        <input type="text" class="fi" id="gwSearch" placeholder="🔍 Suchen…" oninput="renderGewerke()">
-        <select class="fs" id="gwStatusFilter" onchange="renderGewerke()">
-          <option value="">Alle Status</option>
-          <option value="active">Aktiv</option>
-          <option value="pause">Pause</option>
-          <option value="done">Abgeschlossen</option>
-        </select>
-        <input type="text" class="fi" id="gwCodeFilter" placeholder="Code filtern…" oninput="renderGewerke()">
-      </div>
-    </div>
-  </div>
-  <div id="gewerkeList"><div class="empty-state"><div class="ei">📁</div><h4>Keine Gewerke</h4><p>Hazır Gewerk listesine alt firma ekleyebilirsin</p></div></div>
-</div>
-
-
-<!-- Compatibility page -->
+<!-- ═══════════ PAGE: FIRMEN ═══════════ -->
 <div class="page" id="pg-firms">
   <div class="sh">
-    <h2>Weiterleitung <span class="sub">Uyumluluk sayfası</span></h2>
+    <h2>Nachunternehmer <span class="sub">Yüklenici Firmalar</span></h2>
+    <button class="btn btn-primary" onclick="openModal('addFirm')">+ Firma hinzufügen</button>
   </div>
-  <div class="card">
-    <div class="card-body">
-      <div class="empty-state">
-        <div class="ei">📁</div>
-        <h4>Diese Ansicht wurde nach „Gewerke“ verschoben</h4>
-        <p>Bu bölüm artık Gewerke &amp; Nachunternehmer sekmesi içinde yönetiliyor.</p>
-        <button class="btn btn-primary" onclick="goPageById('pg-gewerke')">Gewerke öffnen</button>
-      </div>
-    </div>
-  </div>
+  <div id="firmList"><div class="empty-state"><div class="ei">🏢</div><h4>Keine Firmen</h4><p>Yüklenici ekle</p></div></div>
 </div>
-
 
 <!-- ═══════════ PAGE: CONTAINER ═══════════ -->
 <div class="page" id="pg-ct">
@@ -1964,38 +1826,6 @@ body{
     <h2>Einstellungen <span class="sub">Ayarlar</span></h2>
   </div>
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
-    
-    <div class="card">
-      <div class="card-hd"><div class="card-hd-l"><div class="ci ci-o">🏗</div><h3>Projektinformationen <small>Proje Bilgileri</small></h3></div></div>
-      <div class="card-body">
-        <div class="fr2">
-          <div class="fg">
-            <div class="fl">Projekt-Nr.</div>
-            <input type="text" class="fi" id="setProjectNr" placeholder="GI0447">
-          </div>
-          <div class="fg">
-            <div class="fl">Bauleiter</div>
-            <input type="text" class="fi" id="setProjectManager" placeholder="Serdal Arslan">
-          </div>
-        </div>
-        <div class="fr2">
-          <div class="fg">
-            <div class="fl">Projektname</div>
-            <input type="text" class="fi" id="setProjectName" placeholder="Projektname">
-          </div>
-          <div class="fg">
-            <div class="fl">Standort</div>
-            <input type="text" class="fi" id="setProjectLocation" placeholder="Standort">
-          </div>
-        </div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap;">
-          <button class="btn btn-primary" onclick="saveSettingsProjectInfo()">Speichern</button>
-          <button class="btn btn-ghost" onclick="pullSettingsProjectInfo()">Header übernehmen</button>
-        </div>
-      </div>
-    </div>
-
-
     <div class="card">
       <div class="card-hd"><div class="card-hd-l"><div class="ci ci-b">💾</div><h3>Backup & Wiederherstellung <small>Yedek / Geri Yükleme</small></h3></div></div>
       <div class="card-body">
@@ -2032,71 +1862,6 @@ body{
       </div>
     </div>
 
-
-    
-    <div class="card" style="grid-column:1/-1;">
-      <div class="card-hd"><div class="card-hd-l"><div class="ci ci-p">📊</div><h3>Excel Export Workflow <small>Gelişmiş dışa aktarma akışı</small></h3></div></div>
-      <div class="card-body">
-        <div class="fr3">
-          <div class="fg">
-            <div class="fl">Tagesbericht Excel</div>
-            <button class="btn btn-primary" onclick="openExcelWizard('day')">📊 Tagesbericht</button>
-          </div>
-          <div class="fg">
-            <div class="fl">Wochenbericht Excel</div>
-            <button class="btn btn-ghost" onclick="openExcelWizard('week')">📊 Wochenbericht</button>
-          </div>
-          <div class="fg">
-            <div class="fl">Monatsbericht Excel</div>
-            <button class="btn btn-ghost" onclick="openExcelWizard('month')">📊 Monatsbericht</button>
-          </div>
-        </div>
-        <div class="fr2" style="margin-top:8px;">
-          <div class="fg">
-            <div class="fl">Wochen-Start</div>
-            <input type="date" class="fi" id="excelWeekStart">
-          </div>
-          <div class="fg">
-            <div class="fl">Wochen-Ende</div>
-            <input type="date" class="fi" id="excelWeekEnd">
-          </div>
-        </div>
-        <div class="fr2">
-          <div class="fg">
-            <div class="fl">Monat</div>
-            <input type="month" class="fi" id="excelMonth">
-          </div>
-          <div class="fg">
-            <div class="fl">Hinweis</div>
-            <div style="font-size:12px;color:var(--text3);padding-top:10px;">Excel enthält Zusammenfassung, Timeline, Aufgaben, Mängel, Firmen, Container und Fotos.</div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-        <div class="fr2" style="margin-top:8px;">
-          <div class="fg">
-            <div class="fl">Wochen-Start</div>
-            <input type="date" class="fi" id="pdfWeekStart">
-          </div>
-          <div class="fg">
-            <div class="fl">Wochen-Ende</div>
-            <input type="date" class="fi" id="pdfWeekEnd">
-          </div>
-        </div>
-        <div class="fr2">
-          <div class="fg">
-            <div class="fl">Monat</div>
-            <input type="month" class="fi" id="pdfMonth">
-          </div>
-          <div class="fg">
-            <div class="fl">Hinweis</div>
-            <div style="font-size:12px;color:var(--text3);padding-top:10px;">PDFs enthalten Zusammenfassung, Timeline, Aufgaben, Mängel und Fotos.</div>
-          </div>
-        </div>
-      </div>
-    </div>
-
     <div class="card" style="grid-column:1/-1;">
       <div class="card-hd"><div class="card-hd-l"><div class="ci ci-g">🧠</div><h3>Speicherstatus <small>Depolama durumu</small></h3></div></div>
       <div class="card-body">
@@ -2106,22 +1871,6 @@ body{
         </p>
       </div>
     </div>
-  
-    <div class="card" style="grid-column:1/-1;">
-      <div class="card-hd"><div class="card-hd-l"><div class="ci ci-c">🛟</div><h3>Support</h3></div></div>
-      <div class="card-body">
-        <div class="support" style="font-size:13px;line-height:1.7;color:var(--text2);background:var(--bg3);border:1px solid var(--border);padding:14px;border-radius:12px;">
-          <strong>SERO Bautagebuch</strong><br>
-          Version 1.0<br><br>
-          Offline Bauleitungs- und Dokumentationstool<br><br>
-          <strong>Entwicklung &amp; Support:</strong><br>
-          Serdal Arslan<br><br>
-          Für Supportanfragen, Fehlermeldungen oder Verbesserungsvorschläge:<br>
-          srdlrsln@hotmail.com
-        </div>
-      </div>
-    </div>
-
   </div>
 </div>
 
@@ -2303,68 +2052,6 @@ body{
   </div>
 </div>
 
-
-
-<!-- Gewerk Modal -->
-<div class="modal-ov" id="modal-addGewerk">
-  <div class="modal" style="max-width:620px">
-    <div class="modal-hd"><h3>Gewerk erfassen <small>Gewerk ekle</small></h3><button class="modal-close" onclick="closeModal('addGewerk')">✕</button></div>
-    <div class="modal-body">
-      <input type="hidden" id="gw-id">
-      <div class="fr2">
-        <div class="fg"><div class="fl">Gewerk-Code</div><input type="text" class="fi" id="gw-code" placeholder="902"></div>
-        <div class="fg"><div class="fl">Status</div>
-          <select class="fs" id="gw-status">
-            <option value="active">✅ Aktiv</option>
-            <option value="pause">⏸ Pause</option>
-            <option value="done">✓ Abgeschlossen</option>
-          </select></div>
-      </div>
-      <div class="fg"><div class="fl">Gewerk (DE)</div><input type="text" class="fi" id="gw-name-de" placeholder="Beton- und Stahlbetonarbeiten"></div>
-      <div class="fg"><div class="fl">Türkçe</div><input type="text" class="fi" id="gw-name-tr" placeholder="Beton ve betonarme işleri"></div>
-      <div class="fg"><div class="fl">Notiz</div><textarea class="fta" id="gw-note" style="min-height:70px;" placeholder="Ek bilgi"></textarea></div>
-    </div>
-    <div class="modal-ft"><button class="btn btn-ghost" onclick="closeModal('addGewerk')">Abbrechen</button><button class="btn btn-primary" onclick="saveGewerk()">Speichern ✓</button></div>
-  </div>
-</div>
-
-<!-- Nachunternehmer Modal -->
-<div class="modal-ov" id="modal-addNU">
-  <div class="modal" style="max-width:680px">
-    <div class="modal-hd"><h3>Nachunternehmer <small>Alt firma klasörü</small></h3><button class="modal-close" onclick="closeModal('addNU')">✕</button></div>
-    <div class="modal-body">
-      <input type="hidden" id="nu-id">
-      <div class="fr2">
-        <div class="fg"><div class="fl">Übergeordnetes Gewerk <span class="tr">Hazır listeden seç</span></div><select class="fs" id="nu-gewerk"></select></div>
-        <div class="fg"><div class="fl">NU-Code</div><input type="text" class="fi" id="nu-code" placeholder="902.01"></div>
-      </div>
-      <div class="fg"><div class="fl">Firma / Ordnername</div><input type="text" class="fi" id="nu-name" placeholder="Skokotas"></div>
-      <div class="fr2">
-        <div class="fg"><div class="fl">Ansprechpartner</div><input type="text" class="fi" id="nu-contact" placeholder="Name"></div>
-        <div class="fg"><div class="fl">Telefon</div><input type="text" class="fi" id="nu-phone" placeholder="+49..."></div>
-      </div>
-      <div class="fr2">
-        <div class="fg"><div class="fl">E-Mail</div><input type="text" class="fi" id="nu-email" placeholder="mail@example.com"></div>
-        <div class="fg"><div class="fl">Status</div>
-          <select class="fs" id="nu-status">
-            <option value="active">✅ Aktiv</option>
-            <option value="pause">⏸ Pause</option>
-            <option value="done">✓ Abgeschlossen</option>
-          </select></div>
-      </div>
-      <div class="fr2">
-        <div class="fg"><div class="fl">Baustelle Ansprechpartner</div><input type="text" class="fi" id="nu-site-contact" placeholder="Şantiye sorumlusu"></div>
-        <div class="fg"><div class="fl">Bestellung / Auftrag</div><input type="text" class="fi" id="nu-order" placeholder="Sipariş / Auftrag"></div>
-      </div>
-      <div class="fr2">
-        <div class="fg"><div class="fl">LV Nummer</div><input type="text" class="fi" id="nu-lv" placeholder="LV no"></div>
-        <div class="fg"><div class="fl">Nachtrag</div><input type="text" class="fi" id="nu-nachtrag" placeholder="Nachtrag bilgisi"></div>
-      </div>
-      <div class="fg"><div class="fl">Firma Notları</div><textarea class="fta" id="nu-note" style="min-height:90px;" placeholder="Açıklama / firma notları"></textarea></div>
-    </div>
-    <div class="modal-ft"><button class="btn btn-ghost" onclick="closeModal('addNU')">Abbrechen</button><button class="btn btn-primary" onclick="saveNU()">Speichern ✓</button></div>
-  </div>
-</div>
 
 <!-- Mangel Modal -->
 <div class="modal-ov" id="modal-addMangel">
@@ -2564,48 +2251,6 @@ function makePhotoMetaSafe() {
 
 let pendingTimelinePhotoId = null;
 
-
-const PRESET_GEWERKE = [
-  {code:'901', nameDe:'Erd- und Entwässerungsarbeiten', nameTr:'Toprak ve drenaj işleri'},
-  {code:'902', nameDe:'Beton- und Stahlbetonarbeiten', nameTr:'Beton ve betonarme işleri'},
-  {code:'903', nameDe:'Hallensohle', nameTr:'Salon tabanı'},
-  {code:'904', nameDe:'Bauwerksabdichtung', nameTr:'Yapı yalıtımı'},
-  {code:'905', nameDe:'Industriefußboden Estrich', nameTr:'Endüstriyel zemin şapı'},
-  {code:'906', nameDe:'Mauerwerksarbeiten', nameTr:'Duvar işleri'},
-  {code:'908', nameDe:'Betonfertigteile', nameTr:'Beton prefabrik elemanlar'},
-  {code:'910', nameDe:'Tore, Türen, Überladebrücken', nameTr:'Kapılar, yükleme köprüleri'},
-  {code:'911', nameDe:'Lichtbandwand', nameTr:'Işık bantlı duvar'},
-  {code:'912', nameDe:'Dacheindeckung', nameTr:'Çatı kaplaması'},
-  {code:'913', nameDe:'Lichtkuppeln', nameTr:'Çatı ışıklıkları'},
-  {code:'914', nameDe:'Blechverlegearbeiten (906+936)', nameTr:'Sac döşeme işleri'},
-  {code:'915', nameDe:'Brandschutz', nameTr:'Yangın koruma'},
-  {code:'916', nameDe:'Innenausbau', nameTr:'İç yapı işleri'},
-  {code:'917', nameDe:'Sonnenschutz', nameTr:'Güneş koruma'},
-  {code:'918', nameDe:'Malerarbeiten', nameTr:'Boya işleri'},
-  {code:'919', nameDe:'Fliesenarbeiten', nameTr:'Fayans işleri'},
-  {code:'920', nameDe:'Bodenbeläge', nameTr:'Zemin kaplamaları'},
-  {code:'921', nameDe:'Elektro (840-860+880)', nameTr:'Elektrik işleri'},
-  {code:'922', nameDe:'Löschanlagen (875)', nameTr:'Söndürme sistemleri'},
-  {code:'923', nameDe:'HKLS (811-830)', nameTr:'Isıtma-klima-havalandırma-sıhhi tesisat'},
-  {code:'925', nameDe:'Ingenieurleistungen (1870)', nameTr:'Mühendislik hizmetleri'},
-  {code:'927', nameDe:'Schlosserarbeiten', nameTr:'Metal/doğrama işleri'},
-  {code:'928', nameDe:'Baustelleneinrichtung', nameTr:'Şantiye kurulumu'},
-  {code:'930', nameDe:'Aufzugsanlage', nameTr:'Asansör sistemi'},
-  {code:'934', nameDe:'Außenanlagen', nameTr:'Dış saha düzenlemeleri'}
-];
-
-function getDefaultGewerke() {
-  return PRESET_GEWERKE.map((g, i) => ({
-    id: 'gw_preset_' + g.code,
-    code: g.code,
-    nameDe: g.nameDe,
-    nameTr: g.nameTr,
-    status: 'active',
-    note: '',
-    nus: []
-  }));
-}
-
 function newState() {
   return {
     projectNr:'', projectName:'', bauleiter:'', standort:'',
@@ -2628,7 +2273,6 @@ function newState() {
     weeklyReports: [],
     workAreas: [],
     maengel: [],
-    gewerke: getDefaultGewerke(),
   };
 }
 
@@ -2647,8 +2291,6 @@ function loadAll() {
     if (rawAr) {
       archive = makeArchiveSafeForStorage(JSON.parse(rawAr));
     }
-    ensurePresetGewerke();
-    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(makeStateSafeForStorage(S))); } catch(e2) {}
   } catch(e) { console.warn('Load error', e); }
 }
 
@@ -2868,7 +2510,6 @@ function importBackup(inp) {
       renderWorkEntries();
       renderKanban();
       renderFirms();
-  renderGewerke();
       renderContainers();
       renderMeetings();
       renderPhotos();
@@ -2903,7 +2544,6 @@ function loadArchiveIntoCurrent(id) {
   renderWorkEntries();
   renderKanban();
   renderFirms();
-  renderGewerke();
   renderContainers();
   renderMeetings();
   renderPhotos();
@@ -2912,7 +2552,6 @@ function loadArchiveIntoCurrent(id) {
   renderWorkAreas();
   renderWeeklyReports();
   renderMaengel();
-  renderGewerke();
   updateBadges();
   refreshDash();
   goPageById('pg-tb');
@@ -2926,188 +2565,6 @@ function loadReportByDate() {
   if (!ar) { showToast('Kein Bericht für dieses Datum','warn'); return; }
   loadArchiveIntoCurrent(ar.id);
 }
-
-
-/* timeline/workarea runtime fixes inserted below */
-function populateQuickFirmSelect() {
-  const sel = document.getElementById('tlFirmQuick');
-  if (!sel) return;
-  sel.innerHTML = '<option value="">— Firma wählen</option>' + (S.contractors||[]).map(c=>`<option value="${esc(c.id)}">${esc(c.name)}</option>`).join('');
-}
-
-function addWorkArea() {
-  const val = gv('waInput').trim();
-  if (!val) { showToast('Bereich eingeben','warn'); return; }
-  if (!S.workAreas) S.workAreas = [];
-  if (!S.workAreas.includes(val)) S.workAreas.push(val);
-  sv('waInput','');
-  renderWorkAreas();
-  autoSave();
-}
-
-function delWorkArea(idx) {
-  S.workAreas = (S.workAreas || []).filter((_, i) => i !== idx);
-  renderWorkAreas();
-  autoSave();
-}
-
-function renderWorkAreas() {
-  const box = document.getElementById('workAreaTags');
-  if (!box) return;
-  const areas = S.workAreas || [];
-  if (!areas.length) {
-    box.innerHTML = '<span style="font-size:12px;color:var(--text3);">Noch keine Bereiche gewählt</span>';
-    return;
-  }
-  box.innerHTML = areas.map((a,i)=>`<span class="wa-tag">📍 ${esc(a)} <button type="button" onclick="delWorkArea(${i})">✕</button></span>`).join('');
-}
-
-function addTimelineEntry() {
-  const now = new Date();
-  const t = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
-  if (!S.timeline) S.timeline = [];
-  S.timeline.unshift({ id:'tl_'+Date.now(), time:t, text:'', firmId:(window.currentFirmId||''), area:(S.workAreas && S.workAreas[0]) ? S.workAreas[0] : '', nuCode:(window.currentNUCode || '') });
-  renderTimeline();
-  autoSave();
-}
-
-function quickAddTimeline() {
-  const text = gv('tlText').trim();
-  const time = gv('tlTime') || '';
-  const firmId = gv('tlFirmQuick') || '';
-  if (!text) { showToast('Text eingeben','warn'); return; }
-  if (!S.timeline) S.timeline = [];
-  S.timeline.unshift({
-    id:'tl_'+Date.now(),
-    time,
-    text,
-    firmId,
-    area: (S.workAreas && S.workAreas[0]) ? S.workAreas[0] : '',
-    nuCode:(window.currentNUCode || '')
-  });
-  sv('tlText','');
-  renderTimeline();
-  autoSave();
-}
-
-function setTimelineField(id, field, value) {
-  const row = (S.timeline||[]).find(x=>x.id===id);
-  if (!row) return;
-  row[field] = value;
-  autoSave();
-}
-
-function delTimelineEntry(id) {
-  S.timeline = (S.timeline || []).filter(x => x.id !== id);
-  renderTimeline();
-  autoSave();
-}
-
-function createMangelFromTimeline(timelineId) {
-  const tl = (S.timeline||[]).find(x=>x.id===timelineId);
-  if (!tl) return;
-  openModal('addMangel');
-  sv('mg-id','');
-  sv('mg-title', tl.text || 'Mangel');
-  sv('mg-date', todayStr());
-  sv('mg-deadline','');
-  sv('mg-owner','');
-  sv('mg-area','');
-  sv('mg-desc', tl.text || '');
-  const firmSel = document.getElementById('mg-firm');
-  if (firmSel) {
-    firmSel.innerHTML = '<option value="">— Keine Firma</option>' + (S.contractors||[]).map(c=>`<option value="${esc(c.id)}">${esc(c.name)}</option>`).join('');
-    if (tl.firmId) firmSel.value = tl.firmId;
-  }
-  const photoSel = document.getElementById('mg-photo');
-  if (photoSel) {
-    const linkedPhotos = (S.photos||[]).filter(p=>p.timelineId===timelineId);
-    photoSel.innerHTML = '<option value="">— Kein Foto</option>' + (S.photos||[]).map(ph=>`<option value="${esc(ph.id)}">${esc((ph.caption||ph.name||'Foto').slice(0,60))}</option>`).join('');
-    if (linkedPhotos[0]) photoSel.value = linkedPhotos[0].id;
-  }
-  svs('mg-status','offen');
-}
-
-function createTaskFromTimeline(timelineId) {
-  const tl = (S.timeline||[]).find(x=>x.id===timelineId);
-  if (!tl) return;
-  if (!S.kanban) S.kanban = {today:[], tomorrow:[], done:[]};
-  const firm = (S.contractors||[]).find(c=>c.id===tl.firmId);
-  S.kanban.today.unshift({
-    id:'kt_'+Date.now(),
-    title: tl.text || 'Aufgabe',
-    firmId: tl.firmId || '',
-    firmName: firm ? firm.name : '',
-    prio:'mid',
-    time: tl.time || '',
-    trade: firm?.trade || '',
-    note: 'Aus Timeline erstellt',
-    createdAt: new Date().toISOString(),
-    col:'today',
-    timelineId: timelineId,
-    nuCode: tl.nuCode || (window.currentNUCode || '')
-  });
-  renderKanban();
-  autoSave();
-  showToast('Aufgabe aus Timeline erstellt','ok');
-}
-
-function renderTimeline() {
-  const list = document.getElementById('timelineList');
-  const empty = document.getElementById('timelineEmpty');
-  populateQuickFirmSelect();
-  if (!list) return;
-  const items = S.timeline || [];
-  list.innerHTML = '';
-  list.className = 'timeline-list-wrap';
-  if (!items.length) {
-    if (empty) empty.style.display = 'block';
-    return;
-  }
-  if (empty) empty.style.display = 'none';
-  const base = '<option value="">— Keine Firma</option>' + (S.contractors||[]).map(c=>`<option value="${esc(c.id)}">${esc(c.name)}</option>`).join('');
-  items.forEach(it => {
-    const linkedPhotos = (S.photos||[]).filter(p=>p.timelineId===it.id);
-    const linkedMaengel = (S.maengel||[]).filter(m=>{
-      const p = (S.photos||[]).find(ph=>ph.id===m.photoId);
-      return p && p.timelineId === it.id;
-    });
-    const linkedTasks = [...(S.kanban?.today||[]), ...(S.kanban?.tomorrow||[]), ...(S.kanban?.done||[])]
-      .filter(t => t.timelineId === it.id);
-    let opts = base;
-    if (it.firmId) opts = opts.replace(`value="${it.firmId}"`, `value="${it.firmId}" selected`);
-    const firmName = (S.contractors||[]).find(c=>c.id===it.firmId)?.name || '';
-    const card = document.createElement('div');
-    card.className = 'timeline-event-card';
-    card.innerHTML = `
-      <div class="timeline-event-top">
-        <div class="timeline-time-badge">🕘 ${esc(it.time||'--:--')}</div>
-        <div class="timeline-main-text">${esc(it.text||'')}</div>
-      </div>
-      <div class="timeline-meta-row">
-        ${firmName ? `<span class="timeline-meta-chip">🏢 ${esc(firmName)}</span>` : ''}
-        ${it.nuCode ? `<span class="timeline-meta-chip">📁 ${esc(it.nuCode)}</span>` : ''}
-        ${it.area ? `<span class="timeline-meta-chip">📍 ${esc(it.area)}</span>` : ''}
-        <span class="timeline-meta-chip">📸 ${linkedPhotos.length} Fotos</span>
-        <span class="timeline-meta-chip">⚠️ ${linkedMaengel.length} Mängel</span>
-        <span class="timeline-meta-chip">📋 ${linkedTasks.length} Aufgaben</span>
-      </div>
-      ${linkedPhotos.length ? `<div class="timeline-photo-list">${linkedPhotos.map(p=>`<span class="timeline-photo-chip">📷 ${esc((p.caption||p.name||'Foto').slice(0,28))}</span>`).join('')}</div>` : ''}
-      <div class="timeline-link-row">
-        <textarea class="fta" style="min-height:64px;" placeholder="Ereignis / olay..." onchange="setTimelineField('${it.id}','text',this.value)">${esc(it.text||'')}</textarea>
-        <select class="fs" onchange="setTimelineField('${it.id}','firmId',this.value)">${opts}</select>
-      </div>
-      <div class="timeline-card-actions">
-        <button class="timeline-photo-btn" onclick="openTimelinePhotoPicker('${it.id}')">📸 Foto direkt anhängen</button>
-        <button class="btn btn-ghost btn-xs" onclick="createMangelFromTimeline('${it.id}')">⚠️ Mangel</button>
-        <button class="btn btn-ghost btn-xs" onclick="createTaskFromTimeline('${it.id}')">📋 Aufgabe</button>
-        <button class="btn-icon" onclick="delTimelineEntry('${it.id}')">✕</button>
-      </div>
-    `;
-    list.appendChild(card);
-  });
-}
-
 
 // ═══════════════════════════════════════════════════
 // SAVE REPORT TO ARCHIVE
@@ -3150,64 +2607,6 @@ function formatDateTimeDisplay(d) {
     ' '+pad(d.getHours())+':'+pad(d.getMinutes());
 }
 
-
-function saveSettingsProjectInfo() {
-  const pn = document.getElementById('setProjectNr')?.value || '';
-  const pnm = document.getElementById('setProjectName')?.value || '';
-  const bl = document.getElementById('setProjectManager')?.value || '';
-  const st = document.getElementById('setProjectLocation')?.value || '';
-  if (document.getElementById('hPN')) document.getElementById('hPN').value = pn;
-  if (document.getElementById('tbPN')) document.getElementById('tbPN').value = pn;
-  if (document.getElementById('hPName')) document.getElementById('hPName').value = pnm;
-  if (document.getElementById('tbPName')) document.getElementById('tbPName').value = pnm;
-  if (document.getElementById('hBL')) document.getElementById('hBL').value = bl;
-  if (document.getElementById('tbBL')) document.getElementById('tbBL').value = bl;
-  if (document.getElementById('hST')) document.getElementById('hST').value = st;
-  if (document.getElementById('tbST')) document.getElementById('tbST').value = st;
-  if (typeof syncProjectInfoFromTB === 'function') syncProjectInfoFromTB();
-  if (typeof autoSave === 'function') autoSave();
-  if (typeof showToast === 'function') showToast('Projektinformationen gespeichert','ok');
-}
-function pullSettingsProjectInfo() {
-  const map = [
-    ['setProjectNr','hPN'], ['setProjectName','hPName'],
-    ['setProjectManager','hBL'], ['setProjectLocation','hST']
-  ];
-  map.forEach(([to, frm]) => {
-    const a = document.getElementById(to), b = document.getElementById(frm);
-    if (a && b) a.value = b.value || '';
-  });
-  if (typeof showToast === 'function') showToast('Header-Daten übernommen','ok');
-}
-function exportCurrentDayExcel() { if (typeof exportExcel === 'function') exportExcel(); }
-function exportWeeklyExcel() { if (typeof exportExcel === 'function') exportExcel(); }
-function exportMonthlyExcel() { if (typeof exportExcel === 'function') exportExcel(); }
-
-
-
-function openExcelWizard(type) {
-  if (document.getElementById('xw-type')) document.getElementById('xw-type').value = type || 'day';
-  const today = todayStr();
-  if (document.getElementById('xw-from')) document.getElementById('xw-from').value = today;
-  if (document.getElementById('xw-to')) document.getElementById('xw-to').value = today;
-  const firmSel = document.getElementById('xw-firm');
-  if (firmSel) {
-    firmSel.innerHTML = '<option value="">Alle Firmen</option>' + (S.contractors||[]).map(c=>`<option value="${esc(c.id)}">${esc(c.name)}</option>`).join('');
-    if (window.currentFirmId) firmSel.value = window.currentFirmId;
-  }
-  const pn = (gv('tbPN') || gv('hPN') || 'Bautagebuch').replace(/\s+/g,'_');
-  if (document.getElementById('xw-name')) document.getElementById('xw-name').value = `${pn}_${today}.xlsx`;
-  openModal('excelWizard');
-}
-function runExcelWizard() {
-  const type = gv('xw-type') || 'day';
-  if (type === 'day') exportCurrentDayExcel();
-  else if (type === 'week') exportWeeklyExcel();
-  else if (type === 'month') exportMonthlyExcel();
-  else exportExcel();
-  closeModal('excelWizard');
-}
-
 // ═══════════════════════════════════════════════════
 // INIT
 // ═══════════════════════════════════════════════════
@@ -3219,7 +2618,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   const savedTheme = localStorage.getItem('sero_theme') || 'light';
   setTheme(savedTheme);
   applyStateToForm();
-  ensurePresetGewerke();
   syncProjectInfoToTB();
   buildPersonnel();
   buildGeraete();
@@ -3227,7 +2625,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   renderWorkEntries();
   renderKanban();
   renderFirms();
-  renderGewerke();
   renderContainers();
   renderMeetings();
   renderPhotos();
@@ -3237,7 +2634,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   renderWorkAreas();
   renderWeeklyReports();
   renderMaengel();
-  renderGewerke();
   updateBadges();
   refreshDash();
   // Date display
@@ -3248,7 +2644,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   sv('rDate', S.reportDate || todayStr());
   document.getElementById('mt-date') && (document.getElementById('mt-date').value = todayStr());
   document.getElementById('note-date') && (document.getElementById('note-date').value = todayStr());
-  document.getElementById('pdfMonth') && (document.getElementById('pdfMonth').value = todayStr().slice(0,7));
 });
 
 // ═══════════════════════════════════════════════════
@@ -3616,8 +3011,6 @@ function openModal(name, col) {
     if (col) svs('km-col', col);
     const sel = document.getElementById('km-firm');
     sel.innerHTML = '<option value="">— Alle</option>' + (S.contractors||[]).map(c=>`<option value="${esc(c.id)}">${esc(c.name)}</option>`).join('');
-    const tsel = document.getElementById('km-timeline');
-    if (tsel) tsel.innerHTML = '<option value="">— Kein Event</option>' + (S.timeline||[]).map(t=>`<option value="${esc(t.id)}">${esc(((t.time||'') + ' ' + (t.text||'')).slice(0,80))}</option>`).join('');
   }
   if (name === 'addPers') {
     sv('ap-role',''); sv('ap-tr',''); sv('ap-count','1'); sv('ap-name','');
@@ -3629,15 +3022,6 @@ function openModal(name, col) {
     sv('ag-brand',''); sv('ag-model',''); sv('ag-note','');
     const sel = document.getElementById('ag-firm');
     if (sel) sel.innerHTML = '<option value="">— Keine Firma</option>' + (S.contractors||[]).map(c=>`<option value="${esc(c.id)}">${esc(c.name)}</option>`).join('');
-  }
-  if (name === 'addGewerk') {
-    sv('gw-id',''); sv('gw-code',''); sv('gw-name-de',''); sv('gw-name-tr',''); sv('gw-note',''); svs('gw-status','active');
-  }
-  if (name === 'addNU') {
-    sv('nu-id',''); sv('nu-code',''); sv('nu-name',''); sv('nu-contact',''); sv('nu-phone',''); sv('nu-email',''); sv('nu-note','');
-    sv('nu-site-contact',''); sv('nu-order',''); sv('nu-lv',''); sv('nu-nachtrag','');
-    svs('nu-status','active');
-    populateGewerkSelect();
   }
   if (name === 'addMangel') {
     sv('mg-id',''); sv('mg-title',''); sv('mg-date', todayStr()); sv('mg-deadline','');
@@ -3671,8 +3055,6 @@ function saveKanban() {
     trade: gv('km-trade'),
     note: gv('km-note'),
     createdAt: new Date().toISOString(),
-    timelineId: gv('km-timeline') || '',
-    nuCode: window.currentNUCode || '',
     col,
   };
   if (!S.kanban) S.kanban={today:[],tomorrow:[],done:[]};
@@ -3712,9 +3094,7 @@ function renderKanban() {
           ${task.time?`<span class="chip chip-t">⏰ ${task.time}</span>`:''}
         </div>
         ${task.note?`<div class="kbc-note">📝 ${esc(task.note)}</div>`:''}
-        ${task.sourceMangelId?`<div class="kbc-source">⚠️ Aus Mangel erstellt</div>`:''}
-        ${task.timelineId?`<div class="kbc-source">🕘 Mit Timeline verknüpft</div>`:''}
-        ${task.nuCode?`<div class="kbc-source">📂 ${esc(task.nuCode)}</div>`:''}
+        ${task.sourceMangelId?`<div class="kbc-note">⚠ Aus Mangel erstellt</div>`:''}
         <div class="kbc-acts">
           ${col!=='today'?`<button class="kbc-mv" title="←" onclick="mvTask('${task.id}','${col}','${col==='done'?'tomorrow':'today'}')">←</button>`:''}
           ${col!=='done'?`<button class="kbc-mv" title="→" onclick="mvTask('${task.id}','${col}','${col==='today'?'tomorrow':'done'}')">→</button>`:''}
@@ -3766,7 +3146,6 @@ function saveFirm() {
   closeModal('addFirm');
   autoSave();
   renderFirms();
-  renderGewerke();
   renderSigGrid();
   buildPersonnel();
   showToast('Firma gespeichert','ok');
@@ -3775,9 +3154,8 @@ function saveFirm() {
 function renderFirms() {
   populateQuickFirmSelect();
   const cont = document.getElementById('firmList');
-  const badge = document.getElementById('nb-firms');
-  if (badge) badge.textContent = (S.contractors||[]).length;
   if (!cont) return;
+  document.getElementById('nb-firms').textContent = (S.contractors||[]).length;
   if (!S.contractors || S.contractors.length===0) {
     cont.innerHTML='<div class="empty-state"><div class="ei">🏢</div><h4>Keine Firmen</h4><p>Yüklenici ekle</p></div>';
     return;
@@ -3835,8 +3213,7 @@ function renderFirms() {
 }
 
 function toggleFirm(id){ document.getElementById('cb_'+id)?.classList.toggle('open'); }
-function chgFirmStatus(id,st){ const c=(S.contractors||[]).find(x=>x.id===id); if(c){c.status=st;autoSave();renderFirms();
-  renderGewerke();} }
+function chgFirmStatus(id,st){ const c=(S.contractors||[]).find(x=>x.id===id); if(c){c.status=st;autoSave();renderFirms();} }
 function openNoteModal(fid){ sv('note-fid',fid); openModal('addNote'); }
 function saveNote(){
   const fid=gv('note-fid'), txt=gv('note-txt').trim();
@@ -3846,15 +3223,12 @@ function saveNote(){
     if(!c.notes)c.notes=[];
     c.notes.unshift({id:'n_'+Date.now(),text:txt,date:gv('note-date')||todayStr()});
     closeModal('addNote'); autoSave(); renderFirms();
-  renderGewerke();
     setTimeout(()=>{const b=document.getElementById('cb_'+fid);if(b)b.classList.add('open');},60);
     showToast('Notiz gespeichert','ok');
   }
 }
-function delNote(fid,nid){ const c=(S.contractors||[]).find(x=>x.id===fid); if(c){c.notes=(c.notes||[]).filter(n=>n.id!==nid);autoSave();renderFirms();
-  renderGewerke();} }
-function delFirm(id){ S.contractors=(S.contractors||[]).filter(c=>c.id!==id); autoSave(); renderFirms();
-  renderGewerke(); renderSigGrid(); buildPersonnel(); showToast('Firma gelöscht','ok'); }
+function delNote(fid,nid){ const c=(S.contractors||[]).find(x=>x.id===fid); if(c){c.notes=(c.notes||[]).filter(n=>n.id!==nid);autoSave();renderFirms();} }
+function delFirm(id){ S.contractors=(S.contractors||[]).filter(c=>c.id!==id); autoSave(); renderFirms(); renderSigGrid(); buildPersonnel(); showToast('Firma gelöscht','ok'); }
 
 // ═══════════════════════════════════════════════════
 // CONTAINERS
@@ -4003,13 +3377,12 @@ function addPhoto(file) {
       date:todayStr(),
       time:new Date().toTimeString().slice(0,5),
       caption:'',
-      firmId: window.currentFirmId || '',
+      firmId:'',
       taskId:'',
-      area: (S.workAreas && S.workAreas[0]) ? S.workAreas[0] : '',
+      area:'',
       location:'',
       note:'',
-      timelineId:'',
-      nuCode: window.currentNUCode || ''
+      timelineId:''
     };
     S.photos.push(photo);
     try {
@@ -4060,55 +3433,6 @@ function getTaskOptionsSelected(selected='') {
 }
 
 
-
-function createMangelFromTimeline(timelineId) {
-  const tl = (S.timeline||[]).find(x=>x.id===timelineId);
-  if (!tl) return;
-  openModal('addMangel');
-  sv('mg-id','');
-  sv('mg-title', tl.text || 'Mangel');
-  sv('mg-date', todayStr());
-  sv('mg-deadline','');
-  sv('mg-owner','');
-  sv('mg-area','');
-  sv('mg-desc', tl.text || '');
-  const firmSel = document.getElementById('mg-firm');
-  if (firmSel) {
-    firmSel.innerHTML = '<option value="">— Keine Firma</option>' + (S.contractors||[]).map(c=>`<option value="${esc(c.id)}">${esc(c.name)}</option>`).join('');
-    if (tl.firmId) firmSel.value = tl.firmId;
-  }
-  const photoSel = document.getElementById('mg-photo');
-  if (photoSel) {
-    const linkedPhotos = (S.photos||[]).filter(p=>p.timelineId===timelineId);
-    photoSel.innerHTML = '<option value="">— Kein Foto</option>' + (S.photos||[]).map(ph=>`<option value="${esc(ph.id)}">${esc((ph.caption||ph.name||'Foto').slice(0,60))}</option>`).join('');
-    if (linkedPhotos[0]) photoSel.value = linkedPhotos[0].id;
-  }
-  svs('mg-status','offen');
-}
-
-function createTaskFromTimeline(timelineId) {
-  const tl = (S.timeline||[]).find(x=>x.id===timelineId);
-  if (!tl) return;
-  if (!S.kanban) S.kanban = {today:[], tomorrow:[], done:[]};
-  const firm = (S.contractors||[]).find(c=>c.id===tl.firmId);
-  S.kanban.today.unshift({
-    id:'kt_'+Date.now(),
-    title: tl.text || 'Aufgabe',
-    firmId: tl.firmId || '',
-    firmName: firm ? firm.name : '',
-    prio:'mid',
-    time: tl.time || '',
-    trade: firm?.trade || '',
-    note: 'Aus Timeline erstellt',
-    createdAt: new Date().toISOString(),
-    col:'today',
-    timelineId: timelineId
-  });
-  renderKanban();
-  autoSave();
-  showToast('Aufgabe aus Timeline erstellt','ok');
-}
-
 function createTimelineFromPhoto(photoId) {
   const p = (S.photos||[]).find(x=>x.id===photoId);
   if (!p) return;
@@ -4151,11 +3475,10 @@ function addPhotoLinkedToTimeline(file, timelineId) {
       caption: tl ? (tl.text || '') : '',
       firmId: tl ? (tl.firmId || '') : '',
       taskId:'',
-      area: tl ? (tl.area || '') : '',
+      area:'',
       location:'',
       note:'',
-      timelineId: timelineId,
-      nuCode: tl ? (tl.nuCode || window.currentNUCode || '') : (window.currentNUCode || '')
+      timelineId: timelineId
     };
     S.photos.push(photo);
     try {
@@ -4364,11 +3687,9 @@ function saveMangel() {
     date: gv('mg-date') || todayStr(),
     deadline: gv('mg-deadline') || '',
     owner: gv('mg-owner') || '',
-    area: gv('mg-area') || ((S.photos||[]).find(p=>p.id===gv('mg-photo'))?.area || ''),
+    area: gv('mg-area') || '',
     desc: gv('mg-desc') || '',
-    photoId: gv('mg-photo') || '',
-    timelineId: (S.photos||[]).find(p=>p.id===gv('mg-photo'))?.timelineId || '',
-    nuCode: window.currentNUCode || ''
+    photoId: gv('mg-photo') || ''
   };
   const idx = S.maengel.findIndex(x=>x.id===id);
   if (idx >= 0) S.maengel[idx] = item;
@@ -4448,239 +3769,6 @@ function renderMaengel() {
     box.appendChild(card);
   });
 }
-
-
-function countLinkedForNU(nuCode) {
-  const tasks = [...(S.kanban?.today||[]), ...(S.kanban?.tomorrow||[]), ...(S.kanban?.done||[])].filter(t => t.nuCode === nuCode || t.firmName === nuCode || t.firmId === nuCode);
-  const maengel = (S.maengel||[]).filter(m => m.nuCode === nuCode || m.firmId === nuCode);
-  const fotos = (S.photos||[]).filter(p => p.nuCode === nuCode || p.firmId === nuCode);
-  const geraete = (S.geraete||[]).filter(g => g.nuCode === nuCode || g.firmId === nuCode);
-  const timeline = (S.timeline||[]).filter(t => t.nuCode === nuCode || t.firmId === nuCode);
-  return {tasks:tasks.length, maengel:maengel.length, fotos:fotos.length, geraete:geraete.length, timeline:timeline.length};
-}
-
-
-function ensurePresetGewerke() {
-  if (!S.gewerke) S.gewerke = [];
-  const existingByCode = new Map((S.gewerke||[]).map(g => [g.code, g]));
-  const merged = [];
-  for (const preset of getDefaultGewerke()) {
-    const ex = existingByCode.get(preset.code);
-    if (ex) {
-      merged.push({
-        ...preset,
-        ...ex,
-        code: preset.code,
-        nameDe: preset.nameDe,
-        nameTr: preset.nameTr,
-        nus: ex.nus || []
-      });
-    } else {
-      merged.push(preset);
-    }
-  }
-  // keep any custom extra gewerke too
-  for (const g of (S.gewerke||[])) {
-    if (!merged.find(x => x.code === g.code)) merged.push(g);
-  }
-  S.gewerke = merged.sort((a,b)=>(a.code||'').localeCompare(b.code||''));
-}
-
-function populateGewerkSelect() {
-  const sel = document.getElementById('nu-gewerk');
-  if (!sel) return;
-  sel.innerHTML = '<option value="">— Gewerk wählen</option>' + (S.gewerke||[]).map(g=>`<option value="${esc(g.id)}">${esc(g.code)} ${esc(g.nameDe)}</option>`).join('');
-}
-
-function openGewerkBody(id) {
-  document.getElementById('gwb_'+id)?.classList.toggle('open');
-}
-
-function saveGewerk() {
-  const code = gv('gw-code').trim();
-  const nameDe = gv('gw-name-de').trim();
-  if (!code || !nameDe) { showToast('Code und Gewerk eingeben','warn'); return; }
-  if (!S.gewerke) S.gewerke = [];
-  const id = gv('gw-id') || ('gw_'+Date.now());
-  const item = {
-    id, code, nameDe,
-    nameTr: gv('gw-name-tr') || '',
-    status: gv('gw-status') || 'active',
-    note: gv('gw-note') || '',
-    nus: (S.gewerke.find(x=>x.id===id)?.nus || [])
-  };
-  const idx = S.gewerke.findIndex(x=>x.id===id);
-  if (idx >= 0) S.gewerke[idx] = item;
-  else S.gewerke.push(item);
-  closeModal('addGewerk');
-  renderGewerke();
-  autoSave();
-  showToast('Gewerk gespeichert','ok');
-}
-
-function saveNU() {
-  const gewerkId = gv('nu-gewerk');
-  const code = gv('nu-code').trim();
-  const name = gv('nu-name').trim();
-  if (!gewerkId || !code || !name) { showToast('Gewerk, Code und Name eingeben','warn'); return; }
-  if (!S.gewerke) S.gewerke = [];
-  const gw = S.gewerke.find(g=>g.id===gewerkId);
-  if (!gw) { showToast('Gewerk nicht gefunden','warn'); return; }
-  if (!gw.nus) gw.nus = [];
-  const id = gv('nu-id') || ('nu_'+Date.now());
-  const item = {
-    id, code, name,
-    contact: gv('nu-contact') || '',
-    phone: gv('nu-phone') || '',
-    email: gv('nu-email') || '',
-    siteContact: gv('nu-site-contact') || '',
-    order: gv('nu-order') || '',
-    lvNumber: gv('nu-lv') || '',
-    nachtrag: gv('nu-nachtrag') || '',
-    status: gv('nu-status') || 'active',
-    note: gv('nu-note') || ''
-  };
-  const idx = gw.nus.findIndex(x=>x.id===id);
-  if (idx >= 0) gw.nus[idx] = item;
-  else gw.nus.push(item);
-  closeModal('addNU');
-  renderGewerke();
-  autoSave();
-  showToast('Nachunternehmer gespeichert','ok');
-}
-
-function editGewerk(id) {
-  const g = (S.gewerke||[]).find(x=>x.id===id);
-  if (!g) return;
-  openModal('addGewerk');
-  sv('gw-id', g.id); sv('gw-code', g.code||''); sv('gw-name-de', g.nameDe||''); sv('gw-name-tr', g.nameTr||''); sv('gw-note', g.note||''); svs('gw-status', g.status||'active');
-}
-
-function editNU(gewerkId, nuId) {
-  const g = (S.gewerke||[]).find(x=>x.id===gewerkId);
-  const nu = g?.nus?.find(x=>x.id===nuId);
-  if (!g || !nu) return;
-  openModal('addNU');
-  populateGewerkSelect();
-  sv('nu-id', nu.id); svs('nu-gewerk', g.id); sv('nu-code', nu.code||''); sv('nu-name', nu.name||'');
-  sv('nu-contact', nu.contact||''); sv('nu-phone', nu.phone||''); sv('nu-email', nu.email||'');
-  sv('nu-site-contact', nu.siteContact||''); sv('nu-order', nu.order||''); sv('nu-lv', nu.lvNumber||''); sv('nu-nachtrag', nu.nachtrag||'');
-  sv('nu-note', nu.note||''); svs('nu-status', nu.status||'active');
-}
-
-function delGewerk(id) {
-  S.gewerke = (S.gewerke||[]).filter(x=>x.id!==id);
-  renderGewerke(); autoSave();
-}
-function delNU(gewerkId, nuId) {
-  const g = (S.gewerke||[]).find(x=>x.id===gewerkId);
-  if (!g) return;
-  g.nus = (g.nus||[]).filter(x=>x.id!==nuId);
-  renderGewerke(); autoSave();
-}
-
-function renderGewerke() {
-  const box = document.getElementById('gewerkeList');
-  if (!box) return;
-  const q = (gv('gwSearch')||'').toLowerCase();
-  const st = gv('gwStatusFilter')||'';
-  const codeF = (gv('gwCodeFilter')||'').toLowerCase();
-  let rows = [...(S.gewerke||[])];
-  if (q) rows = rows.filter(g => ((g.code||'')+' '+(g.nameDe||'')+' '+(g.nameTr||'')).toLowerCase().includes(q) || (g.nus||[]).some(n=>((n.code||'')+' '+(n.name||'')).toLowerCase().includes(q)));
-  if (st) rows = rows.filter(g => g.status===st || (g.nus||[]).some(n=>n.status===st));
-  if (codeF) rows = rows.filter(g => (g.code||'').toLowerCase().includes(codeF) || (g.nus||[]).some(n=>(n.code||'').toLowerCase().includes(codeF)));
-  const nbg = document.getElementById('nb-gewerke'); if (nbg) nbg.textContent = (S.gewerke||[]).length;
-
-  if (!rows.length) {
-    box.innerHTML = '<div class="empty-state"><div class="ei">📁</div><h4>Keine Gewerke</h4><p>Hazır Gewerk listesine alt firma ekleyebilirsin</p></div>';
-    return;
-  }
-  box.innerHTML = '';
-  rows.sort((a,b)=>(a.code||'').localeCompare(b.code||''));
-  rows.forEach(g => {
-    const totalNU = (g.nus||[]).length;
-    const totalTasks = (g.nus||[]).reduce((s,n)=>s+countLinkedForNU(n.code).tasks,0);
-    const totalMaengel = (g.nus||[]).reduce((s,n)=>s+countLinkedForNU(n.code).maengel,0);
-    const folder = document.createElement('div');
-    folder.className = 'gewerk-folder';
-    folder.innerHTML = `
-      <div class="gewerk-head" onclick="openGewerkBody('${g.id}')">
-        <div class="gewerk-title-wrap">
-          <div class="gewerk-folder-icon">📁</div>
-          <div>
-            <div class="gewerk-title">${esc(g.code)} ${esc(g.nameDe)}</div>
-            <div class="gewerk-sub">${esc(g.nameTr||'')} ${g.note?`· ${esc(g.note)}`:''}</div>
-            <div class="gewerk-counts">
-              <span class="gw-chip">📂 ${totalNU} Nachunternehmer</span>
-              <span class="gw-chip">📋 ${totalTasks} Aufgaben</span>
-              <span class="gw-chip">⚠️ ${totalMaengel} Mängel</span>
-            </div>
-          </div>
-        </div>
-        <div style="display:flex;gap:8px;align-items:center;">
-          <button class="btn btn-primary btn-xs" onclick="event.stopPropagation();openModal('addNU');populateGewerkSelect();svs('nu-gewerk','${g.id}');sv('nu-code','${g.code}.');">+ Firma</button>
-        </div>
-      </div>
-      <div class="gewerk-body" id="gwb_${g.id}">
-        ${(g.nus||[]).sort((a,b)=>(a.code||'').localeCompare(b.code||'')).map(n=>{
-          const c = countLinkedForNU(n.code);
-          return `
-            <div class="nu-row">
-              <div class="nu-top">
-                <div>
-                  <div class="nu-title">📂 ${esc(n.code)} ${esc(n.name)}</div>
-                  <div class="nu-meta">
-                    ${n.contact?`👤 ${esc(n.contact)} · `:''}
-                    ${n.phone?`☎ ${esc(n.phone)} · `:''}
-                    ${n.email?`✉ ${esc(n.email)} · `:''}
-                    ${n.siteContact?`🏗 ${esc(n.siteContact)} · `:''}
-                    ${n.order?`📦 ${esc(n.order)} · `:''}
-                    ${n.lvNumber?`# ${esc(n.lvNumber)} · `:''}
-                    ${n.nachtrag?`➕ ${esc(n.nachtrag)} · `:''}
-                    ${n.note?esc(n.note):''}
-                  </div>
-                </div>
-                <div style="display:flex;gap:8px;align-items:center;">
-                  <span class="mangel-badge ${n.status==='done'?'mg-erledigt':(n.status==='pause'?'mg-bearbeitung':'')}">${n.status==='done'?'Abgeschlossen':(n.status==='pause'?'Pause':'Aktiv')}</span>
-                  <button class="btn btn-ghost btn-xs" onclick="editNU('${g.id}','${n.id}')">Bearbeiten</button>
-                  <button class="btn-icon" onclick="delNU('${g.id}','${n.id}')">✕</button>
-                </div>
-              </div>
-              <div class="nu-grid">
-                <div class="nu-mini"><div class="n">${c.tasks}</div><div class="l">Aufgaben</div></div>
-                <div class="nu-mini"><div class="n">${c.maengel}</div><div class="l">Mängel</div></div>
-                <div class="nu-mini"><div class="n">${c.fotos}</div><div class="l">Fotos</div></div>
-                <div class="nu-mini"><div class="n">${c.geraete}</div><div class="l">Geräte</div></div>
-                <div class="nu-mini"><div class="n">${c.timeline}</div><div class="l">Timeline</div></div>
-              </div>
-              ${(n.note || n.order || n.lvNumber || n.nachtrag) ? `
-                <div style="margin-top:10px;padding:10px 12px;background:#fff;border:1px solid var(--border);border-radius:12px;font-size:11px;color:var(--text2);line-height:1.7;">
-                  ${n.order ? `<div><strong>Bestellung:</strong> ${esc(n.order)}</div>` : ''}
-                  ${n.lvNumber ? `<div><strong>LV Nummer:</strong> ${esc(n.lvNumber)}</div>` : ''}
-                  ${n.nachtrag ? `<div><strong>Nachtrag:</strong> ${esc(n.nachtrag)}</div>` : ''}
-                  ${n.note ? `<div><strong>Firma Notları:</strong> ${esc(n.note)}</div>` : ''}
-                </div>` : ''}
-              <div class="nu-actions">
-                <button class="btn btn-ghost btn-xs" onclick="applyNUToQuickContext('${n.code}','${n.name}')">Als Kontext wählen</button>
-              </div>
-            </div>`;
-        }).join('') || '<div style="padding:14px 0;font-size:12px;color:var(--text3);">Noch keine Nachunternehmer in diesem Gewerk</div>'}
-      </div>
-    `;
-    box.appendChild(folder);
-  });
-}
-
-function applyNUToQuickContext(nuCode, nuName) {
-  window.currentNUCode = nuCode;
-  window.currentNUName = nuName;
-  const match = (S.contractors||[]).find(c => c.name === nuName || c.id === nuCode || c.nuCode === nuCode);
-  window.currentFirmId = match ? match.id : '';
-  const quickSel = document.getElementById('tlFirmQuick');
-  if (quickSel && window.currentFirmId) quickSel.value = window.currentFirmId;
-  showToast(`Aktiver Kontext: ${nuCode} ${nuName}`,'ok');
-}
-
 
 // ═══════════════════════════════════════════════════
 // ARCHIVE
@@ -4779,7 +3867,7 @@ function refreshDash() {
   const stats=[
     {l:'Arbeitskräfte',sub:'Personel bugün',val:totalP,cls:'s-o',page:'pg-tb',data:(S.personnelTypes||[]).filter(p=>(S.personnelCounts||{})[p.key]>0).map(p=>`👷 ${p.de}: <strong>${(S.personnelCounts||{})[p.key]}</strong>`)},
     {l:'Kanban Offen',sub:'Açık görevler',val:kbOpen,cls:'s-b',page:'pg-kanban',data:(S.kanban?.today||[]).slice(0,4).map(t=>`🔥 ${t.title}${t.firmName?' · '+t.firmName:''}`)},
-    {l:'Aktive Firmen',sub:'Aktif firmalar',val:activeFirms,cls:'s-g',page:'pg-gewerke',data:(S.contractors||[]).filter(c=>c.status==='active').map(c=>`🏢 ${c.name} · ${c.trade||'—'}`)},
+    {l:'Aktive Firmen',sub:'Aktif firmalar',val:activeFirms,cls:'s-g',page:'pg-firms',data:(S.contractors||[]).filter(c=>c.status==='active').map(c=>`🏢 ${c.name} · ${c.trade||'—'}`)},
     {l:'Container Voll',sub:'Dolu konteyner',val:vollCt,cls:'s-r',page:'pg-ct',data:(S.containers||[]).filter(c=>c.status==='voll').map(c=>`🗑 ${c.ctId} — ${c.type}`)},
     {l:'Fortschritt',sub:'İlerleme',val:(S.progress||0)+'%',cls:'s-p',page:'pg-tb',data:[`📊 Gesamtfortschritt: <strong>${S.progress||0}%</strong>`,`🌤 Wetter: ${S.weather||'—'}`,`🌡 Temp: ${S.tempMin||'—'}°C / ${S.tempMax||'—'}°C`]},
     {l:'Dateien',sub:'Dosyalar',val:fileTotal,cls:'s-gl',page:'pg-files',data:[`📸 Fotos: <strong>${(S.photos||[]).length}</strong>`,`📄 Dokumente: <strong>${(S.docs||[]).length}</strong>`,`📅 Protokolle: <strong>${(S.meetings||[]).length}</strong>`]},
@@ -4863,156 +3951,13 @@ function refreshDash() {
 function updateBadges() {
   const kbT=(S.kanban?.today||[]).length+(S.kanban?.tomorrow||[]).length;
   document.getElementById('nb-kanban').textContent=kbT;
-  const nbf=document.getElementById('nb-firms'); if(nbf) nbf.textContent=(S.contractors||[]).length;
+  document.getElementById('nb-firms').textContent=(S.contractors||[]).length;
   document.getElementById('nb-ct').textContent=(S.containers||[]).length;
   document.getElementById('nb-meet').textContent=(S.meetings||[]).length;
   document.getElementById('nb-files').textContent=(S.photos||[]).length+(S.docs||[]).length;
   const nbm = document.getElementById('nb-mangel'); if (nbm) nbm.textContent=(S.maengel||[]).length;
-  const nbg = document.getElementById('nb-gewerke'); if (nbg) nbg.textContent=(S.gewerke||[]).length;
   document.getElementById('nb-archive').textContent=archive.length;
 }
-
-
-function getCurrentStateSnapshot() {
-  collectFormToState();
-  return JSON.parse(JSON.stringify(S));
-}
-
-function summarizeRangeEntries(entries) {
-  return {
-    count: entries.length,
-    personnel: entries.reduce((s,a)=>s+(a.totalPersonnel||0),0),
-    works: entries.reduce((s,a)=>s+(a.workCount||0),0),
-    avgProgress: entries.length ? Math.round(entries.reduce((s,a)=>s+(a.progress||0),0)/entries.length) : 0,
-    maengel: entries.reduce((s,a)=>s+((a.snap?.maengel||[]).length),0),
-    tasks: entries.reduce((s,a)=>{
-      const k = a.snap?.kanban || {};
-      return s + (k.today||[]).length + (k.tomorrow||[]).length + (k.done||[]).length;
-    },0),
-    photos: entries.reduce((s,a)=>s+((a.snap?.photos||[]).length),0),
-  };
-}
-
-function initPdfDoc(title) {
-  const {jsPDF}=window.jspdf;
-  const doc=new jsPDF({orientation:'p',unit:'mm',format:'a4'});
-  doc.setFont('helvetica','bold');
-  doc.setFontSize(20);
-  doc.text(title,14,18);
-  doc.setFontSize(10);
-  doc.setFont('helvetica','normal');
-  return doc;
-}
-
-function addPdfLine(doc, label, value, y) {
-  doc.setFont('helvetica','bold');
-  doc.text(label,14,y);
-  doc.setFont('helvetica','normal');
-  doc.text(String(value||'—'),60,y);
-}
-
-function exportCurrentDayPDF() {
-  const s = getCurrentStateSnapshot();
-  const doc = initPdfDoc('Tagesbericht');
-  let y = 30;
-  addPdfLine(doc,'Projekt', s.projectName || '—', y); y+=7;
-  addPdfLine(doc,'Datum', s.reportDate || todayStr(), y); y+=7;
-  addPdfLine(doc,'Bericht-Nr.', s.reportNr || '—', y); y+=7;
-  addPdfLine(doc,'Bauleiter', s.bauleiter || '—', y); y+=7;
-  addPdfLine(doc,'Standort', s.standort || '—', y); y+=7;
-  addPdfLine(doc,'Fortschritt', (s.progress||0)+'%', y); y+=7;
-  addPdfLine(doc,'Wetter', s.weather || '—', y); y+=10;
-
-  doc.setFont('helvetica','bold'); doc.text('Arbeitsbereiche',14,y); y+=6;
-  doc.setFont('helvetica','normal');
-  doc.text((s.workAreas||[]).join(', ') || '—',14,y,{maxWidth:180}); y+=12;
-
-  doc.setFont('helvetica','bold'); doc.text('Bemerkungen',14,y); y+=6;
-  doc.setFont('helvetica','normal');
-  doc.text(s.remarks || '—',14,y,{maxWidth:180}); y+=16;
-
-  doc.setFont('helvetica','bold'); doc.text('Timeline',14,y); y+=6;
-  doc.setFont('helvetica','normal');
-  (s.timeline||[]).slice(0,12).forEach(t=>{
-    doc.text(`${t.time||''}  ${t.text||''}`,14,y,{maxWidth:180}); y+=6;
-    if (y>270) { doc.addPage(); y=20; }
-  });
-
-  doc.addPage(); y=20;
-  doc.setFont('helvetica','bold'); doc.text('Aufgaben',14,y); y+=8;
-  doc.setFont('helvetica','normal');
-  [...(s.kanban?.today||[]), ...(s.kanban?.tomorrow||[]), ...(s.kanban?.done||[])].slice(0,20).forEach(t=>{
-    doc.text(`• ${t.title||''} | ${t.firmName||''} | ${t.prio||''}`,14,y,{maxWidth:180}); y+=6;
-    if (t.note) { doc.text(`  ${t.note}`,18,y,{maxWidth:176}); y+=6; }
-    if (y>270) { doc.addPage(); y=20; }
-  });
-
-  doc.addPage(); y=20;
-  doc.setFont('helvetica','bold'); doc.text('Mängel',14,y); y+=8;
-  doc.setFont('helvetica','normal');
-  (s.maengel||[]).slice(0,20).forEach(m=>{
-    doc.text(`• ${m.title||''} | ${m.status||''} | ${m.area||''}`,14,y,{maxWidth:180}); y+=6;
-    if (m.desc) { doc.text(`  ${m.desc}`,18,y,{maxWidth:176}); y+=6; }
-    if (y>270) { doc.addPage(); y=20; }
-  });
-
-  doc.save(`SERO_Tagesbericht_${s.reportDate||todayStr()}.pdf`);
-  showToast('Tagesbericht PDF erstellt','ok');
-}
-
-function exportWeeklyPDF() {
-  const start = gv('pdfWeekStart');
-  const end = gv('pdfWeekEnd');
-  if (!start || !end) { showToast('Wochen-Start und Ende wählen','warn'); return; }
-  const entries = archive.filter(a=>a.reportDate>=start && a.reportDate<=end);
-  if (!entries.length) { showToast('Keine Berichte im Zeitraum','warn'); return; }
-  const sum = summarizeRangeEntries(entries);
-  const doc = initPdfDoc('Wochenbericht');
-  let y=30;
-  addPdfLine(doc,'Zeitraum', `${start} bis ${end}`, y); y+=8;
-  addPdfLine(doc,'Berichte', sum.count, y); y+=7;
-  addPdfLine(doc,'Personal gesamt', sum.personnel, y); y+=7;
-  addPdfLine(doc,'Arbeiten', sum.works, y); y+=7;
-  addPdfLine(doc,'Ø Fortschritt', sum.avgProgress+'%', y); y+=7;
-  addPdfLine(doc,'Mängel', sum.maengel, y); y+=7;
-  addPdfLine(doc,'Aufgaben', sum.tasks, y); y+=7;
-  addPdfLine(doc,'Fotos', sum.photos, y); y+=10;
-  doc.setFont('helvetica','bold'); doc.text('Tage',14,y); y+=6;
-  doc.setFont('helvetica','normal');
-  entries.forEach(e=>{
-    doc.text(`• ${e.reportDate} | ${e.projectName||''} | Fortschritt ${e.progress||0}% | Mängel ${(e.snap?.maengel||[]).length}`,14,y,{maxWidth:180}); y+=6;
-    if (y>270) { doc.addPage(); y=20; }
-  });
-  doc.save(`SERO_Wochenbericht_${start}_${end}.pdf`);
-  showToast('Wochenbericht PDF erstellt','ok');
-}
-
-function exportMonthlyPDF() {
-  const month = gv('pdfMonth');
-  if (!month) { showToast('Monat wählen','warn'); return; }
-  const entries = archive.filter(a=>(a.reportDate||'').startsWith(month));
-  if (!entries.length) { showToast('Keine Berichte im Monat','warn'); return; }
-  const sum = summarizeRangeEntries(entries);
-  const doc = initPdfDoc('Monatsbericht');
-  let y=30;
-  addPdfLine(doc,'Monat', month, y); y+=8;
-  addPdfLine(doc,'Berichte', sum.count, y); y+=7;
-  addPdfLine(doc,'Personal gesamt', sum.personnel, y); y+=7;
-  addPdfLine(doc,'Arbeiten', sum.works, y); y+=7;
-  addPdfLine(doc,'Ø Fortschritt', sum.avgProgress+'%', y); y+=7;
-  addPdfLine(doc,'Mängel', sum.maengel, y); y+=7;
-  addPdfLine(doc,'Aufgaben', sum.tasks, y); y+=7;
-  addPdfLine(doc,'Fotos', sum.photos, y); y+=10;
-  doc.setFont('helvetica','bold'); doc.text('Tagesübersicht',14,y); y+=6;
-  doc.setFont('helvetica','normal');
-  entries.forEach(e=>{
-    doc.text(`• ${e.reportDate} | ${e.projectName||''} | Fortschritt ${e.progress||0}%`,14,y,{maxWidth:180}); y+=6;
-    if (y>270) { doc.addPage(); y=20; }
-  });
-  doc.save(`SERO_Monatsbericht_${month}.pdf`);
-  showToast('Monatsbericht PDF erstellt','ok');
-}
-
 
 // ═══════════════════════════════════════════════════
 // EXCEL EXPORT
@@ -5142,26 +4087,15 @@ function exportExcel(overrideDate) {
 
     // Mängel
     if((S.maengel||[]).length>0){
-      const s11=[['Titel','Status','Datum','Deadline','Firma','NU-Code','Verantwortlich','Bereich','Beschreibung','Foto'],
+      const s11=[['Titel','Status','Datum','Deadline','Firma','Verantwortlich','Bereich','Beschreibung','Foto'],
         ...(S.maengel||[]).map(m=>[
           m.title||'',m.status||'',m.date||'',m.deadline||'',
           (S.contractors||[]).find(c=>c.id===m.firmId)?.name||'',
-          m.nuCode||'',m.owner||'',m.area||'',m.desc||'',
+          m.owner||'',m.area||'',m.desc||'',
           (S.photos||[]).find(p=>p.id===m.photoId)?.name||''
         ])];
-      const ws11=XLSX.utils.aoa_to_sheet(s11);ws11['!cols']=[{wch:24},{wch:14},{wch:12},{wch:12},{wch:18},{wch:12},{wch:18},{wch:18},{wch:38},{wch:22}];
+      const ws11=XLSX.utils.aoa_to_sheet(s11);ws11['!cols']=[{wch:24},{wch:14},{wch:12},{wch:12},{wch:18},{wch:18},{wch:18},{wch:38},{wch:22}];
       XLSX.utils.book_append_sheet(wb,ws11,'Maengel');
-    }
-
-    // Gewerke & Nachunternehmer
-    if((S.gewerke||[]).length>0){
-      const s12=[['Gewerk-Code','Gewerk DE','Gewerk TR','NU-Code','Nachunternehmer','Kontakt','Telefon','E-Mail','Baustelle Ansprechpartner','Bestellung','LV Nummer','Nachtrag','Status','Notiz']];
-      (S.gewerke||[]).forEach(g=>{
-        if(!(g.nus||[]).length) s12.push([g.code||'',g.nameDe||'',g.nameTr||'','','','','','','','','','','',g.note||'']);
-        else (g.nus||[]).forEach(n=>s12.push([g.code||'',g.nameDe||'',g.nameTr||'',n.code||'',n.name||'',n.contact||'',n.phone||'',n.email||'',n.siteContact||'',n.order||'',n.lvNumber||'',n.nachtrag||'',n.status||'',n.note||'']));
-      });
-      const ws12=XLSX.utils.aoa_to_sheet(s12);ws12['!cols']=[{wch:12},{wch:28},{wch:24},{wch:12},{wch:26},{wch:18},{wch:16},{wch:24},{wch:22},{wch:20},{wch:14},{wch:18},{wch:14},{wch:30}];
-      XLSX.utils.book_append_sheet(wb,ws12,'Gewerke');
     }
 
     XLSX.writeFile(wb,`SERO_Bautagebuch_${S.projectNr||'Projekt'}_${date}.xlsx`);
@@ -5433,5 +4367,680 @@ function showToast(msg,type='ok'){
   toastTm=setTimeout(()=>{t.className='';},2800);
 }
 </script>
+
+<script id="sero-patch-v2">
+(function(){
+  const GEWERK_PRESETS = [
+    {code:'100',name:'Stahlbau'},
+    {code:'400',name:'Fassade'},
+    {code:'901',name:'Erd- und Entwässerungsarbeiten'},
+    {code:'902',name:'Beton- und Stahlbetonarbeiten'},
+    {code:'903',name:'Hallensohle'},
+    {code:'904',name:'Bauwerksabdichtung'},
+    {code:'905',name:'Industriefußboden Estrich'},
+    {code:'906',name:'Mauerwerksarbeiten'},
+    {code:'908',name:'Betonfertigteile'},
+    {code:'910',name:'Tore, Türen, Überladebrücken'},
+    {code:'911',name:'Lichtbandwand'},
+    {code:'912',name:'Dacheindeckung'},
+    {code:'913',name:'Lichtkuppeln'},
+    {code:'914',name:'Blechverlegearbeiten (906+936)'},
+    {code:'915',name:'Brandschutz'},
+    {code:'916',name:'Innenausbau'},
+    {code:'917',name:'Sonnenschutz'},
+    {code:'918',name:'Malerarbeiten'},
+    {code:'919',name:'Fliesenarbeiten'},
+    {code:'920',name:'Bodenbeläge'},
+    {code:'921',name:'Elektro (840–860+880)'},
+    {code:'922',name:'Löschanlagen (875)'},
+    {code:'923',name:'HKLS (811–830)'},
+    {code:'925',name:'Ingenieurleistungen (1870)'},
+    {code:'927',name:'Schlosserarbeiten'},
+    {code:'928',name:'Baustelleneinrichtung'},
+    {code:'930',name:'Aufzugsanlage'},
+    {code:'934',name:'Außenanlagen'}
+  ];
+  window.currentFirmId = window.currentFirmId || '';
+  window.currentNUCode = window.currentNUCode || '';
+
+  function e(id){ return document.getElementById(id); }
+  function h(s){ return String(s||'').replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+
+  function ensurePatchState(){
+    if (!window.S) return;
+    if (!Array.isArray(S.gewerkePresets) || !S.gewerkePresets.length) {
+      S.gewerkePresets = GEWERK_PRESETS.map(x=>({code:x.code,name:x.name}));
+    }
+    if (!Array.isArray(S.contractors)) S.contractors = [];
+    S.contractors.forEach((c, idx) => {
+      if (!c.gewerkCode) {
+        const found = (S.gewerkePresets||[]).find(g => (c.trade||'').toLowerCase().includes((g.name||'').toLowerCase()));
+        c.gewerkCode = found ? found.code : (S.gewerkePresets[0]?.code || '902');
+      }
+      if (!c.nuCode) c.nuCode = nextNUCode(c.gewerkCode, c.id);
+    });
+    if (!Array.isArray(S.workAreas)) S.workAreas = [];
+    if (!Array.isArray(S.timeline)) S.timeline = [];
+    if (!Array.isArray(S.maengel)) S.maengel = [];
+    if (!Array.isArray(S.photos)) S.photos = [];
+  }
+
+  function nextNUCode(gewerkCode, excludeId){
+    const nums = (S.contractors||[])
+      .filter(c => c.gewerkCode === gewerkCode && c.id !== excludeId)
+      .map(c => {
+        const m = String(c.nuCode||'').match(/\.(\d+)$/);
+        return m ? parseInt(m[1],10) : 0;
+      });
+    const next = (nums.length ? Math.max.apply(null, nums) : 0) + 1;
+    return gewerkCode + '.' + String(next).padStart(2,'0');
+  }
+
+  function contractorName(id){
+    return (S.contractors||[]).find(c=>c.id===id)?.name || '';
+  }
+
+  function getGewerkName(code){
+    return (S.gewerkePresets||[]).find(g=>g.code===code)?.name || '';
+  }
+
+  function populateQuickFirmSelect(){
+    const sel = e('tlFirmQuick');
+    if (!sel) return;
+    const current = sel.value || window.currentFirmId || '';
+    sel.innerHTML = '<option value="">— Firma wählen</option>' + (S.contractors||[]).map(c=>`<option value="${h(c.id)}">${h((c.nuCode||'') + ' ' + c.name)}</option>`).join('');
+    if (current) sel.value = current;
+  }
+
+  function applyNUToQuickContext(nuCode, nuName, firmId){
+    window.currentNUCode = nuCode || '';
+    window.currentFirmId = firmId || '';
+    const q = e('tlFirmQuick');
+    if (q && firmId) q.value = firmId;
+    if (typeof showToast === 'function') showToast(`Aktiver Kontext: ${nuCode} ${nuName}`,'ok');
+  }
+
+  function populateMangelFirmSelect(current){
+    const sel = e('mg-firm');
+    if (!sel) return;
+    sel.innerHTML = '<option value="">— Keine Firma</option>' + (S.contractors||[]).map(c=>`<option value="${h(c.id)}">${h((c.nuCode||'') + ' ' + c.name)}</option>`).join('');
+    if (current) sel.value = current;
+    else if (window.currentFirmId) sel.value = window.currentFirmId;
+  }
+
+  function populateMangelPhotoSelect(current){
+    const sel = e('mg-photo');
+    if (!sel) return;
+    sel.innerHTML = '<option value="">— Kein Foto</option>' + (S.photos||[]).map(ph=>`<option value="${h(ph.id)}">${h((ph.caption||ph.name||'Foto').slice(0,70))}</option>`).join('');
+    if (current) sel.value = current;
+  }
+
+  function injectAddFirmFields(){
+    const nameInput = e('af-name');
+    if (!nameInput) return;
+    if (e('af-gewerkCode')) return;
+    const row = document.createElement('div');
+    row.className = 'fr2';
+    row.innerHTML = `
+      <div class="fg">
+        <div class="fl">Gewerk-Code <span class="tr">Klasör kodu</span></div>
+        <select class="fs" id="af-gewerkCode"></select>
+      </div>
+      <div class="fg">
+        <div class="fl">NU-Code <span class="tr">Otomatik kod</span></div>
+        <input type="text" class="fi" id="af-nuCode" placeholder="902.01" readonly>
+      </div>`;
+    const tradeRow = nameInput.closest('.fr2');
+    if (tradeRow && tradeRow.parentNode) tradeRow.parentNode.insertBefore(row, tradeRow.nextSibling);
+  }
+
+  function populateAddFirmGewerkSelect(selected){
+    injectAddFirmFields();
+    const sel = e('af-gewerkCode');
+    if (!sel) return;
+    sel.innerHTML = (S.gewerkePresets||[]).map(g=>`<option value="${h(g.code)}">${h(g.code + ' ' + g.name)}</option>`).join('');
+    sel.value = selected || sel.value || (S.gewerkePresets[0]?.code || '');
+    const nu = e('af-nuCode');
+    if (nu) nu.value = nextNUCode(sel.value);
+    sel.onchange = () => { if (nu) nu.value = nextNUCode(sel.value); };
+    const trade = e('af-trade');
+    if (trade) {
+      const gname = getGewerkName(sel.value);
+      if (!trade.value) trade.value = gname;
+      sel.onchange = () => {
+        if (nu) nu.value = nextNUCode(sel.value);
+        if (trade) trade.value = getGewerkName(sel.value);
+      };
+    }
+  }
+
+  // Override openModal to populate selects
+  const originalOpenModal = window.openModal;
+  window.openModal = function(name, col){
+    if (typeof originalOpenModal === 'function') originalOpenModal(name, col);
+    ensurePatchState();
+    if (name === 'addFirm') populateAddFirmGewerkSelect();
+    if (name === 'addMangel') {
+      populateMangelFirmSelect();
+      populateMangelPhotoSelect();
+      if (e('mg-area') && !e('mg-area').value && Array.isArray(S.workAreas) && S.workAreas.length) e('mg-area').value = S.workAreas[0];
+    }
+  };
+
+  window.saveFirm = function saveFirmPatched() {
+    ensurePatchState();
+    const name = (window.gv ? gv('af-name') : e('af-name')?.value || '').trim();
+    if (!name) { if (window.showToast) showToast('Firmenname eingeben!','warn'); return; }
+    const gewerkCode = e('af-gewerkCode')?.value || (S.gewerkePresets[0]?.code || '902');
+    const nuCode = e('af-nuCode')?.value || nextNUCode(gewerkCode);
+    const tradeValue = (window.gv ? gv('af-trade') : e('af-trade')?.value || '') || getGewerkName(gewerkCode);
+    const firm = {
+      id:'f_'+Date.now(),
+      name,
+      trade:tradeValue,
+      gewerkCode,
+      nuCode,
+      contact:(window.gv ? gv('af-contact') : e('af-contact')?.value || ''),
+      phone:(window.gv ? gv('af-phone') : e('af-phone')?.value || ''),
+      status:(window.gv ? gv('af-status') : e('af-status')?.value || 'active'),
+      color:(window.gv ? gv('af-color') : e('af-color')?.value || (window.COLORS ? COLORS[(S.contractors||[]).length % COLORS.length] : '#3b82f6')),
+      notes:[]
+    };
+    const firstNote = (window.gv ? gv('af-note') : e('af-note')?.value || '').trim();
+    if (firstNote) firm.notes.push({id:'n_'+Date.now(), text:firstNote, date:(window.todayStr ? todayStr() : new Date().toISOString().slice(0,10))});
+    S.contractors.push(firm);
+    window.currentFirmId = firm.id;
+    window.currentNUCode = firm.nuCode;
+    if (typeof closeModal === 'function') closeModal('addFirm');
+    if (typeof autoSave === 'function') autoSave(); else if (typeof persistState === 'function') persistState();
+    if (typeof renderFirms === 'function') renderFirms();
+    if (typeof renderSigGrid === 'function') renderSigGrid();
+    if (typeof buildPersonnel === 'function') buildPersonnel();
+    if (typeof showToast === 'function') showToast('Firma gespeichert','ok');
+  };
+
+  window.renderFirms = function renderFirmsPatched() {
+    ensurePatchState();
+    populateQuickFirmSelect();
+    const cont = e('firmList');
+    const badge = e('nb-firms');
+    if (badge) badge.textContent = String((S.contractors||[]).length);
+    if (!cont) return;
+    if (!S.contractors || !S.contractors.length) {
+      cont.innerHTML = '<div class="empty-state"><div class="ei">📁</div><h4>Keine Gewerke / Nachunternehmer</h4><p>Gewerk altında firma ekle</p></div>';
+      return;
+    }
+    const grouped = {};
+    (S.gewerkePresets||[]).forEach(g => grouped[g.code] = {name:g.name, firms:[]});
+    (S.contractors||[]).forEach(c => {
+      if (!grouped[c.gewerkCode]) grouped[c.gewerkCode] = {name:getGewerkName(c.gewerkCode)||c.trade||'Gewerk', firms:[]};
+      grouped[c.gewerkCode].firms.push(c);
+    });
+    const html = Object.keys(grouped).sort().map(code => {
+      const g = grouped[code];
+      const firms = g.firms || [];
+      if (!firms.length) return `
+        <div class="card" style="margin-bottom:10px;">
+          <div class="card-hd" style="justify-content:space-between;">
+            <div class="card-hd-l"><div class="ci ci-b">📁</div><h3>${h(code)} ${h(g.name)}</h3></div>
+            <button class="btn btn-primary btn-xs" onclick="openModal('addFirm'); setTimeout(()=>{ if(document.getElementById('af-gewerkCode')) document.getElementById('af-gewerkCode').value='${h(code)}'; if(window.populateAddFirmGewerkSelect) populateAddFirmGewerkSelect('${h(code)}'); },30)">+ Firma</button>
+          </div>
+          <div class="card-body"><div class="empty-state" style="padding:18px 10px;"><p>Noch keine Firma</p></div></div>
+        </div>`;
+      const firmsHtml = firms.sort((a,b)=>(a.nuCode||'').localeCompare(b.nuCode||'')).map(c => {
+        const active = window.currentFirmId === c.id ? 'border-color:var(--accent2);box-shadow:0 0 0 2px rgba(59,130,246,.1);' : '';
+        const statusMap = {active:{lbl:'Aktiv',cls:'cs-a'},pause:{lbl:'Pause',cls:'cs-p'},done:{lbl:'Abgeschlossen',cls:'cs-d'}};
+        const sm = statusMap[c.status] || statusMap.active;
+        const noteCount = (c.notes||[]).length;
+        return `
+          <div class="con-card" style="${active}">
+            <div class="con-hd" onclick="applyNUToQuickContext('${h(c.nuCode||'')}','${h(c.name)}','${h(c.id)}')">
+              <div class="con-av" style="background:${h(c.color||'#3b82f6')}">${h((c.name||'').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase())}</div>
+              <div class="con-info">
+                <div class="con-name">${h(c.nuCode||'')} ${h(c.name)}</div>
+                <div class="con-trade">${h(c.contact||'')}${c.phone?' · '+h(c.phone):''}</div>
+                <div class="tag-row" style="margin-top:6px;">
+                  <span class="tag">📁 ${h(code)}</span>
+                  ${noteCount ? `<span class="tag">📝 ${noteCount}</span>`:''}
+                </div>
+              </div>
+              <span class="con-status-badge ${sm.cls}">${sm.lbl}</span>
+            </div>
+            <div class="con-body open">
+              ${(c.notes||[]).map(n=>`<div class="con-note-item"><div style="flex:1"><div class="con-note-txt">${h(n.text)}</div></div><div class="con-note-date">${h(n.date)}</div></div>`).join('') || '<div class="empty-state" style="padding:10px 0;"><p>Keine Notizen</p></div>'}
+              <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;">
+                <button class="btn btn-blue btn-xs" onclick="applyNUToQuickContext('${h(c.nuCode||'')}','${h(c.name)}','${h(c.id)}')">Als Kontext</button>
+                <button class="btn btn-ghost btn-xs" onclick="openAddNotePatched('${h(c.id)}')">+ Notiz</button>
+              </div>
+            </div>
+          </div>`;
+      }).join('');
+      return `<div class="card" style="margin-bottom:10px;">
+        <div class="card-hd" style="justify-content:space-between;">
+          <div class="card-hd-l"><div class="ci ci-b">📁</div><h3>${h(code)} ${h(g.name)} <small>${firms.length} Firma</small></h3></div>
+          <button class="btn btn-primary btn-xs" onclick="openModal('addFirm'); setTimeout(()=>{ if(document.getElementById('af-gewerkCode')) document.getElementById('af-gewerkCode').value='${h(code)}'; if(window.populateAddFirmGewerkSelect) populateAddFirmGewerkSelect('${h(code)}'); },30)">+ Firma</button>
+        </div>
+        <div class="card-body">${firmsHtml}</div>
+      </div>`;
+    }).join('');
+    cont.innerHTML = html;
+  };
+
+  window.openAddNotePatched = function(fid){
+    const text = prompt('Notiz eingeben');
+    if (!text) return;
+    const c = (S.contractors||[]).find(x=>x.id===fid); if (!c) return;
+    if (!Array.isArray(c.notes)) c.notes = [];
+    c.notes.unshift({id:'n_'+Date.now(), text, date:(window.todayStr?todayStr():new Date().toISOString().slice(0,10))});
+    if (typeof autoSave === 'function') autoSave();
+    renderFirms();
+  }
+
+  window.addTimelineEntry = function addTimelineEntryPatched() {
+    ensurePatchState();
+    if (!S.timeline) S.timeline = [];
+    S.timeline.unshift({
+      id:'tl_'+Date.now(),
+      time:new Date().toTimeString().slice(0,5),
+      text:'',
+      firmId: window.currentFirmId || '',
+      nuCode: window.currentNUCode || '',
+      area: (S.workAreas&&S.workAreas[0]) ? S.workAreas[0] : ''
+    });
+    renderTimeline();
+    if (typeof autoSave === 'function') autoSave();
+  };
+
+  window.quickAddTimeline = function quickAddTimelinePatched() {
+    ensurePatchState();
+    const time = e('tlTime')?.value || new Date().toTimeString().slice(0,5);
+    const text = (e('tlText')?.value || '').trim();
+    const firmId = e('tlFirmQuick')?.value || window.currentFirmId || '';
+    if (!text) { if (window.showToast) showToast('Text eingeben','warn'); return; }
+    const firm = (S.contractors||[]).find(c=>c.id===firmId);
+    if (!S.timeline) S.timeline = [];
+    S.timeline.unshift({
+      id:'tl_'+Date.now(),
+      time,
+      text,
+      firmId,
+      nuCode: firm?.nuCode || window.currentNUCode || '',
+      area: (S.workAreas&&S.workAreas[0]) ? S.workAreas[0] : ''
+    });
+    if (e('tlText')) e('tlText').value = '';
+    if (e('tlTime')) e('tlTime').value = '';
+    renderTimeline();
+    if (typeof autoSave === 'function') autoSave();
+  };
+
+  window.renderTimeline = function renderTimelinePatched() {
+    const list = e('timelineList'), empty = e('timelineEmpty');
+    if (!list) return;
+    const rows = S.timeline || [];
+    list.innerHTML = rows.map(it => {
+      const firmName = contractorName(it.firmId);
+      return `<div class="timeline-item">
+        <input type="time" class="fi" value="${h(it.time||'')}" onchange="(function(v){const x=(S.timeline||[]).find(a=>a.id==='${h(it.id)}'); if(x){x.time=v; autoSave();}})(this.value)">
+        <textarea class="fta" style="min-height:46px;" onchange="(function(v){const x=(S.timeline||[]).find(a=>a.id==='${h(it.id)}'); if(x){x.text=v; autoSave();}})(this.value)">${h(it.text||'')}</textarea>
+        <div>
+          <select class="fs" onchange="(function(v){const x=(S.timeline||[]).find(a=>a.id==='${h(it.id)}'); if(x){x.firmId=v; const f=(S.contractors||[]).find(c=>c.id===v); x.nuCode=f?f.nuCode:''; autoSave(); renderTimeline();}})(this.value)">${'<option value="">— Firma wählen</option>' + (S.contractors||[]).map(c=>`<option value="${h(c.id)}" ${it.firmId===c.id?'selected':''}>${h((c.nuCode||'')+' '+c.name)}</option>`).join('')}</select>
+          <div class="tag-row">
+            ${it.nuCode ? `<span class="tag">📁 ${h(it.nuCode)}</span>`:''}
+            ${it.area ? `<span class="tag">📍 ${h(it.area)}</span>`:''}
+            ${firmName ? `<span class="tag">🏢 ${h(firmName)}</span>`:''}
+          </div>
+          <div class="timeline-actions">
+            <button class="timeline-photo-btn" onclick="openTimelinePhotoPicker('${h(it.id)}')">📸 Foto</button>
+          </div>
+        </div>
+        <div style="display:flex;justify-content:flex-end;"><button class="btn-icon" onclick="(function(){S.timeline=(S.timeline||[]).filter(x=>x.id!=='${h(it.id)}'); autoSave(); renderTimeline();})()">✕</button></div>
+      </div>`;
+    }).join('');
+    if (empty) empty.style.display = rows.length ? 'none' : 'block';
+  };
+
+  // strengthen photo linkage
+  window.addPhoto = function addPhotoPatched(file) {
+    const reader=new FileReader();
+    reader.onload=async e2=>{
+      if(!S.photos)S.photos=[];
+      const firmId = window.currentFirmId || '';
+      const firm = (S.contractors||[]).find(c=>c.id===firmId);
+      const photo = {
+        id:'ph_'+Date.now()+'_'+Math.random().toString(36).slice(2),
+        name:file.name,
+        data:e2.target.result,
+        date:(window.todayStr?todayStr():new Date().toISOString().slice(0,10)),
+        time:new Date().toTimeString().slice(0,5),
+        caption:'',
+        firmId: firmId,
+        taskId:'',
+        area:(S.workAreas&&S.workAreas[0]) ? S.workAreas[0] : '',
+        location:'',
+        note:'',
+        timelineId:'',
+        nuCode: firm?.nuCode || window.currentNUCode || ''
+      };
+      S.photos.push(photo);
+      try {
+        if (typeof idbSavePhoto === 'function') await idbSavePhoto({ id: photo.id, data: photo.data, name: photo.name, savedAt: new Date().toISOString() });
+        if (typeof autoSave === 'function') autoSave();
+        if (typeof renderPhotos === 'function') renderPhotos();
+        if (typeof updateBadges === 'function') updateBadges();
+      } catch(err) {
+        if (typeof showToast === 'function') showToast('Foto konnte nicht gespeichert werden','err');
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
+  window.addPhotoLinkedToTimeline = function addPhotoLinkedToTimelinePatched(file, timelineId) {
+    const reader=new FileReader();
+    reader.onload=async e2=>{
+      if(!S.photos)S.photos=[];
+      const tl = (S.timeline||[]).find(x=>x.id===timelineId);
+      const photo = {
+        id:'ph_'+Date.now()+'_'+Math.random().toString(36).slice(2),
+        name:file.name,
+        data:e2.target.result,
+        date:(window.todayStr?todayStr():new Date().toISOString().slice(0,10)),
+        time:new Date().toTimeString().slice(0,5),
+        caption: tl ? (tl.text || '') : '',
+        firmId: tl ? (tl.firmId || '') : (window.currentFirmId || ''),
+        taskId:'',
+        area: tl ? (tl.area || '') : ((S.workAreas&&S.workAreas[0]) ? S.workAreas[0] : ''),
+        location:'',
+        note:'',
+        timelineId: timelineId,
+        nuCode: tl ? (tl.nuCode || '') : (window.currentNUCode || '')
+      };
+      S.photos.push(photo);
+      try {
+        if (typeof idbSavePhoto === 'function') await idbSavePhoto({ id: photo.id, data: photo.data, name: photo.name, savedAt: new Date().toISOString() });
+        window.pendingTimelinePhotoId = null;
+        if (typeof autoSave === 'function') autoSave();
+        if (typeof renderPhotos === 'function') renderPhotos();
+        if (typeof renderTimeline === 'function') renderTimeline();
+        if (typeof updateBadges === 'function') updateBadges();
+        if (typeof showToast === 'function') showToast('Foto direkt mit Tagesereignis verknüpft','ok');
+      } catch(err) {
+        if (typeof showToast === 'function') showToast('Foto konnte nicht gespeichert werden','err');
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
+  // strengthen mangel linkage
+  window.saveMangel = function saveMangelPatched() {
+    const title = (window.gv ? gv('mg-title') : e('mg-title')?.value || '').trim();
+    if (!title) { if (window.showToast) showToast('Titel eingeben','warn'); return; }
+    if (!S.maengel) S.maengel = [];
+    const photoId = (window.gv ? gv('mg-photo') : e('mg-photo')?.value || '');
+    const photo = (S.photos||[]).find(p=>p.id===photoId);
+    const firmId = (window.gv ? gv('mg-firm') : e('mg-firm')?.value || '') || photo?.firmId || window.currentFirmId || '';
+    const firm = (S.contractors||[]).find(c=>c.id===firmId);
+    const id = (window.gv ? gv('mg-id') : e('mg-id')?.value || '') || ('mg_' + Date.now());
+    const item = {
+      id,
+      title,
+      firmId,
+      status:(window.gv ? gv('mg-status') : e('mg-status')?.value || 'offen'),
+      date:(window.gv ? gv('mg-date') : e('mg-date')?.value || '') || (window.todayStr ? todayStr() : new Date().toISOString().slice(0,10)),
+      deadline:(window.gv ? gv('mg-deadline') : e('mg-deadline')?.value || ''),
+      owner:(window.gv ? gv('mg-owner') : e('mg-owner')?.value || ''),
+      area:(window.gv ? gv('mg-area') : e('mg-area')?.value || '') || photo?.area || '',
+      desc:(window.gv ? gv('mg-desc') : e('mg-desc')?.value || ''),
+      photoId: photoId,
+      timelineId: photo?.timelineId || '',
+      nuCode: firm?.nuCode || photo?.nuCode || window.currentNUCode || ''
+    };
+    const idx = S.maengel.findIndex(x=>x.id===id);
+    if (idx >= 0) S.maengel[idx] = item; else S.maengel.unshift(item);
+    if (typeof closeModal === 'function') closeModal('addMangel');
+    if (typeof renderMaengel === 'function') renderMaengel();
+    if (typeof autoSave === 'function') autoSave();
+    if (typeof showToast === 'function') showToast('Mangel gespeichert','ok');
+  };
+
+  // advanced excel workflow
+  function collectRangeRows(from, to){
+    const rows = [];
+    function inRange(d){
+      if (!d) return false;
+      return (!from || d >= from) && (!to || d <= to);
+    }
+    const currentDate = S.reportDate || (window.todayStr?todayStr():new Date().toISOString().slice(0,10));
+    const snaps = [];
+    // current
+    snaps.push({date: currentDate, snap: JSON.parse(JSON.stringify(S)), source:'current'});
+    (window.archive||[]).forEach(a => {
+      if (a && a.snap && a.reportDate) snaps.push({date:a.reportDate, snap:a.snap, source:'archive'});
+    });
+    const uniq = {};
+    snaps.forEach(s=>{ if (!uniq[s.date] || s.source==='current') uniq[s.date]=s; });
+    return Object.values(uniq).filter(s=>inRange(s.date)).sort((a,b)=>String(a.date).localeCompare(String(b.date)));
+  }
+
+  window.exportExcel = function exportExcelPatched(overrideDate){
+    try{
+      if (typeof collectFormToState === 'function') collectFormToState();
+      const from = overrideDate || e('setExcelFrom')?.value || S.reportDate || (window.todayStr?todayStr():new Date().toISOString().slice(0,10));
+      const to = e('setExcelTo')?.value || from;
+      const onlyCurrent = (e('setExcelContext')?.value || 'yes') === 'yes';
+      const firmFilter = e('setExcelFirm')?.value || '';
+      const wb = XLSX.utils.book_new();
+      const snapshots = onlyCurrent ? [{date:S.reportDate||from,snap:S}] : collectRangeRows(from,to);
+      const summary = [['Datum','Projekt','Bauleiter','Wetter','Fortschritt','Personal','Arbeiten']];
+      const timeline = [['Datum','Zeit','Text','Firma','NU-Code','Bereich']];
+      const tasks = [['Datum','Spalte','Aufgabe','Firma','Priorität','Gewerk']];
+      const maengel = [['Datum','Titel','Status','Firma','NU-Code','Bereich','Beschreibung']];
+      const firms = [['NU-Code','Firma','Gewerk-Code','Gewerk','Kontakt','Telefon','Status']];
+      const containers = [['Datum','Typ','ID','Standort','Status','Notiz']];
+      const photos = [['Datum','Datei','Caption','Firma','NU-Code','Bereich','Timeline']];
+      const meetings = [['Datum','Titel','Typ','Zeit','Ort','Teilnehmer']];
+      const firmSeen = new Set();
+
+      snapshots.forEach(snapObj=>{
+        const snap = snapObj.snap || {};
+        const snapContractors = snap.contractors || [];
+        const matchFirm = f => !firmFilter || f === firmFilter;
+        const totalP = Object.values(snap.personnelCounts || {}).reduce((a,b)=>a+(parseInt(b)||0),0);
+        summary.push([snapObj.date, snap.projectName||'', snap.bauleiter||'', snap.weather||'', snap.progress||0, totalP, (snap.workEntries||[]).length]);
+        (snap.timeline||[]).forEach(t=>{
+          if (firmFilter && t.firmId !== firmFilter) return;
+          const firm = snapContractors.find(c=>c.id===t.firmId);
+          timeline.push([snapObj.date, t.time||'', t.text||'', firm?.name||'', firm?.nuCode||t.nuCode||'', t.area||'']);
+        });
+        [['today','Heute'],['tomorrow','Morgen'],['done','Erledigt']].forEach(([k,lbl])=>{
+          (snap.kanban?.[k]||[]).forEach(t=>{
+            if (firmFilter && t.firmId !== firmFilter) return;
+            const firm = snapContractors.find(c=>c.id===t.firmId);
+            tasks.push([snapObj.date, lbl, t.title||'', firm?.name||'', t.prio||'', t.trade||'']);
+          });
+        });
+        (snap.maengel||[]).forEach(m=>{
+          if (firmFilter && m.firmId !== firmFilter) return;
+          const firm = snapContractors.find(c=>c.id===m.firmId);
+          maengel.push([snapObj.date, m.title||'', m.status||'', firm?.name||'', firm?.nuCode||m.nuCode||'', m.area||'', m.desc||'']);
+        });
+        (snap.containers||[]).forEach(c=>{
+          containers.push([snapObj.date, c.type||'', c.ctId||'', c.loc||'', c.status||'', c.note||'']);
+        });
+        (snap.photos||[]).forEach(p=>{
+          if (firmFilter && p.firmId !== firmFilter) return;
+          const firm = snapContractors.find(c=>c.id===p.firmId);
+          const tl = (snap.timeline||[]).find(t=>t.id===p.timelineId);
+          photos.push([snapObj.date, p.name||'', p.caption||'', firm?.name||'', firm?.nuCode||p.nuCode||'', p.area||'', tl ? ((tl.time||'')+' '+(tl.text||'')) : '']);
+        });
+        (snap.meetings||[]).forEach(m=>{
+          meetings.push([snapObj.date, m.title||'', m.type||'', m.time||'', m.loc||'', (m.attendees||[]).join(', ')]);
+        });
+        snapContractors.forEach(c=>{
+          if (firmSeen.has(c.id)) return;
+          firmSeen.add(c.id);
+          firms.push([c.nuCode||'', c.name||'', c.gewerkCode||'', getGewerkName(c.gewerkCode)||c.trade||'', c.contact||'', c.phone||'', c.status||'']);
+        });
+      });
+
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(summary), 'Zusammenfassung');
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(timeline), 'Timeline');
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(tasks), 'Aufgaben');
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(maengel), 'Maengel');
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(firms), 'Firmen');
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(containers), 'Container');
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(photos), 'Fotos');
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(meetings), 'Besprechungen');
+      const name = (e('setExcelFileName')?.value || `Bautagebuch_${S.projectNr||'Projekt'}_${from}_${to}.xlsx`).replace(/[\/\\:*?"<>|]+/g,'_');
+      XLSX.writeFile(wb, name);
+      if (typeof showToast === 'function') showToast('Excel exportiert','ok');
+    }catch(err){
+      console.error(err);
+      if (typeof showToast === 'function') showToast('Excel Fehler: '+err.message,'err');
+    }
+  };
+
+  function injectSettingsCards(){
+    const settings = e('pg-settings');
+    if (!settings || e('sero-settings-patch')) return;
+    const grid = settings.querySelector('div[style*="grid-template-columns:1fr 1fr"]');
+    if (!grid) return;
+    const wrap = document.createElement('div');
+    wrap.id = 'sero-settings-patch';
+    wrap.style.gridColumn = '1 / -1';
+    wrap.innerHTML = `
+      <div class="card" style="margin-bottom:14px;">
+        <div class="card-hd"><div class="card-hd-l"><div class="ci ci-o">🏗</div><h3>Gewerke verwalten <small>Düzenlenebilir preset liste</small></h3></div></div>
+        <div class="card-body">
+          <div class="fg"><div class="fl">Liste <span class="tr">Format: CODE|NAME</span></div>
+            <textarea class="fta" id="setGewerkList" style="min-height:140px;"></textarea>
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <button class="btn btn-primary" onclick="saveGewerkPresets()">Speichern</button>
+            <button class="btn btn-ghost" onclick="loadDefaultGewerkPresets()">Standard laden</button>
+          </div>
+        </div>
+      </div>
+      <div class="card" style="margin-bottom:14px;">
+        <div class="card-hd"><div class="card-hd-l"><div class="ci ci-g">📊</div><h3>Excel Export Workflow <small>Gelişmiş dışa aktarma</small></h3></div></div>
+        <div class="card-body">
+          <div class="fr2">
+            <div class="fg"><div class="fl">Von</div><input type="date" class="fi" id="setExcelFrom"></div>
+            <div class="fg"><div class="fl">Bis</div><input type="date" class="fi" id="setExcelTo"></div>
+          </div>
+          <div class="fr2">
+            <div class="fg"><div class="fl">Nur aktueller Kontext</div>
+              <select class="fs" id="setExcelContext"><option value="yes">Ja</option><option value="no">Nein</option></select>
+            </div>
+            <div class="fg"><div class="fl">Firma filtern</div>
+              <select class="fs" id="setExcelFirm"><option value="">Alle Firmen</option></select>
+            </div>
+          </div>
+          <div class="fg"><div class="fl">Dateiname</div><input type="text" class="fi" id="setExcelFileName" placeholder="Bautagebuch.xlsx"></div>
+          <button class="btn btn-primary" onclick="exportExcel()">Excel erstellen</button>
+        </div>
+      </div>
+      <div class="card" style="margin-bottom:14px;">
+        <div class="card-hd"><div class="card-hd-l"><div class="ci ci-c">🛟</div><h3>Support</h3></div></div>
+        <div class="card-body">
+          <div style="font-size:13px;line-height:1.7;color:var(--text2);">
+            <strong>SERO Bautagebuch</strong><br>
+            Version 1.0<br>
+            Build 2026.04<br><br>
+            Offline Bauleitungs- und Dokumentationstool für Bauleitung, Nachunternehmer-Koordination und Tagesdokumentation.<br><br>
+            <strong>Entwicklung &amp; Support</strong><br>
+            Serdal Arslan<br><br>
+            Support, Fehlermeldungen oder Verbesserungsvorschläge:<br>
+            srdlrsln@hotmail.com<br><br>
+            <span style="font-size:12px;color:var(--text3);">Alle Daten werden lokal im Browser gespeichert (Offline-System).</span>
+          </div>
+        </div>
+      </div>`;
+    grid.appendChild(wrap);
+    loadDefaultGewerkPresets(false);
+    syncSettingsFields();
+  }
+
+  function syncSettingsFields(){
+    const from = e('setExcelFrom'), to = e('setExcelTo');
+    if (from && !from.value) from.value = S.reportDate || (window.todayStr?todayStr():new Date().toISOString().slice(0,10));
+    if (to && !to.value) to.value = S.reportDate || (window.todayStr?todayStr():new Date().toISOString().slice(0,10));
+    const firmSel = e('setExcelFirm');
+    if (firmSel) {
+      const current = firmSel.value;
+      firmSel.innerHTML = '<option value="">Alle Firmen</option>' + (S.contractors||[]).map(c=>`<option value="${h(c.id)}">${h((c.nuCode||'') + ' ' + c.name)}</option>`).join('');
+      if (current) firmSel.value = current;
+      else if (window.currentFirmId) firmSel.value = window.currentFirmId;
+    }
+    const list = e('setGewerkList');
+    if (list) list.value = (S.gewerkePresets||[]).map(g=>`${g.code}|${g.name}`).join('\n');
+  }
+
+  window.loadDefaultGewerkPresets = function(showMsg=true){
+    ensurePatchState();
+    S.gewerkePresets = GEWERK_PRESETS.map(x=>({code:x.code,name:x.name}));
+    syncSettingsFields();
+    if (showMsg && typeof showToast === 'function') showToast('Standard-Gewerke geladen','ok');
+  };
+
+  window.saveGewerkPresets = function(){
+    const raw = e('setGewerkList')?.value || '';
+    const rows = raw.split(/\n+/).map(x=>x.trim()).filter(Boolean);
+    const parsed = rows.map(r=>{
+      const parts = r.split('|');
+      return {code:(parts[0]||'').trim(), name:(parts.slice(1).join('|')||'').trim()};
+    }).filter(x=>x.code && x.name);
+    if (!parsed.length) { if (typeof showToast === 'function') showToast('Mindestens ein Gewerk nötig','warn'); return; }
+    S.gewerkePresets = parsed;
+    // keep contractor codes but update trade labels where matching
+    (S.contractors||[]).forEach(c=>{
+      if (!c.gewerkCode || !parsed.find(g=>g.code===c.gewerkCode)) c.gewerkCode = parsed[0].code;
+      if (!c.nuCode || !String(c.nuCode).startsWith(c.gewerkCode + '.')) c.nuCode = nextNUCode(c.gewerkCode, c.id);
+      if (!c.trade) c.trade = getGewerkName(c.gewerkCode);
+    });
+    if (typeof autoSave === 'function') autoSave();
+    renderFirms();
+    if (typeof showToast === 'function') showToast('Gewerkliste gespeichert','ok');
+  };
+
+  function polishLabels(){
+    const navFirm = document.querySelector('.nav-tab[data-page="pg-firms"]');
+    if (navFirm) navFirm.innerHTML = '<span class="ti">📁</span>Gewerke <span class="nav-badge" id="nb-firms">'+((S.contractors||[]).length)+'</span>';
+    const pgFirmH2 = document.querySelector('#pg-firms h2');
+    if (pgFirmH2) pgFirmH2.innerHTML = 'Gewerke / Nachunternehmer <span class="sub">Klasör ağacı</span>';
+    const btn = document.querySelector('#pg-firms .sh .btn');
+    if (btn) btn.textContent = '+ Nachunternehmer hinzufügen';
+  }
+
+  function patchInit(){
+    ensurePatchState();
+    injectAddFirmFields();
+    injectSettingsCards();
+    syncSettingsFields();
+    polishLabels();
+    populateQuickFirmSelect();
+    populateMangelFirmSelect();
+    populateMangelPhotoSelect();
+    renderFirms();
+    renderTimeline();
+    if (typeof renderPhotos === 'function') renderPhotos();
+    if (typeof renderMaengel === 'function') renderMaengel();
+    if (typeof updateBadges === 'function') updateBadges();
+    if (typeof refreshDash === 'function') refreshDash();
+  }
+
+  // expose helper
+  window.populateAddFirmGewerkSelect = populateAddFirmGewerkSelect;
+  window.applyNUToQuickContext = applyNUToQuickContext;
+  window.populateQuickFirmSelect = populateQuickFirmSelect;
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', patchInit);
+  } else {
+    patchInit();
+  }
+  window.addEventListener('load', patchInit);
+})();
+</script>
+
 </body>
 </html>
