@@ -4484,15 +4484,25 @@ function showToast(msg,type='ok'){
     row.className = 'fr2';
     row.innerHTML = `
       <div class="fg">
-        <div class="fl">Gewerk-Code <span class="tr">Klasör kodu</span></div>
-        <select class="fs" id="af-gewerkCode"></select>
+        <div class="fl">Gewerk-Code <span class="tr">Manuell oder Liste</span></div>
+        <input class="fi" id="af-gewerkCode" list="af-gewerkCodeList" placeholder="902">
+        <datalist id="af-gewerkCodeList"></datalist>
       </div>
       <div class="fg">
-        <div class="fl">NU-Code <span class="tr">Otomatik kod</span></div>
-        <input type="text" class="fi" id="af-nuCode" placeholder="902.01" readonly>
+        <div class="fl" style="display:flex;justify-content:space-between;align-items:center;gap:8px;">
+          <span>NU-Code <span class="tr">Manuell editierbar</span></span>
+          <button type="button" class="btn btn-ghost btn-xs" onclick="regenerateNUCode()">Auto</button>
+        </div>
+        <input type="text" class="fi" id="af-nuCode" placeholder="902.01">
       </div>`;
     const tradeRow = nameInput.closest('.fr2');
     if (tradeRow && tradeRow.parentNode) tradeRow.parentNode.insertBefore(row, tradeRow.nextSibling);
+  }
+
+  function renderGewerkCodeDataList(){
+    const list = e('af-gewerkCodeList');
+    if (!list) return;
+    list.innerHTML = (S.gewerkePresets||[]).map(g=>`<option value="${h(g.code)}">${h(g.code + ' ' + g.name)}</option>`).join('');
   }
 
   function populateAddFirmGewerkSelect(selected){
@@ -4501,18 +4511,28 @@ function showToast(msg,type='ok'){
     if (!sel) return;
     const editId = e('af-edit-id')?.value || '';
     const existing = editId ? (S.contractors||[]).find(c=>c.id===editId) : null;
-    sel.innerHTML = (S.gewerkePresets||[]).map(g=>`<option value="${h(g.code)}">${h(g.code + ' ' + g.name)}</option>`).join('');
+    renderGewerkCodeDataList();
     sel.value = selected || existing?.gewerkCode || sel.value || (S.gewerkePresets[0]?.code || '');
     const nu = e('af-nuCode');
-    if (nu) nu.value = existing?.nuCode || nextNUCode(sel.value, editId || undefined);
+    if (nu && !nu.value) nu.value = existing?.nuCode || nextNUCode(sel.value, editId || undefined);
     const trade = e('af-trade');
-    sel.onchange = () => {
-      if (nu) nu.value = nextNUCode(sel.value, editId || undefined);
-      if (trade && (!trade.value || trade.dataset.autoFill === '1')) {
-        trade.value = getGewerkName(sel.value);
+    const applyTradeFromCode = () => {
+      const code = (sel.value||'').trim();
+      const gname = getGewerkName(code);
+      if (trade && gname && (!trade.value || trade.dataset.autoFill === '1')) {
+        trade.value = gname;
         trade.dataset.autoFill = '1';
       }
     };
+    sel.oninput = () => {
+      const code = (sel.value||'').trim();
+      if (nu && (!nu.value || nu.dataset.autoFill === '1')) {
+        nu.value = nextNUCode(code || (S.gewerkePresets[0]?.code || '902'), editId || undefined);
+        nu.dataset.autoFill = '1';
+      }
+      applyTradeFromCode();
+    };
+    if (nu) nu.oninput = () => { nu.dataset.autoFill = '0'; };
     if (trade) {
       const gname = getGewerkName(sel.value);
       if (!trade.value) {
@@ -4521,6 +4541,16 @@ function showToast(msg,type='ok'){
       }
       trade.oninput = () => { trade.dataset.autoFill = '0'; };
     }
+    applyTradeFromCode();
+  }
+
+  window.regenerateNUCode = function regenerateNUCode(){
+    const code = (e('af-gewerkCode')?.value || '').trim() || (S.gewerkePresets[0]?.code || '902');
+    const editId = e('af-edit-id')?.value || undefined;
+    const nu = e('af-nuCode');
+    if (!nu) return;
+    nu.value = nextNUCode(code, editId);
+    nu.dataset.autoFill = '1';
   }
 
   // Override openModal to populate selects
@@ -4548,7 +4578,7 @@ function showToast(msg,type='ok'){
     if (e('af-status')) e('af-status').value = 'active';
     if (e('af-color')) e('af-color').value = (window.COLORS ? COLORS[(S.contractors||[]).length % COLORS.length] : '#3b82f6');
     if (e('af-gewerkCode')) e('af-gewerkCode').value = defaultCode || (S.gewerkePresets[0]?.code || '902');
-    if (e('af-nuCode')) e('af-nuCode').value = nextNUCode(e('af-gewerkCode')?.value || defaultCode || (S.gewerkePresets[0]?.code || '902'));
+    if (e('af-nuCode')) { e('af-nuCode').value = nextNUCode(e('af-gewerkCode')?.value || defaultCode || (S.gewerkePresets[0]?.code || '902')); e('af-nuCode').dataset.autoFill = '1'; }
     if (e('af-trade')) delete e('af-trade').dataset.autoFill;
   }
 
@@ -4571,21 +4601,55 @@ function showToast(msg,type='ok'){
     if (e('af-nuCode')) e('af-nuCode').value = c.nuCode || nextNUCode(c.gewerkCode || (S.gewerkePresets[0]?.code || '902'), c.id);
   };
 
+  function upsertGewerk(code, name, oldCode){
+    const newCode = String(code||'').trim();
+    const newName = String(name||'').trim() || newCode;
+    if (!newCode) return {ok:false, message:'Gewerk-Code eingeben'};
+    const list = S.gewerkePresets || (S.gewerkePresets = []);
+    const conflict = list.find(g => String(g.code)===newCode && String(g.code)!==String(oldCode||''));
+    if (conflict) return {ok:false, message:'Gewerk-Code existiert bereits'};
+    const existing = list.find(g => String(g.code)===String(oldCode||newCode));
+    if (existing) {
+      existing.code = newCode;
+      existing.name = newName;
+    } else {
+      list.push({code:newCode, name:newName});
+    }
+    if (oldCode && oldCode !== newCode) {
+      (S.contractors||[]).forEach(c => { if (String(c.gewerkCode)===String(oldCode)) c.gewerkCode = newCode; });
+    }
+    list.sort((a,b)=>String(a.code).localeCompare(String(b.code), undefined, {numeric:true}));
+    return {ok:true, code:newCode, name:newName};
+  }
+
   window.addGewerkCodePrompt = function addGewerkCodePrompt(){
     ensurePatchState();
     const code = prompt('Neuer Gewerk-Code');
     if (code === null) return;
-    const cleanCode = String(code).trim();
-    if (!cleanCode) { if (window.showToast) showToast('Gewerk-Code eingeben','warn'); return; }
-    if ((S.gewerkePresets||[]).some(g => String(g.code) === cleanCode)) { if (window.showToast) showToast('Gewerk-Code existiert bereits','warn'); return; }
     const name = prompt('Gewerk-Bezeichnung', 'Neues Gewerk');
     if (name === null) return;
-    const cleanName = String(name).trim() || 'Neues Gewerk';
-    S.gewerkePresets.push({code:cleanCode, name:cleanName});
-    S.gewerkePresets.sort((a,b)=>String(a.code).localeCompare(String(b.code), undefined, {numeric:true}));
+    const result = upsertGewerk(code, name);
+    if (!result.ok) { if (window.showToast) showToast(result.message,'warn'); return; }
     if (typeof autoSave === 'function') autoSave();
+    renderGewerkCodeDataList();
     if (typeof renderFirms === 'function') renderFirms();
     if (typeof showToast === 'function') showToast('Gewerk-Code hinzugefügt','ok');
+  };
+
+  window.editGewerkPrompt = function editGewerkPrompt(code){
+    ensurePatchState();
+    const item = (S.gewerkePresets||[]).find(g => String(g.code)===String(code));
+    if (!item) return;
+    const nextCode = prompt('Gewerk-Code bearbeiten', item.code);
+    if (nextCode === null) return;
+    const nextName = prompt('Gewerk-Bezeichnung bearbeiten', item.name || '');
+    if (nextName === null) return;
+    const result = upsertGewerk(nextCode, nextName, item.code);
+    if (!result.ok) { if (window.showToast) showToast(result.message,'warn'); return; }
+    if (typeof autoSave === 'function') autoSave();
+    renderGewerkCodeDataList();
+    if (typeof renderFirms === 'function') renderFirms();
+    if (typeof showToast === 'function') showToast('Gewerk aktualisiert','ok');
   };
 
   window.saveFirm = function saveFirmPatched() {
@@ -4594,10 +4658,16 @@ function showToast(msg,type='ok'){
     const existing = editId ? (S.contractors||[]).find(c=>c.id===editId) : null;
     const name = (window.gv ? gv('af-name') : e('af-name')?.value || '').trim();
     if (!name) { if (window.showToast) showToast('Firmenname eingeben!','warn'); return; }
-    const gewerkCode = e('af-gewerkCode')?.value || existing?.gewerkCode || (S.gewerkePresets[0]?.code || '902');
-    const nuCode = e('af-nuCode')?.value || existing?.nuCode || nextNUCode(gewerkCode, editId || undefined);
-    const tradeValue = (window.gv ? gv('af-trade') : e('af-trade')?.value || '') || getGewerkName(gewerkCode);
+    const gewerkCode = (e('af-gewerkCode')?.value || existing?.gewerkCode || (S.gewerkePresets[0]?.code || '902')).trim();
+    const nuCode = (e('af-nuCode')?.value || existing?.nuCode || nextNUCode(gewerkCode, editId || undefined)).trim();
+    const tradeValue = ((window.gv ? gv('af-trade') : e('af-trade')?.value || '') || getGewerkName(gewerkCode) || gewerkCode).trim();
     const firstNote = (window.gv ? gv('af-note') : e('af-note')?.value || '').trim();
+    if (!gewerkCode) { if (window.showToast) showToast('Gewerk-Code eingeben','warn'); return; }
+    if (!nuCode) { if (window.showToast) showToast('NU-Code eingeben','warn'); return; }
+    const dup = (S.contractors||[]).find(c => String(c.nuCode||'').trim()===nuCode && c.id!==editId);
+    if (dup) { if (window.showToast) showToast('NU-Code existiert bereits','warn'); return; }
+    const upsert = upsertGewerk(gewerkCode, tradeValue);
+    if (!upsert.ok) { if (window.showToast) showToast(upsert.message,'warn'); return; }
 
     if (existing) {
       existing.name = name;
@@ -4662,7 +4732,10 @@ function showToast(msg,type='ok'){
         <div class="card" style="margin-bottom:10px;">
           <div class="card-hd" style="justify-content:space-between;">
             <div class="card-hd-l"><div class="ci ci-b">📁</div><h3>${h(code)} ${h(g.name)}</h3></div>
-            <button class="btn btn-primary btn-xs" onclick="openModal('addFirm'); setTimeout(()=>{ if(window.resetFirmModalForCreate) resetFirmModalForCreate('${h(code)}'); if(document.getElementById('af-gewerkCode')) document.getElementById('af-gewerkCode').value='${h(code)}'; if(window.populateAddFirmGewerkSelect) populateAddFirmGewerkSelect('${h(code)}'); },30)">+ Firma</button>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;">
+              <button class="btn btn-ghost btn-xs" onclick="editGewerkPrompt('${h(code)}')">✏️ Gewerk</button>
+              <button class="btn btn-primary btn-xs" onclick="openModal('addFirm'); setTimeout(()=>{ if(window.resetFirmModalForCreate) resetFirmModalForCreate('${h(code)}'); if(document.getElementById('af-gewerkCode')) document.getElementById('af-gewerkCode').value='${h(code)}'; if(window.populateAddFirmGewerkSelect) populateAddFirmGewerkSelect('${h(code)}'); },30)">+ Firma</button>
+            </div>
           </div>
           <div class="card-body"><div class="empty-state" style="padding:18px 10px;"><p>Noch keine Firma</p></div></div>
         </div>`;
@@ -4699,7 +4772,10 @@ function showToast(msg,type='ok'){
       return `<div class="card" style="margin-bottom:10px;">
         <div class="card-hd" style="justify-content:space-between;">
           <div class="card-hd-l"><div class="ci ci-b">📁</div><h3>${h(code)} ${h(g.name)} <small>${firms.length} Firma</small></h3></div>
-          <button class="btn btn-primary btn-xs" onclick="openModal('addFirm'); setTimeout(()=>{ if(window.resetFirmModalForCreate) resetFirmModalForCreate('${h(code)}'); if(document.getElementById('af-gewerkCode')) document.getElementById('af-gewerkCode').value='${h(code)}'; if(window.populateAddFirmGewerkSelect) populateAddFirmGewerkSelect('${h(code)}'); },30)">+ Firma</button>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;">
+            <button class="btn btn-ghost btn-xs" onclick="editGewerkPrompt('${h(code)}')">✏️ Gewerk</button>
+            <button class="btn btn-primary btn-xs" onclick="openModal('addFirm'); setTimeout(()=>{ if(window.resetFirmModalForCreate) resetFirmModalForCreate('${h(code)}'); if(document.getElementById('af-gewerkCode')) document.getElementById('af-gewerkCode').value='${h(code)}'; if(window.populateAddFirmGewerkSelect) populateAddFirmGewerkSelect('${h(code)}'); },30)">+ Firma</button>
+          </div>
         </div>
         <div class="card-body">${firmsHtml}</div>
       </div>`;
