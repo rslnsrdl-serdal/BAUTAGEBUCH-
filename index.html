@@ -4611,6 +4611,7 @@ function showToast(msg,type='ok'){
               <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;">
                 <button class="btn btn-blue btn-xs" onclick="applyNUToQuickContext('${h(c.nuCode||'')}','${h(c.name)}','${h(c.id)}')">Als Kontext</button>
                 <button class="btn btn-ghost btn-xs" onclick="openAddNotePatched('${h(c.id)}')">+ Notiz</button>
+                <button class="btn btn-ghost btn-xs" onclick="if(confirm('Diese Firma löschen?')) delFirm('${h(c.id)}')">🗑 Löschen</button>
               </div>
             </div>
           </div>`;
