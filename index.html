@@ -1541,7 +1541,7 @@ body{
       <button class="nav-tab active" data-page="pg-dash" onclick="goPage(this)"><span class="ti">🏠</span>Dashboard</button>
       <button class="nav-tab" data-page="pg-kanban" onclick="goPage(this)"><span class="ti">📋</span>Kanban <span class="nav-badge" id="nb-kanban">0</span></button>
       <button class="nav-tab" data-page="pg-tb" onclick="goPage(this)"><span class="ti">📝</span>Tagesbericht</button>
-      <button class="nav-tab" data-page="pg-gewerke" onclick="goPage(this)"><span class="ti">📁</span>Gewerke <span class="nav-badge" id="nb-gewerke">0</span></button>
+      <button class="nav-tab" data-page="pg-gewerke" onclick="goPage(this)"><span class="ti">📁</span>Gewerke <span class="nav-badge" id="nb-gewerke">0</span><span class="nav-badge" id="nb-firms" style="display:none">0</span></button>
       <button class="nav-tab" data-page="pg-ct" onclick="goPage(this)"><span class="ti">🗑</span>Container <span class="nav-badge" id="nb-ct">0</span></button>
       <button class="nav-tab" data-page="pg-meet" onclick="goPage(this)"><span class="ti">📅</span>Besprechungen <span class="nav-badge" id="nb-meet">0</span></button>
       <button class="nav-tab" data-page="pg-files" onclick="goPage(this)"><span class="ti">📂</span>Dateien <span class="nav-badge" id="nb-files">0</span></button>
@@ -1584,7 +1584,7 @@ body{
     <div class="card">
       <div class="card-hd">
         <div class="card-hd-l"><div class="ci ci-b">📋</div><h3>Letzte Firmennotes <small>Son firma notları</small></h3></div>
-        <button class="btn btn-ghost btn-xs" onclick="goPageById('pg-firms')">Alle →</button>
+        <button class="btn btn-ghost btn-xs" onclick="goPageById('pg-gewerke')">Alle →</button>
       </div>
       <div class="card-body" id="dash-notes" style="max-height:180px;overflow-y:auto;"></div>
     </div>
@@ -1832,6 +1832,25 @@ body{
   </div>
   <div id="gewerkeList"><div class="empty-state"><div class="ei">📁</div><h4>Keine Gewerke</h4><p>Hazır Gewerk listesine alt firma ekleyebilirsin</p></div></div>
 </div>
+
+
+<!-- Compatibility page -->
+<div class="page" id="pg-firms">
+  <div class="sh">
+    <h2>Weiterleitung <span class="sub">Uyumluluk sayfası</span></h2>
+  </div>
+  <div class="card">
+    <div class="card-body">
+      <div class="empty-state">
+        <div class="ei">📁</div>
+        <h4>Diese Ansicht wurde nach „Gewerke“ verschoben</h4>
+        <p>Bu bölüm artık Gewerke &amp; Nachunternehmer sekmesi içinde yönetiliyor.</p>
+        <button class="btn btn-primary" onclick="goPageById('pg-gewerke')">Gewerke öffnen</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 
 <!-- ═══════════ PAGE: CONTAINER ═══════════ -->
 <div class="page" id="pg-ct">
@@ -3756,8 +3775,9 @@ function saveFirm() {
 function renderFirms() {
   populateQuickFirmSelect();
   const cont = document.getElementById('firmList');
+  const badge = document.getElementById('nb-firms');
+  if (badge) badge.textContent = (S.contractors||[]).length;
   if (!cont) return;
-  document.getElementById('nb-firms').textContent = (S.contractors||[]).length;
   if (!S.contractors || S.contractors.length===0) {
     cont.innerHTML='<div class="empty-state"><div class="ei">🏢</div><h4>Keine Firmen</h4><p>Yüklenici ekle</p></div>';
     return;
@@ -4759,7 +4779,7 @@ function refreshDash() {
   const stats=[
     {l:'Arbeitskräfte',sub:'Personel bugün',val:totalP,cls:'s-o',page:'pg-tb',data:(S.personnelTypes||[]).filter(p=>(S.personnelCounts||{})[p.key]>0).map(p=>`👷 ${p.de}: <strong>${(S.personnelCounts||{})[p.key]}</strong>`)},
     {l:'Kanban Offen',sub:'Açık görevler',val:kbOpen,cls:'s-b',page:'pg-kanban',data:(S.kanban?.today||[]).slice(0,4).map(t=>`🔥 ${t.title}${t.firmName?' · '+t.firmName:''}`)},
-    {l:'Aktive Firmen',sub:'Aktif firmalar',val:activeFirms,cls:'s-g',page:'pg-firms',data:(S.contractors||[]).filter(c=>c.status==='active').map(c=>`🏢 ${c.name} · ${c.trade||'—'}`)},
+    {l:'Aktive Firmen',sub:'Aktif firmalar',val:activeFirms,cls:'s-g',page:'pg-gewerke',data:(S.contractors||[]).filter(c=>c.status==='active').map(c=>`🏢 ${c.name} · ${c.trade||'—'}`)},
     {l:'Container Voll',sub:'Dolu konteyner',val:vollCt,cls:'s-r',page:'pg-ct',data:(S.containers||[]).filter(c=>c.status==='voll').map(c=>`🗑 ${c.ctId} — ${c.type}`)},
     {l:'Fortschritt',sub:'İlerleme',val:(S.progress||0)+'%',cls:'s-p',page:'pg-tb',data:[`📊 Gesamtfortschritt: <strong>${S.progress||0}%</strong>`,`🌤 Wetter: ${S.weather||'—'}`,`🌡 Temp: ${S.tempMin||'—'}°C / ${S.tempMax||'—'}°C`]},
     {l:'Dateien',sub:'Dosyalar',val:fileTotal,cls:'s-gl',page:'pg-files',data:[`📸 Fotos: <strong>${(S.photos||[]).length}</strong>`,`📄 Dokumente: <strong>${(S.docs||[]).length}</strong>`,`📅 Protokolle: <strong>${(S.meetings||[]).length}</strong>`]},
