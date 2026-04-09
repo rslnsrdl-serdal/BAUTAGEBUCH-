@@ -2016,20 +2016,20 @@ body{
 
     
     <div class="card" style="grid-column:1/-1;">
-      <div class="card-hd"><div class="card-hd-l"><div class="ci ci-p">📊</div><h3>Excel Berichte <small>Günlük / Haftalık / Aylık</small></h3></div></div>
+      <div class="card-hd"><div class="card-hd-l"><div class="ci ci-p">📊</div><h3>Excel Export Workflow <small>Gelişmiş dışa aktarma akışı</small></h3></div></div>
       <div class="card-body">
         <div class="fr3">
           <div class="fg">
             <div class="fl">Tagesbericht Excel</div>
-            <button class="btn btn-primary" onclick="exportCurrentDayExcel()">📊 Heutigen Bericht</button>
+            <button class="btn btn-primary" onclick="openExcelWizard('day')">📊 Tagesbericht</button>
           </div>
           <div class="fg">
             <div class="fl">Wochenbericht Excel</div>
-            <button class="btn btn-ghost" onclick="exportWeeklyExcel()">📊 Wochenbericht</button>
+            <button class="btn btn-ghost" onclick="openExcelWizard('week')">📊 Wochenbericht</button>
           </div>
           <div class="fg">
             <div class="fl">Monatsbericht Excel</div>
-            <button class="btn btn-ghost" onclick="exportMonthlyExcel()">📊 Monatsbericht</button>
+            <button class="btn btn-ghost" onclick="openExcelWizard('month')">📊 Monatsbericht</button>
           </div>
         </div>
         <div class="fr2" style="margin-top:8px;">
@@ -2947,7 +2947,7 @@ function addTimelineEntry() {
   const now = new Date();
   const t = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
   if (!S.timeline) S.timeline = [];
-  S.timeline.unshift({ id:'tl_'+Date.now(), time:t, text:'', firmId:'', nuCode:(window.currentNUCode || '') });
+  S.timeline.unshift({ id:'tl_'+Date.now(), time:t, text:'', firmId:(window.currentFirmId||''), area:(S.workAreas && S.workAreas[0]) ? S.workAreas[0] : '', nuCode:(window.currentNUCode || '') });
   renderTimeline();
   autoSave();
 }
@@ -2963,6 +2963,7 @@ function quickAddTimeline() {
     time,
     text,
     firmId,
+    area: (S.workAreas && S.workAreas[0]) ? S.workAreas[0] : '',
     nuCode:(window.currentNUCode || '')
   });
   sv('tlText','');
@@ -3067,6 +3068,7 @@ function renderTimeline() {
       <div class="timeline-meta-row">
         ${firmName ? `<span class="timeline-meta-chip">🏢 ${esc(firmName)}</span>` : ''}
         ${it.nuCode ? `<span class="timeline-meta-chip">📁 ${esc(it.nuCode)}</span>` : ''}
+        ${it.area ? `<span class="timeline-meta-chip">📍 ${esc(it.area)}</span>` : ''}
         <span class="timeline-meta-chip">📸 ${linkedPhotos.length} Fotos</span>
         <span class="timeline-meta-chip">⚠️ ${linkedMaengel.length} Mängel</span>
         <span class="timeline-meta-chip">📋 ${linkedTasks.length} Aufgaben</span>
@@ -3162,6 +3164,30 @@ function exportCurrentDayExcel() { if (typeof exportExcel === 'function') export
 function exportWeeklyExcel() { if (typeof exportExcel === 'function') exportExcel(); }
 function exportMonthlyExcel() { if (typeof exportExcel === 'function') exportExcel(); }
 
+
+
+function openExcelWizard(type) {
+  if (document.getElementById('xw-type')) document.getElementById('xw-type').value = type || 'day';
+  const today = todayStr();
+  if (document.getElementById('xw-from')) document.getElementById('xw-from').value = today;
+  if (document.getElementById('xw-to')) document.getElementById('xw-to').value = today;
+  const firmSel = document.getElementById('xw-firm');
+  if (firmSel) {
+    firmSel.innerHTML = '<option value="">Alle Firmen</option>' + (S.contractors||[]).map(c=>`<option value="${esc(c.id)}">${esc(c.name)}</option>`).join('');
+    if (window.currentFirmId) firmSel.value = window.currentFirmId;
+  }
+  const pn = (gv('tbPN') || gv('hPN') || 'Bautagebuch').replace(/\s+/g,'_');
+  if (document.getElementById('xw-name')) document.getElementById('xw-name').value = `${pn}_${today}.xlsx`;
+  openModal('excelWizard');
+}
+function runExcelWizard() {
+  const type = gv('xw-type') || 'day';
+  if (type === 'day') exportCurrentDayExcel();
+  else if (type === 'week') exportWeeklyExcel();
+  else if (type === 'month') exportMonthlyExcel();
+  else exportExcel();
+  closeModal('excelWizard');
+}
 
 // ═══════════════════════════════════════════════════
 // INIT
@@ -3957,12 +3983,13 @@ function addPhoto(file) {
       date:todayStr(),
       time:new Date().toTimeString().slice(0,5),
       caption:'',
-      firmId:'',
+      firmId: window.currentFirmId || '',
       taskId:'',
-      area:'',
+      area: (S.workAreas && S.workAreas[0]) ? S.workAreas[0] : '',
       location:'',
       note:'',
-      timelineId:''
+      timelineId:'',
+      nuCode: window.currentNUCode || ''
     };
     S.photos.push(photo);
     try {
@@ -4104,10 +4131,11 @@ function addPhotoLinkedToTimeline(file, timelineId) {
       caption: tl ? (tl.text || '') : '',
       firmId: tl ? (tl.firmId || '') : '',
       taskId:'',
-      area:'',
+      area: tl ? (tl.area || '') : '',
       location:'',
       note:'',
-      timelineId: timelineId
+      timelineId: timelineId,
+      nuCode: tl ? (tl.nuCode || window.currentNUCode || '') : (window.currentNUCode || '')
     };
     S.photos.push(photo);
     try {
@@ -4316,9 +4344,10 @@ function saveMangel() {
     date: gv('mg-date') || todayStr(),
     deadline: gv('mg-deadline') || '',
     owner: gv('mg-owner') || '',
-    area: gv('mg-area') || '',
+    area: gv('mg-area') || ((S.photos||[]).find(p=>p.id===gv('mg-photo'))?.area || ''),
     desc: gv('mg-desc') || '',
     photoId: gv('mg-photo') || '',
+    timelineId: (S.photos||[]).find(p=>p.id===gv('mg-photo'))?.timelineId || '',
     nuCode: window.currentNUCode || ''
   };
   const idx = S.maengel.findIndex(x=>x.id===id);
@@ -4625,6 +4654,10 @@ function renderGewerke() {
 function applyNUToQuickContext(nuCode, nuName) {
   window.currentNUCode = nuCode;
   window.currentNUName = nuName;
+  const match = (S.contractors||[]).find(c => c.name === nuName || c.id === nuCode || c.nuCode === nuCode);
+  window.currentFirmId = match ? match.id : '';
+  const quickSel = document.getElementById('tlFirmQuick');
+  if (quickSel && window.currentFirmId) quickSel.value = window.currentFirmId;
   showToast(`Aktiver Kontext: ${nuCode} ${nuName}`,'ok');
 }
 
