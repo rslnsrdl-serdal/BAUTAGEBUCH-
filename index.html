@@ -1709,7 +1709,7 @@ body{
 <div class="page" id="pg-firms">
   <div class="sh">
     <h2>Nachunternehmer <span class="sub">Yüklenici Firmalar</span></h2>
-    <button class="btn btn-primary" onclick="openModal('addFirm')">+ Firma hinzufügen</button>
+    <div class="sh-act"><button class="btn btn-ghost" onclick="addGewerkCodePrompt()">+ Gewerk-Code</button><button class="btn btn-primary" onclick="openModal('addFirm')">+ Firma hinzufügen</button></div>
   </div>
   <div id="firmList"><div class="empty-state"><div class="ei">🏢</div><h4>Keine Firmen</h4><p>Yüklenici ekle</p></div></div>
 </div>
@@ -1951,8 +1951,9 @@ body{
 <!-- Firma Modal -->
 <div class="modal-ov" id="modal-addFirm">
   <div class="modal">
-    <div class="modal-hd"><h3>Firma erfassen <small>Firma Ekle</small></h3><button class="modal-close" onclick="closeModal('addFirm')">✕</button></div>
+    <div class="modal-hd"><h3 id="af-modal-title">Firma erfassen <small>Firma Ekle</small></h3><button class="modal-close" onclick="closeModal('addFirm')">✕</button></div>
     <div class="modal-body">
+      <input type="hidden" id="af-edit-id">
       <div class="fr2">
         <div class="fg"><div class="fl">Firmenname <span class="tr">Firma Adı</span></div><input type="text" class="fi" id="af-name" placeholder="GmbH, AG…"></div>
         <div class="fg"><div class="fl">Gewerk <span class="tr">İş Türü</span></div><input type="text" class="fi" id="af-trade" placeholder="Elektro, Rohbau…"></div>
@@ -1975,7 +1976,7 @@ body{
       <div class="fg"><div class="fl">Erste Notiz <span class="tr">İlk Not</span></div>
         <textarea class="fta" id="af-note" placeholder="Aktueller Stand…" style="min-height:70px;"></textarea></div>
     </div>
-    <div class="modal-ft"><button class="btn btn-ghost" onclick="closeModal('addFirm')">Abbrechen</button><button class="btn btn-primary" onclick="saveFirm()">Speichern ✓</button></div>
+    <div class="modal-ft"><button class="btn btn-ghost" onclick="closeModal('addFirm')">Abbrechen</button><button class="btn btn-primary" id="af-save-btn" onclick="saveFirm()">Speichern ✓</button></div>
   </div>
 </div>
 
@@ -4498,19 +4499,27 @@ function showToast(msg,type='ok'){
     injectAddFirmFields();
     const sel = e('af-gewerkCode');
     if (!sel) return;
+    const editId = e('af-edit-id')?.value || '';
+    const existing = editId ? (S.contractors||[]).find(c=>c.id===editId) : null;
     sel.innerHTML = (S.gewerkePresets||[]).map(g=>`<option value="${h(g.code)}">${h(g.code + ' ' + g.name)}</option>`).join('');
-    sel.value = selected || sel.value || (S.gewerkePresets[0]?.code || '');
+    sel.value = selected || existing?.gewerkCode || sel.value || (S.gewerkePresets[0]?.code || '');
     const nu = e('af-nuCode');
-    if (nu) nu.value = nextNUCode(sel.value);
-    sel.onchange = () => { if (nu) nu.value = nextNUCode(sel.value); };
+    if (nu) nu.value = existing?.nuCode || nextNUCode(sel.value, editId || undefined);
     const trade = e('af-trade');
+    sel.onchange = () => {
+      if (nu) nu.value = nextNUCode(sel.value, editId || undefined);
+      if (trade && (!trade.value || trade.dataset.autoFill === '1')) {
+        trade.value = getGewerkName(sel.value);
+        trade.dataset.autoFill = '1';
+      }
+    };
     if (trade) {
       const gname = getGewerkName(sel.value);
-      if (!trade.value) trade.value = gname;
-      sel.onchange = () => {
-        if (nu) nu.value = nextNUCode(sel.value);
-        if (trade) trade.value = getGewerkName(sel.value);
-      };
+      if (!trade.value) {
+        trade.value = existing?.trade || gname;
+        trade.dataset.autoFill = existing?.trade ? '0' : '1';
+      }
+      trade.oninput = () => { trade.dataset.autoFill = '0'; };
     }
   }
 
@@ -4519,7 +4528,10 @@ function showToast(msg,type='ok'){
   window.openModal = function(name, col){
     if (typeof originalOpenModal === 'function') originalOpenModal(name, col);
     ensurePatchState();
-    if (name === 'addFirm') populateAddFirmGewerkSelect();
+    if (name === 'addFirm') {
+      resetFirmModalForCreate();
+      populateAddFirmGewerkSelect();
+    }
     if (name === 'addMangel') {
       populateMangelFirmSelect();
       populateMangelPhotoSelect();
@@ -4527,36 +4539,103 @@ function showToast(msg,type='ok'){
     }
   };
 
+
+  function resetFirmModalForCreate(defaultCode){
+    if (e('af-edit-id')) e('af-edit-id').value = '';
+    if (e('af-modal-title')) e('af-modal-title').innerHTML = 'Firma erfassen <small>Firma Ekle</small>';
+    if (e('af-save-btn')) e('af-save-btn').textContent = 'Speichern ✓';
+    ['af-name','af-trade','af-contact','af-phone','af-note'].forEach(id => { if (e(id)) e(id).value = ''; });
+    if (e('af-status')) e('af-status').value = 'active';
+    if (e('af-color')) e('af-color').value = (window.COLORS ? COLORS[(S.contractors||[]).length % COLORS.length] : '#3b82f6');
+    if (e('af-gewerkCode')) e('af-gewerkCode').value = defaultCode || (S.gewerkePresets[0]?.code || '902');
+    if (e('af-nuCode')) e('af-nuCode').value = nextNUCode(e('af-gewerkCode')?.value || defaultCode || (S.gewerkePresets[0]?.code || '902'));
+    if (e('af-trade')) delete e('af-trade').dataset.autoFill;
+  }
+
+  window.editFirm = function editFirm(id){
+    ensurePatchState();
+    const c = (S.contractors||[]).find(x=>x.id===id);
+    if (!c) return;
+    if (typeof originalOpenModal === 'function') originalOpenModal('addFirm');
+    if (e('af-edit-id')) e('af-edit-id').value = c.id;
+    if (e('af-modal-title')) e('af-modal-title').innerHTML = 'Firma bearbeiten <small>Firma Düzenle</small>';
+    if (e('af-save-btn')) e('af-save-btn').textContent = 'Aktualisieren ✓';
+    if (e('af-name')) e('af-name').value = c.name || '';
+    if (e('af-trade')) { e('af-trade').value = c.trade || ''; e('af-trade').dataset.autoFill = '0'; }
+    if (e('af-contact')) e('af-contact').value = c.contact || '';
+    if (e('af-phone')) e('af-phone').value = c.phone || '';
+    if (e('af-status')) e('af-status').value = c.status || 'active';
+    if (e('af-color')) e('af-color').value = c.color || '#3b82f6';
+    if (e('af-note')) e('af-note').value = '';
+    populateAddFirmGewerkSelect(c.gewerkCode || (S.gewerkePresets[0]?.code || '902'));
+    if (e('af-nuCode')) e('af-nuCode').value = c.nuCode || nextNUCode(c.gewerkCode || (S.gewerkePresets[0]?.code || '902'), c.id);
+  };
+
+  window.addGewerkCodePrompt = function addGewerkCodePrompt(){
+    ensurePatchState();
+    const code = prompt('Neuer Gewerk-Code');
+    if (code === null) return;
+    const cleanCode = String(code).trim();
+    if (!cleanCode) { if (window.showToast) showToast('Gewerk-Code eingeben','warn'); return; }
+    if ((S.gewerkePresets||[]).some(g => String(g.code) === cleanCode)) { if (window.showToast) showToast('Gewerk-Code existiert bereits','warn'); return; }
+    const name = prompt('Gewerk-Bezeichnung', 'Neues Gewerk');
+    if (name === null) return;
+    const cleanName = String(name).trim() || 'Neues Gewerk';
+    S.gewerkePresets.push({code:cleanCode, name:cleanName});
+    S.gewerkePresets.sort((a,b)=>String(a.code).localeCompare(String(b.code), undefined, {numeric:true}));
+    if (typeof autoSave === 'function') autoSave();
+    if (typeof renderFirms === 'function') renderFirms();
+    if (typeof showToast === 'function') showToast('Gewerk-Code hinzugefügt','ok');
+  };
+
   window.saveFirm = function saveFirmPatched() {
     ensurePatchState();
+    const editId = e('af-edit-id')?.value || '';
+    const existing = editId ? (S.contractors||[]).find(c=>c.id===editId) : null;
     const name = (window.gv ? gv('af-name') : e('af-name')?.value || '').trim();
     if (!name) { if (window.showToast) showToast('Firmenname eingeben!','warn'); return; }
-    const gewerkCode = e('af-gewerkCode')?.value || (S.gewerkePresets[0]?.code || '902');
-    const nuCode = e('af-nuCode')?.value || nextNUCode(gewerkCode);
+    const gewerkCode = e('af-gewerkCode')?.value || existing?.gewerkCode || (S.gewerkePresets[0]?.code || '902');
+    const nuCode = e('af-nuCode')?.value || existing?.nuCode || nextNUCode(gewerkCode, editId || undefined);
     const tradeValue = (window.gv ? gv('af-trade') : e('af-trade')?.value || '') || getGewerkName(gewerkCode);
-    const firm = {
-      id:'f_'+Date.now(),
-      name,
-      trade:tradeValue,
-      gewerkCode,
-      nuCode,
-      contact:(window.gv ? gv('af-contact') : e('af-contact')?.value || ''),
-      phone:(window.gv ? gv('af-phone') : e('af-phone')?.value || ''),
-      status:(window.gv ? gv('af-status') : e('af-status')?.value || 'active'),
-      color:(window.gv ? gv('af-color') : e('af-color')?.value || (window.COLORS ? COLORS[(S.contractors||[]).length % COLORS.length] : '#3b82f6')),
-      notes:[]
-    };
     const firstNote = (window.gv ? gv('af-note') : e('af-note')?.value || '').trim();
-    if (firstNote) firm.notes.push({id:'n_'+Date.now(), text:firstNote, date:(window.todayStr ? todayStr() : new Date().toISOString().slice(0,10))});
-    S.contractors.push(firm);
-    window.currentFirmId = firm.id;
-    window.currentNUCode = firm.nuCode;
+
+    if (existing) {
+      existing.name = name;
+      existing.trade = tradeValue;
+      existing.gewerkCode = gewerkCode;
+      existing.nuCode = nuCode;
+      existing.contact = (window.gv ? gv('af-contact') : e('af-contact')?.value || '');
+      existing.phone = (window.gv ? gv('af-phone') : e('af-phone')?.value || '');
+      existing.status = (window.gv ? gv('af-status') : e('af-status')?.value || 'active');
+      existing.color = (window.gv ? gv('af-color') : e('af-color')?.value || existing.color || '#3b82f6');
+      if (!Array.isArray(existing.notes)) existing.notes = [];
+      if (firstNote) existing.notes.unshift({id:'n_'+Date.now(), text:firstNote, date:(window.todayStr ? todayStr() : new Date().toISOString().slice(0,10))});
+      window.currentFirmId = existing.id;
+      window.currentNUCode = existing.nuCode;
+    } else {
+      const firm = {
+        id:'f_'+Date.now(),
+        name,
+        trade:tradeValue,
+        gewerkCode,
+        nuCode,
+        contact:(window.gv ? gv('af-contact') : e('af-contact')?.value || ''),
+        phone:(window.gv ? gv('af-phone') : e('af-phone')?.value || ''),
+        status:(window.gv ? gv('af-status') : e('af-status')?.value || 'active'),
+        color:(window.gv ? gv('af-color') : e('af-color')?.value || (window.COLORS ? COLORS[(S.contractors||[]).length % COLORS.length] : '#3b82f6')),
+        notes:[]
+      };
+      if (firstNote) firm.notes.push({id:'n_'+Date.now(), text:firstNote, date:(window.todayStr ? todayStr() : new Date().toISOString().slice(0,10))});
+      S.contractors.push(firm);
+      window.currentFirmId = firm.id;
+      window.currentNUCode = firm.nuCode;
+    }
     if (typeof closeModal === 'function') closeModal('addFirm');
     if (typeof autoSave === 'function') autoSave(); else if (typeof persistState === 'function') persistState();
     if (typeof renderFirms === 'function') renderFirms();
     if (typeof renderSigGrid === 'function') renderSigGrid();
     if (typeof buildPersonnel === 'function') buildPersonnel();
-    if (typeof showToast === 'function') showToast('Firma gespeichert','ok');
+    if (typeof showToast === 'function') showToast(existing ? 'Firma aktualisiert' : 'Firma gespeichert','ok');
   };
 
   window.renderFirms = function renderFirmsPatched() {
@@ -4583,7 +4662,7 @@ function showToast(msg,type='ok'){
         <div class="card" style="margin-bottom:10px;">
           <div class="card-hd" style="justify-content:space-between;">
             <div class="card-hd-l"><div class="ci ci-b">📁</div><h3>${h(code)} ${h(g.name)}</h3></div>
-            <button class="btn btn-primary btn-xs" onclick="openModal('addFirm'); setTimeout(()=>{ if(document.getElementById('af-gewerkCode')) document.getElementById('af-gewerkCode').value='${h(code)}'; if(window.populateAddFirmGewerkSelect) populateAddFirmGewerkSelect('${h(code)}'); },30)">+ Firma</button>
+            <button class="btn btn-primary btn-xs" onclick="openModal('addFirm'); setTimeout(()=>{ if(window.resetFirmModalForCreate) resetFirmModalForCreate('${h(code)}'); if(document.getElementById('af-gewerkCode')) document.getElementById('af-gewerkCode').value='${h(code)}'; if(window.populateAddFirmGewerkSelect) populateAddFirmGewerkSelect('${h(code)}'); },30)">+ Firma</button>
           </div>
           <div class="card-body"><div class="empty-state" style="padding:18px 10px;"><p>Noch keine Firma</p></div></div>
         </div>`;
@@ -4610,6 +4689,7 @@ function showToast(msg,type='ok'){
               ${(c.notes||[]).map(n=>`<div class="con-note-item"><div style="flex:1"><div class="con-note-txt">${h(n.text)}</div></div><div class="con-note-date">${h(n.date)}</div></div>`).join('') || '<div class="empty-state" style="padding:10px 0;"><p>Keine Notizen</p></div>'}
               <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;">
                 <button class="btn btn-blue btn-xs" onclick="applyNUToQuickContext('${h(c.nuCode||'')}','${h(c.name)}','${h(c.id)}')">Als Kontext</button>
+                <button class="btn btn-ghost btn-xs" onclick="editFirm('${h(c.id)}')">✏️ Bearbeiten</button>
                 <button class="btn btn-ghost btn-xs" onclick="openAddNotePatched('${h(c.id)}')">+ Notiz</button>
                 <button class="btn btn-ghost btn-xs" onclick="if(confirm('Diese Firma löschen?')) delFirm('${h(c.id)}')">🗑 Löschen</button>
               </div>
@@ -4619,7 +4699,7 @@ function showToast(msg,type='ok'){
       return `<div class="card" style="margin-bottom:10px;">
         <div class="card-hd" style="justify-content:space-between;">
           <div class="card-hd-l"><div class="ci ci-b">📁</div><h3>${h(code)} ${h(g.name)} <small>${firms.length} Firma</small></h3></div>
-          <button class="btn btn-primary btn-xs" onclick="openModal('addFirm'); setTimeout(()=>{ if(document.getElementById('af-gewerkCode')) document.getElementById('af-gewerkCode').value='${h(code)}'; if(window.populateAddFirmGewerkSelect) populateAddFirmGewerkSelect('${h(code)}'); },30)">+ Firma</button>
+          <button class="btn btn-primary btn-xs" onclick="openModal('addFirm'); setTimeout(()=>{ if(window.resetFirmModalForCreate) resetFirmModalForCreate('${h(code)}'); if(document.getElementById('af-gewerkCode')) document.getElementById('af-gewerkCode').value='${h(code)}'; if(window.populateAddFirmGewerkSelect) populateAddFirmGewerkSelect('${h(code)}'); },30)">+ Firma</button>
         </div>
         <div class="card-body">${firmsHtml}</div>
       </div>`;
