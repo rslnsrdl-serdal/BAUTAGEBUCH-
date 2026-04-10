@@ -1691,7 +1691,7 @@ body{
         <div class="card-hd"><div class="card-hd-l"><div class="ci ci-b">📅</div><h3>Datum <small>Tarih</small></h3></div></div>
         <div class="card-body">
           <div class="fg"><div class="fl">Berichtstag <span class="tr">Rapor Günü</span></div>
-            <input type="date" class="fi" id="rDate" oninput="autoSave()"></div>
+            <input type="date" class="fi" id="rDate" oninput="onReportDateChange()"></div>
           <div class="fg"><div class="fl">Bericht-Nr. <span class="tr">Rapor No</span></div>
             <input type="text" class="fi" id="rNr" placeholder="2025-001" oninput="autoSave()"></div>
         </div>
@@ -1757,23 +1757,44 @@ body{
       <div class="card">
         <div class="card-hd">
           <div class="card-hd-l"><div class="ci ci-b">🏗</div><h3>Geräte <small>Ekipman</small></h3></div>
-          <button class="btn btn-primary btn-xs" onclick="openModal('addGeraet')">+ Hinzufügen</button>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span id="geraetActiveBadge" class="nav-badge">0</span>
+            <button class="btn btn-primary btn-xs" onclick="openModal('addGeraet')">+ Hinzufügen</button>
+          </div>
         </div>
-        <div class="card-body" id="geraetList"></div>
+        <div class="card-body">
+          <button class="btn btn-ghost btn-sm" id="geraetToggleBtn" onclick="toggleGeraetePanel()">Geräte anzeigen</button>
+          <div id="geraetList" style="display:none;margin-top:10px;"></div>
+        </div>
       </div>
 
       <!-- Fortschritt -->
       <div class="card">
-        <div class="card-hd"><div class="card-hd-l"><div class="ci ci-g">📊</div><h3>Fortschritt <small>İlerleme</small></h3></div></div>
+        <div class="card-hd"><div class="card-hd-l"><div class="ci ci-g">📊</div><h3>Fortschritt <small>Monatlich nach Terminplan</small></h3></div></div>
         <div class="card-body">
-          <input type="range" id="progSlider" min="0" max="100" value="0"
-            style="width:100%;accent-color:var(--accent2);margin-bottom:6px;"
-            oninput="updProg(this.value)">
-          <div style="display:flex;justify-content:space-between;align-items:center;">
-            <span style="font-size:10px;color:var(--text3);">0%</span>
-            <span id="progVal" style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:var(--accent2);">0%</span>
-            <span style="font-size:10px;color:var(--text3);">100%</span>
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:10px;">
+            <div>
+              <div style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text3);">Monat</div>
+              <div id="progMonthLbl" style="font-size:15px;font-weight:700;color:var(--text);margin-top:3px;">—</div>
+            </div>
+            <div style="text-align:right;">
+              <div style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text3);">Ist-Fortschritt</div>
+              <div id="progVal" style="font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Helvetica Neue',sans-serif;font-size:24px;font-weight:700;color:var(--accent2);margin-top:2px;letter-spacing:-0.03em;">0 %</div>
+            </div>
           </div>
+          <div style="background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:10px 12px;margin-bottom:10px;">
+            <div style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text3);margin-bottom:4px;">Terminplan-Basis</div>
+            <div id="progPlanPhase" style="font-size:12px;color:var(--text);line-height:1.6;">—</div>
+          </div>
+          <div class="fr2">
+            <div class="fg"><div class="fl">Soll % <span class="tr">Terminplan</span></div><input type="number" class="fi" id="progSollInput" min="0" max="100" placeholder="0" oninput="setProgressField('soll',this.value)"></div>
+            <div class="fg"><div class="fl">Ist % <span class="tr">Baustelle</span></div><input type="number" class="fi" id="progIstInput" min="0" max="100" placeholder="0" oninput="setProgressField('ist',this.value)"></div>
+          </div>
+          <div class="fr2">
+            <div class="fg"><div class="fl">Abweichung</div><input type="text" class="fi" id="progDiffInput" readonly></div>
+            <div class="fg"><div class="fl">Monat übernehmen</div><button class="btn btn-ghost" style="width:100%;justify-content:center;" onclick="applySuggestedMonthlyProgress()">Terminplan übernehmen</button></div>
+          </div>
+          <div class="fg"><div class="fl">Bemerkung <span class="tr">Monatsnotiz</span></div><textarea class="fta" id="progNote" style="min-height:58px;" placeholder="z. B. leichter Verzug wegen Wetter / Vorlauf / Lieferung" oninput="setProgressField('note',this.value)"></textarea></div>
         </div>
       </div>
 
@@ -2464,7 +2485,7 @@ function newState() {
   return {
     projectNr:'', projectName:'', bauleiter:'', standort:'',
     reportDate:'', reportNr:'', weather:'', tempMin:'', tempMax:'',
-    wind:'', boden:'', progress:0, remarks:'', sig1:'', sig2:'', sig3:'',
+    wind:'', boden:'', progress:0, progressPlan:{month:'',soll:'',ist:'',phase:'',note:''}, remarks:'', sig1:'', sig2:'', sig3:'',
     sig1Firm:'', sig2Firm:'', sig3Firm:'',
     personnelTypes: JSON.parse(JSON.stringify(DEFAULT_PERS)),
     personnelCounts: {polier:0,maurer:0,zimmermann:0,eisenbinder:0,elektriker:0,sanitaer:0,hilfskraft:0},
@@ -2543,7 +2564,11 @@ function collectFormToState() {
   S.tempMax     = gv('tMax');
   S.wind        = gv('wSel');
   S.boden       = gv('bSel');
-  S.progress    = gv('progSlider');
+  if (!S.progressPlan) S.progressPlan = {month:'',soll:'',ist:'',phase:'',note:''};
+  S.progressPlan.soll = gv('progSollInput');
+  S.progressPlan.ist = gv('progIstInput');
+  S.progressPlan.note = gv('progNote');
+  S.progress = parseInt(S.progressPlan.ist || '0') || 0;
   S.remarks     = gv('rBem');
   // personnel counts
   S.personnelTypes.forEach(p => {
@@ -2569,13 +2594,13 @@ function applyStateToForm() {
   sv('tbBL', S.bauleiter);
   sv('tbST', S.standort);
   sv('rDate', S.reportDate || todayStr());
+  syncMonthlyProgressFromDate(S.reportDate || todayStr(), false);
   sv('rNr', S.reportNr || autoRNr());
   sv('tMin', S.tempMin);
   sv('tMax', S.tempMax);
   svs('wSel', S.wind);
   svs('bSel', S.boden);
-  const ps = document.getElementById('progSlider');
-  if (ps) { ps.value = S.progress||0; updProg(S.progress||0, false); }
+  renderProgressPanel();
   sv('rBem', S.remarks);
   // weather button
   if (S.weather) {
@@ -2854,6 +2879,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (el) el.textContent = '— '+DAYS_DE[d.getDay()]+', '+d.getDate()+'. '+MONTHS_DE[d.getMonth()]+' '+d.getFullYear();
   // Default dates
   sv('rDate', S.reportDate || todayStr());
+  syncMonthlyProgressFromDate(S.reportDate || todayStr(), false);
   document.getElementById('mt-date') && (document.getElementById('mt-date').value = todayStr());
   document.getElementById('note-date') && (document.getElementById('note-date').value = todayStr());
 });
@@ -2917,11 +2943,89 @@ function selWx(btn, emoji, label) {
 // PROGRESS
 // ═══════════════════════════════════════════════════
 function updProg(val, doSave = true) {
-  const pv = document.getElementById('progVal');
-  if (pv) pv.textContent = val + '%';
-  S.progress = val;
+  if (!S.progressPlan) S.progressPlan = {month:'',soll:'',ist:'',phase:'',note:''};
+  S.progressPlan.ist = String(val || '0');
+  S.progress = parseInt(S.progressPlan.ist || '0') || 0;
+  renderProgressPanel();
   if (doSave) autoSave();
 }
+
+function onReportDateChange() {
+  const date = gv('rDate') || todayStr();
+  S.reportDate = date;
+  syncMonthlyProgressFromDate(date, false);
+  autoSave();
+}
+
+function setProgressField(field, value) {
+  if (!S.progressPlan) S.progressPlan = {month:'',soll:'',ist:'',phase:'',note:''};
+  S.progressPlan[field] = value;
+  if (field === 'ist') S.progress = parseInt(value || '0') || 0;
+  renderProgressPanel();
+  autoSave();
+}
+
+function getSuggestedMonthlyProgress(dateStr) {
+  const map = {
+    '2025-01': { soll: 8,  phase: 'Baustelleneinrichtung / Baubeginn und Mutterbodenabtrag' },
+    '2025-02': { soll: 15, phase: 'Geländenivellierung / Bodenverbesserung' },
+    '2025-03': { soll: 24, phase: 'Bodenverbesserung sowie Beginn Erd- und Entwässerungsarbeiten' },
+    '2025-04': { soll: 35, phase: 'Erd- und Entwässerungsarbeiten, Fundamente, Beginn Montage BFT-Tragwerk' },
+    '2025-05': { soll: 48, phase: 'Fundamente, Brandwände, Stahldachtragwerk, Mezzanine / Büroanbau' },
+    '2025-06': { soll: 60, phase: 'Dacheindeckung + Fassade, TGA-Installationen, CO2-Tank' },
+    '2025-07': { soll: 68, phase: 'TGA, WHG-Abdichtung, Aussenanlagen + Verkehrsflächen' },
+    '2025-08': { soll: 76, phase: 'WHG-Abdichtung, Hallensohle, TGA-Installationen' },
+    '2025-09': { soll: 84, phase: 'Hallensohle, Early Access, Regalmontage, Einbau Probenahmekabine' },
+    '2025-10': { soll: 90, phase: 'Regalmontage, Regalsprinkler, Finishes' },
+    '2025-11': { soll: 95, phase: 'Regalmontage, Beschichtung Regalgassen, Finishes, TGA-Endphase' },
+    '2025-12': { soll: 98, phase: 'Sachverständigen- und Bauamtsabnahme, Finishes, Regalsprinkler' },
+    '2026-01': { soll: 100, phase: 'Abnahme und Übergabe an DHL' }
+  };
+  const key = String(dateStr || todayStr()).slice(0,7);
+  return Object.assign({ key }, map[key] || { soll: '', phase: 'Keine Terminplan-Basis für diesen Monat hinterlegt' });
+}
+
+function syncMonthlyProgressFromDate(dateStr, overwriteIst=false) {
+  if (!S.progressPlan) S.progressPlan = {month:'',soll:'',ist:'',phase:'',note:''};
+  const sug = getSuggestedMonthlyProgress(dateStr);
+  S.progressPlan.month = sug.key;
+  S.progressPlan.phase = sug.phase;
+  if (String(S.progressPlan.soll||'') === '') S.progressPlan.soll = String(sug.soll || '');
+  if (overwriteIst && String(S.progressPlan.ist||'') === '') S.progressPlan.ist = String(sug.soll || '');
+  S.progress = parseInt(S.progressPlan.ist || '0') || 0;
+  renderProgressPanel();
+}
+
+function applySuggestedMonthlyProgress() {
+  const sug = getSuggestedMonthlyProgress(gv('rDate') || todayStr());
+  if (!S.progressPlan) S.progressPlan = {month:'',soll:'',ist:'',phase:'',note:''};
+  S.progressPlan.month = sug.key;
+  S.progressPlan.phase = sug.phase;
+  S.progressPlan.soll = String(sug.soll || '');
+  renderProgressPanel();
+  autoSave();
+  showToast('Terminplan-Basis übernommen','ok');
+}
+
+function renderProgressPanel() {
+  if (!S.progressPlan) S.progressPlan = {month:'',soll:'',ist:'',phase:'',note:''};
+  const date = gv('rDate') || S.reportDate || todayStr();
+  const sug = getSuggestedMonthlyProgress(date);
+  if (!S.progressPlan.month) S.progressPlan.month = sug.key;
+  if (!S.progressPlan.phase) S.progressPlan.phase = sug.phase;
+  if (document.getElementById('progMonthLbl')) document.getElementById('progMonthLbl').textContent = S.progressPlan.month || '—';
+  if (document.getElementById('progPlanPhase')) document.getElementById('progPlanPhase').textContent = S.progressPlan.phase || '—';
+  sv('progSollInput', S.progressPlan.soll || '');
+  sv('progIstInput', S.progressPlan.ist || '');
+  sv('progNote', S.progressPlan.note || '');
+  const ist = parseInt(S.progressPlan.ist || '0') || 0;
+  const soll = parseInt(S.progressPlan.soll || '');
+  if (document.getElementById('progVal')) document.getElementById('progVal').textContent = ist + ' %';
+  if (document.getElementById('progDiffInput')) {
+    document.getElementById('progDiffInput').value = Number.isNaN(soll) ? '—' : ((ist - soll > 0 ? '+' : '') + String(ist - soll) + ' %');
+  }
+}
+
 
 // ═══════════════════════════════════════════════════
 // PERSONNEL
@@ -2936,21 +3040,23 @@ function buildPersonnel() {
     if (!S.personnelCounts[p.key]) S.personnelCounts[p.key] = 0;
     const count = S.personnelCounts[p.key] || 0;
     const names = S.personnelNames?.[p.key] || [];
-    const firm = S.personnelFirms?.[p.key] || '';
+    const firmId = S.personnelFirms?.[p.key] || '';
+    const firmName = (S.contractors||[]).find(c=>c.id===firmId)?.name || 'Keine Firma';
     const row = document.createElement('div');
     row.className = 'pers-row';
     row.id = 'pr_'+p.key;
-    const firmOpts = '<option value="">— Keine Firma</option>'+(S.contractors||[]).map(c=>`<option value="${esc(c.id)}" ${firm===c.id?'selected':''}>${esc(c.name)}</option>`).join('');
+    const firmOpts = '<option value="">— Keine Firma</option>' + (S.contractors||[]).map(c=>`<option value="${esc(c.id)}" ${firmId===c.id?'selected':''}>${esc(c.name)}</option>`).join('');
     row.innerHTML = `
       <div class="pers-main">
         <div class="pers-label">
           <div class="de">${esc(p.de)}</div>
           <div class="tr" style="font-size:9px;color:var(--text3);font-style:italic;">${esc(p.tr||'')}</div>
+          <div style="font-size:10px;color:var(--accent2);margin-top:2px;">${esc(firmName)}</div>
         </div>
         <button class="cnt-btn" onclick="chgPers('${p.key}',-1)">−</button>
         <div class="cnt-val" id="pv_${p.key}">${count}</div>
         <button class="cnt-btn" onclick="chgPers('${p.key}',1)">+</button>
-        <button class="pers-expand-btn" id="peb_${p.key}" onclick="togglePersDetail('${p.key}')">▾</button>
+        <button class="btn btn-ghost btn-xs" style="padding:5px 8px;" onclick="togglePersDetail('${p.key}')">Bearbeiten</button>
         <button class="btn-icon" style="width:24px;height:24px;font-size:11px;" onclick="delPersType('${p.key}')">✕</button>
       </div>
       <div class="pers-detail" id="pd_${p.key}">
@@ -2975,8 +3081,6 @@ function buildPersonnel() {
           </div>
         </div>
       </div>
-    </div>
-      </div>
     `;
     list.appendChild(row);
   });
@@ -2998,6 +3102,7 @@ function setPersName(key, idx, val) {
 function setPersFirm(key, firmId) {
   if (!S.personnelFirms) S.personnelFirms = {};
   S.personnelFirms[key] = firmId;
+  buildPersonnel();
   autoSave();
 }
 
@@ -3009,6 +3114,7 @@ function chgPers(key, delta) {
   const el = document.getElementById('pv_'+key);
   if (el) el.textContent = v;
   updTotalPers();
+  buildPersonnel();
   autoSave();
 }
 
@@ -3045,37 +3151,65 @@ function delPersType(key) {
 // ═══════════════════════════════════════════════════
 // GERÄTE
 // ═══════════════════════════════════════════════════
+function isActiveGeraet(g) {
+  return (parseInt(g.count||0)||0) > 0 || !!(g.brand||g.model||g.note||g.firmId||g.hours);
+}
+
+function toggleGeraetePanel() {
+  const panel = document.getElementById('geraetList');
+  const btn = document.getElementById('geraetToggleBtn');
+  if (!panel || !btn) return;
+  const isOpen = panel.style.display !== 'none';
+  panel.style.display = isOpen ? 'none' : 'block';
+  btn.textContent = isOpen ? 'Geräte anzeigen' : 'Geräte ausblenden';
+}
+
 function buildGeraete() {
   const list = document.getElementById('geraetList');
+  const badge = document.getElementById('geraetActiveBadge');
   if (!list) return;
   list.innerHTML = '';
   if (!S.geraete) S.geraete = JSON.parse(JSON.stringify(DEFAULT_GERAETE));
-  S.geraete.forEach(g => {
+  const active = S.geraete.filter(isActiveGeraet);
+  if (badge) badge.textContent = String(active.length);
+  if (active.length === 0) {
+    list.innerHTML = '<div class="empty-state" style="padding:16px 8px;"><div class="ei">🏗</div><h4>Keine aktiven Geräte</h4><p>Nur genutzte Geräte werden angezeigt</p></div>';
+    return;
+  }
+  active.forEach(g => {
     const row = document.createElement('div');
     row.className = 'geraet-row';
-    const gFirmOpts = '<option value="">— Keine</option>'+(S.contractors||[]).map(c=>`<option value="${esc(c.id)}" ${(g.firmId||'')=== c.id?'selected':''}>${esc(c.name)}</option>`).join('');
+    const firmName = (S.contractors||[]).find(c=>c.id===g.firmId)?.name || 'Keine Firma';
+    const gFirmOpts = '<option value="">— Keine</option>' + (S.contractors||[]).map(c=>`<option value="${esc(c.id)}" ${(g.firmId||'')=== c.id?'selected':''}>${esc(c.name)}</option>`).join('');
     row.innerHTML = `
       <div class="geraet-head">
         <span class="geraet-icon">${g.icon||'🔧'}</span>
         <div class="geraet-name">
           <div style="font-size:12px;font-weight:600;">${esc(g.de)}</div>
-          <div class="geraet-sub">${esc(g.tr||'')} ${g.brand||g.model?`· ${esc(g.brand||'')} ${esc(g.model||'')}`:''}</div>
+          <div class="geraet-sub">${esc(g.tr||'')} ${(g.brand||g.model)?('· ' + esc(g.brand||'') + ' ' + esc(g.model||'')):''}</div>
+          <div class="geraet-sub">${esc(firmName)}${g.hours?(' · ' + esc(String(g.hours)) + ' h'):''}</div>
         </div>
         <button class="cnt-btn" onclick="chgGeraet('${g.key}',-1)">−</button>
         <div class="cnt-val" id="gv_${g.key}">${g.count||0}</div>
         <button class="cnt-btn" onclick="chgGeraet('${g.key}',1)">+</button>
-        <button class="btn-icon" style="width:24px;height:24px;font-size:11px;margin-left:4px;" onclick="delGeraet('${g.key}')">✕</button>
+        <button class="btn btn-ghost btn-xs" style="padding:5px 8px;" onclick="toggleGeraetDetail('${g.key}')">Bearbeiten</button>
       </div>
-      <div class="geraet-detail-grid">
+      <div class="geraet-detail-grid" id="gd_${g.key}" style="display:none;">
         <input class="fi" type="text" placeholder="Marke" value="${esc(g.brand||'')}" onchange="setGeraetField('${g.key}','brand',this.value)">
         <input class="fi" type="text" placeholder="Modell" value="${esc(g.model||'')}" onchange="setGeraetField('${g.key}','model',this.value)">
         <select class="fs" onchange="setGeraetField('${g.key}','firmId',this.value)">${gFirmOpts}</select>
         <input class="fi" type="number" min="0" placeholder="Stunden" value="${esc(g.hours||'')}" onchange="setGeraetField('${g.key}','hours',this.value)">
         <textarea class="fta" style="grid-column:1/-1;min-height:54px;" placeholder="Notiz / Seriennr. / Standort…" onchange="setGeraetField('${g.key}','note',this.value)">${esc(g.note||'')}</textarea>
+        <div style="grid-column:1/-1;display:flex;justify-content:flex-end;"><button class="btn-icon" style="width:24px;height:24px;font-size:11px;" onclick="delGeraet('${g.key}')">✕</button></div>
       </div>
     `;
     list.appendChild(row);
   });
+}
+
+function toggleGeraetDetail(key) {
+  const el = document.getElementById('gd_'+key);
+  if (el) el.style.display = el.style.display === 'none' ? 'grid' : 'none';
 }
 
 function setGeraetFirm(key, firmId) {
@@ -3086,6 +3220,7 @@ function setGeraetField(key, field, value) {
   const g=(S.geraete||[]).find(x=>x.key===key);
   if(!g) return;
   g[field] = field === 'hours' ? (parseInt(value||'0')||0) : value;
+  buildGeraete();
   autoSave();
 }
 
@@ -3095,6 +3230,7 @@ function chgGeraet(key, delta) {
   g.count = Math.max(0, (g.count||0)+delta);
   const el = document.getElementById('gv_'+key);
   if (el) el.textContent = g.count;
+  buildGeraete();
   autoSave();
 }
 
