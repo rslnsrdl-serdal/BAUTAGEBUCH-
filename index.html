@@ -4282,7 +4282,7 @@ async function exportPDF() {
 
     const W = 210, H = 297, M = 15;
     let y = 20;
-    const ink = [25,25,25], gray = [110,110,110], line = [205,205,205], soft=[245,245,245];
+    const ink = [25,25,25], gray = [110,110,110], line = [205,205,205], soft=[255,255,255];
 
     const setFont = (style='normal', size=10, color=ink) => {
       doc.setFont('NotoSans', style === 'bold' ? 'bold' : 'normal');
@@ -4341,8 +4341,8 @@ async function exportPDF() {
         const lines = doc.splitTextToSize(txt, W - 2*M - labelW - 6);
         const rowH = Math.max(8, lines.length * 5 + 2);
         ensureSpace(rowH + 1);
-        doc.setFillColor(...soft);
-        doc.rect(M, y - 4.5, labelW, rowH, 'F');
+        doc.setDrawColor(...line);
+        doc.rect(M, y - 4.5, labelW, rowH);
         doc.setDrawColor(...line);
         doc.rect(M, y - 4.5, W - 2*M, rowH);
         doc.line(M + labelW, y - 4.5, M + labelW, y - 4.5 + rowH);
@@ -4374,9 +4374,7 @@ async function exportPDF() {
       const cols = widths || headers.map(() => totalW / headers.length);
       ensureSpace(10);
       let x = M;
-      doc.setFillColor(...soft);
       headers.forEach((h, i) => {
-        doc.rect(x, y - 5, cols[i], 8, 'F');
         doc.setDrawColor(...line);
         doc.rect(x, y - 5, cols[i], 8);
         setFont('bold', 8);
