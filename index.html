@@ -624,10 +624,16 @@ body{
   justify-content:space-between;cursor:pointer;gap:10px;
 }
 .con-av{
-  width:38px;height:38px;border-radius:var(--radius-s);
+  width:18px;height:18px;border-radius:999px;
   display:flex;align-items:center;justify-content:center;
-  font-family:'Syne',sans-serif;font-size:13px;font-weight:800;
-  color:#fff;flex-shrink:0;
+  font-size:10px;font-weight:700;flex-shrink:0;
+  background:var(--bg4);color:var(--text3);border:1px solid var(--border);
+}
+.list-marker{
+  width:18px;height:18px;border-radius:999px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  background:var(--bg4);border:1px solid var(--border);
+  color:var(--text3);font-size:10px;font-weight:700;
 }
 .con-info{flex:1;min-width:0;}
 .con-name{font-size:14px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
@@ -707,12 +713,11 @@ body{
   justify-content:space-between;cursor:pointer;gap:10px;
 }
 .mt-datebox{
-  background:var(--bg3);border-radius:var(--radius-xs);
-  padding:5px 9px;text-align:center;flex-shrink:0;min-width:44px;
-  border:1px solid var(--border);
+  display:flex;align-items:center;gap:8px;flex-shrink:0;min-width:auto;
+  background:transparent;border:none;padding:0;text-align:left;
 }
-.mt-datebox .day{font-family:'Syne',sans-serif;font-size:18px;font-weight:800;color:var(--accent);line-height:1;}
-.mt-datebox .mon{font-size:8px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text3);}
+.mt-datebox .day{font-family:inherit;font-size:12px;font-weight:700;color:var(--text);line-height:1;}
+.mt-datebox .mon{font-size:11px;font-weight:500;letter-spacing:0;text-transform:none;color:var(--text3);}
 .mt-title{font-size:13px;font-weight:700;color:var(--text);}
 .mt-sub{font-size:10px;color:var(--text3);margin-top:2px;}
 .mt-type-badge{font-size:9px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;padding:3px 9px;border-radius:9px;flex-shrink:0;}
@@ -859,12 +864,11 @@ body{
 }
 .ar-item:hover{border-color:var(--border2);background:var(--bg3);}
 .ar-date-box{
-  background:var(--bg3);border-radius:var(--radius-xs);
-  padding:5px 9px;text-align:center;flex-shrink:0;min-width:48px;
-  border:1px solid var(--border);
+  display:flex;align-items:center;gap:8px;flex-shrink:0;min-width:auto;
+  background:transparent;border:none;padding:0;text-align:left;
 }
-.ar-date-box .d{font-family:'Syne',sans-serif;font-size:18px;font-weight:800;color:var(--accent2);line-height:1;}
-.ar-date-box .m{font-size:8px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text3);}
+.ar-date-box .d{font-family:inherit;font-size:12px;font-weight:700;color:var(--text);line-height:1;}
+.ar-date-box .m{font-size:11px;font-weight:500;letter-spacing:0;text-transform:none;color:var(--text3);}
 .ar-info{flex:1;min-width:0;}
 .ar-title{font-size:13px;font-weight:600;color:var(--text);}
 .ar-sub{font-size:10px;color:var(--text3);margin-top:2px;}
@@ -1580,6 +1584,7 @@ body{
       <button class="nav-tab" data-page="pg-kanban" onclick="goPage(this)"><span class="ti">📋</span>Kanban <span class="nav-badge" id="nb-kanban">0</span></button>
       <button class="nav-tab" data-page="pg-tb" onclick="goPage(this)"><span class="ti">📝</span>Tagesbericht</button>
       <button class="nav-tab" data-page="pg-firms" onclick="goPage(this)"><span class="ti">🏢</span>Firmen <span class="nav-badge" id="nb-firms">0</span></button>
+      <button class="nav-tab" data-page="pg-contacts" onclick="goPage(this)"><span class="ti">📇</span>Kontakte <span class="nav-badge" id="nb-contacts">0</span></button>
       <button class="nav-tab" data-page="pg-ct" onclick="goPage(this)"><span class="ti">🗑</span>Container <span class="nav-badge" id="nb-ct">0</span></button>
       <button class="nav-tab" data-page="pg-meet" onclick="goPage(this)"><span class="ti">📅</span>Besprechungen <span class="nav-badge" id="nb-meet">0</span></button>
       <button class="nav-tab" data-page="pg-files" onclick="goPage(this)"><span class="ti">📂</span>Dateien <span class="nav-badge" id="nb-files">0</span></button>
@@ -1850,6 +1855,36 @@ body{
     <div class="sh-act"><button class="btn btn-ghost" onclick="addGewerkCodePrompt()">+ Gewerk-Code</button><button class="btn btn-primary" onclick="openModal('addFirm')">+ Firma hinzufügen</button></div>
   </div>
   <div id="firmList"><div class="empty-state"><div class="ei">🏢</div><h4>Keine Firmen</h4><p>Yüklenici ekle</p></div></div>
+</div>
+
+
+<!-- ═══════════ PAGE: KONTAKTE ═══════════ -->
+<div class="page" id="pg-contacts">
+  <div class="sh">
+    <h2>Kontakte <span class="sub">İletişim listesi</span></h2>
+    <button class="btn btn-primary" onclick="openModal('addContact')">+ Kontakt hinzufügen</button>
+  </div>
+  <div class="card" style="margin-bottom:14px;">
+    <div class="card-body">
+      <div class="fr3">
+        <input type="text" class="fi" id="contactSearch" placeholder="🔍 Suchen…" oninput="renderContacts()">
+        <select class="fs" id="contactFilterGroup" onchange="renderContacts()">
+          <option value="">Alle Kategorien</option>
+          <option value="Bauleitung">Bauleitung</option>
+          <option value="Polier">Polier</option>
+          <option value="Nachunternehmer">Nachunternehmer</option>
+          <option value="Elektrik">Elektrik</option>
+          <option value="Container">Container</option>
+          <option value="Sicherheit">Sicherheit</option>
+          <option value="Sonstige">Sonstige</option>
+        </select>
+        <select class="fs" id="contactFilterFirm" onchange="renderContacts()">
+          <option value="">Alle Firmen</option>
+        </select>
+      </div>
+    </div>
+  </div>
+  <div id="contactList"><div class="empty-state"><div class="ei">📇</div><h4>Keine Kontakte</h4><p>Önemli kişi ekle</p></div></div>
 </div>
 
 <!-- ═══════════ PAGE: CONTAINER ═══════════ -->
@@ -2230,6 +2265,41 @@ body{
 </div>
 
 
+
+<!-- Kontakt Modal -->
+<div class="modal-ov" id="modal-addContact">
+  <div class="modal">
+    <div class="modal-hd"><h3>Kontakt erfassen <small>Kişi ekle</small></h3><button class="modal-close" onclick="closeModal('addContact')">✕</button></div>
+    <div class="modal-body">
+      <input type="hidden" id="contact-id">
+      <div class="fr2">
+        <div class="fg"><div class="fl">Name <span class="tr">Ad Soyad</span></div><input type="text" class="fi" id="contact-name" placeholder="Name…"></div>
+        <div class="fg"><div class="fl">Firma <span class="tr">Şirket</span></div><select class="fs" id="contact-firm"><option value="">— Keine Firma</option></select></div>
+      </div>
+      <div class="fr2">
+        <div class="fg"><div class="fl">Funktion <span class="tr">Görev</span></div><input type="text" class="fi" id="contact-role" placeholder="Polier, Bauleitung…"></div>
+        <div class="fg"><div class="fl">Kategorie <span class="tr">Kategori</span></div>
+          <select class="fs" id="contact-group">
+            <option value="Bauleitung">Bauleitung</option>
+            <option value="Polier">Polier</option>
+            <option value="Nachunternehmer">Nachunternehmer</option>
+            <option value="Elektrik">Elektrik</option>
+            <option value="Container">Container</option>
+            <option value="Sicherheit">Sicherheit</option>
+            <option value="Sonstige">Sonstige</option>
+          </select>
+        </div>
+      </div>
+      <div class="fr2">
+        <div class="fg"><div class="fl">Telefon</div><input type="tel" class="fi" id="contact-phone" placeholder="+49…"></div>
+        <div class="fg"><div class="fl">E-Mail</div><input type="email" class="fi" id="contact-mail" placeholder="mail@example.com"></div>
+      </div>
+      <div class="fg"><div class="fl">Bemerkung <span class="tr">Not</span></div><textarea class="fta" id="contact-note" style="min-height:70px;" placeholder="Zusätzliche Information…"></textarea></div>
+    </div>
+    <div class="modal-ft"><button class="btn btn-ghost" onclick="closeModal('addContact')">Abbrechen</button><button class="btn btn-primary" onclick="saveContact()">Speichern ✓</button></div>
+  </div>
+</div>
+
 <!-- Archive View Modal -->
 <div class="modal-ov" id="modal-viewAr">
   <div class="modal" style="max-width:720px">
@@ -2412,6 +2482,7 @@ function newState() {
     weeklyReports: [],
     workAreas: [],
     maengel: [],
+    contacts: [],
   };
 }
 
@@ -2683,6 +2754,7 @@ function loadArchiveIntoCurrent(id) {
   renderWorkEntries();
   renderKanban();
   renderFirms();
+  renderContacts();
   renderContainers();
   renderMeetings();
   renderPhotos();
@@ -2764,6 +2836,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   renderWorkEntries();
   renderKanban();
   renderFirms();
+  renderContacts();
   renderContainers();
   renderMeetings();
   renderPhotos();
@@ -3187,6 +3260,12 @@ function openModal(name, col) {
   if (name === 'addNote') {
     sv('note-txt',''); sv('note-date', todayStr());
   }
+  if (name === 'addContact') {
+    sv('contact-id',''); sv('contact-name',''); sv('contact-role',''); sv('contact-phone',''); sv('contact-mail',''); sv('contact-note','');
+    const sel = document.getElementById('contact-firm');
+    if (sel) sel.innerHTML = '<option value="">— Keine Firma</option>' + (S.contractors||[]).map(c=>`<option value="${esc(c.id)}">${esc(c.name)}</option>`).join('');
+    svs('contact-group','Bauleitung');
+  }
   document.getElementById('modal-'+name)?.classList.add('open');
 }
 function closeModal(name) { document.getElementById('modal-'+name)?.classList.remove('open'); }
@@ -3299,6 +3378,7 @@ function saveFirm() {
   closeModal('addFirm');
   autoSave();
   renderFirms();
+  renderContacts();
   renderSigGrid();
   buildPersonnel();
   showToast('Firma gespeichert','ok');
@@ -3333,7 +3413,7 @@ function renderFirms() {
     `).join('');
     card.innerHTML = `
       <div class="con-hd" onclick="toggleFirm('${c.id}')">
-        <div class="con-av" style="background:${c.color}">${initials}</div>
+        <div class="list-marker">•</div>
         <div class="con-info">
           <div class="con-name">${esc(c.name)}</div>
           <div class="con-trade">${esc(c.trade||'')}${c.contact?' · '+esc(c.contact):''}${c.phone?' · '+esc(c.phone):''}</div>
@@ -3383,6 +3463,101 @@ function saveNote(){
 }
 function delNote(fid,nid){ const c=(S.contractors||[]).find(x=>x.id===fid); if(c){c.notes=(c.notes||[]).filter(n=>n.id!==nid);autoSave();renderFirms();} }
 function delFirm(id){ S.contractors=(S.contractors||[]).filter(c=>c.id!==id); autoSave(); renderFirms(); renderSigGrid(); buildPersonnel(); showToast('Firma gelöscht','ok'); }
+
+// ═══════════════════════════════════════════════════
+// KONTAKTE
+// ═══════════════════════════════════════════════════
+function saveContact() {
+  const name = gv('contact-name').trim();
+  if (!name) { showToast('Name eingeben!','warn'); return; }
+  if (!S.contacts) S.contacts = [];
+  const item = {
+    id: gv('contact-id') || ('co_' + Date.now()),
+    name,
+    firmId: gv('contact-firm') || '',
+    role: gv('contact-role') || '',
+    group: gv('contact-group') || 'Sonstige',
+    phone: gv('contact-phone') || '',
+    mail: gv('contact-mail') || '',
+    note: gv('contact-note') || ''
+  };
+  const idx = S.contacts.findIndex(x=>x.id===item.id);
+  if (idx >= 0) S.contacts[idx] = item; else S.contacts.unshift(item);
+  closeModal('addContact');
+  autoSave();
+  renderContacts();
+  showToast('Kontakt gespeichert','ok');
+}
+
+function editContact(id) {
+  const c = (S.contacts||[]).find(x=>x.id===id);
+  if (!c) return;
+  openModal('addContact');
+  sv('contact-id', c.id);
+  sv('contact-name', c.name||'');
+  sv('contact-role', c.role||'');
+  sv('contact-phone', c.phone||'');
+  sv('contact-mail', c.mail||'');
+  sv('contact-note', c.note||'');
+  const sel = document.getElementById('contact-firm');
+  if (sel) {
+    sel.innerHTML = '<option value="">— Keine Firma</option>' + (S.contractors||[]).map(f=>`<option value="${esc(f.id)}">${esc(f.name)}</option>`).join('');
+    sel.value = c.firmId || '';
+  }
+  svs('contact-group', c.group||'Sonstige');
+}
+
+function delContact(id) {
+  S.contacts = (S.contacts||[]).filter(x=>x.id!==id);
+  autoSave();
+  renderContacts();
+}
+
+function renderContacts() {
+  const box = document.getElementById('contactList');
+  const filterFirm = document.getElementById('contactFilterFirm');
+  if (filterFirm) {
+    const cur = filterFirm.value;
+    filterFirm.innerHTML = '<option value="">Alle Firmen</option>' + (S.contractors||[]).map(f=>`<option value="${esc(f.id)}">${esc(f.name)}</option>`).join('');
+    filterFirm.value = cur;
+  }
+  if (!box) return;
+  let rows = [...(S.contacts||[])];
+  const q = (gv('contactSearch')||'').toLowerCase();
+  const g = gv('contactFilterGroup') || '';
+  const f = gv('contactFilterFirm') || '';
+  if (q) rows = rows.filter(c => ((c.name||'')+' '+(c.role||'')+' '+(c.phone||'')+' '+(c.mail||'')+' '+(c.note||'')).toLowerCase().includes(q));
+  if (g) rows = rows.filter(c => c.group === g);
+  if (f) rows = rows.filter(c => c.firmId === f);
+  if (!rows.length) {
+    box.innerHTML = '<div class="empty-state"><div class="ei">📇</div><h4>Keine Kontakte</h4><p>Önemli kişi ekle</p></div>';
+    updateBadges();
+    return;
+  }
+  box.innerHTML = '<div class="con-list">' + rows.map(c => {
+    const firmName = (S.contractors||[]).find(f=>f.id===c.firmId)?.name || '';
+    return `
+      <div class="con-card">
+        <div class="con-hd" style="cursor:default;">
+          <div class="list-marker">•</div>
+          <div class="con-info">
+            <div class="con-name">${esc(c.name||'')}</div>
+            <div class="con-trade">${esc(c.role||'')}${firmName?' · '+esc(firmName):''}${c.phone?' · '+esc(c.phone):''}</div>
+          </div>
+          <span class="con-status-badge cs-d">${esc(c.group||'Sonstige')}</span>
+          <div style="display:flex;gap:6px;">
+            <button class="btn-icon edit" onclick="editContact('${c.id}')">✎</button>
+            <button class="btn-icon" onclick="delContact('${c.id}')">✕</button>
+          </div>
+        </div>
+        <div class="con-body open" style="display:block;padding:0 15px 13px;border-top:1px solid var(--border);">
+          ${c.mail?`<div style="font-size:12px;color:var(--text2);margin-top:10px;">✉️ ${esc(c.mail)}</div>`:''}
+          ${c.note?`<div style="font-size:12px;color:var(--text2);margin-top:8px;line-height:1.6;">${esc(c.note)}</div>`:''}
+        </div>
+      </div>`;
+  }).join('') + '</div>';
+  updateBadges();
+}
 
 // ═══════════════════════════════════════════════════
 // CONTAINERS
@@ -3491,10 +3666,10 @@ function renderMeetings() {
     const card=document.createElement('div'); card.className='mt-card';
     card.innerHTML=`
       <div class="mt-hd" onclick="toggleMeet('${m.id}')">
-        <div class="mt-datebox"><div class="day">${m.day}</div><div class="mon">${m.month}</div></div>
+        <div class="mt-datebox"><div class="list-marker">•</div><div><div class="day">${m.date}</div><div class="mon">${m.time||''}${m.loc?' · '+esc(m.loc):''}</div></div></div>
         <div style="flex:1;min-width:0;">
           <div class="mt-title">${esc(m.title)}</div>
-          <div class="mt-sub">${m.time||''} ${m.loc?'· '+esc(m.loc):''} · ${(m.attendees||[]).length} Teilnehmer</div>
+          <div class="mt-sub">${(m.attendees||[]).length} Teilnehmer</div>
         </div>
         <span class="mt-type-badge ${tCls}">${tLbl}</span>
         <button class="btn-icon" style="margin-left:6px;" onclick="event.stopPropagation();delMeet('${m.id}')">✕</button>
@@ -3952,10 +4127,10 @@ function renderArchive(filter) {
     const item=document.createElement('div'); item.className='ar-item';
     item.onclick=()=>viewArchiveEntry(ar.id);
     item.innerHTML=`
-      <div class="ar-date-box"><div class="d">${d.getDate()}</div><div class="m">${MONTHS_DE[d.getMonth()]}</div></div>
+      <div class="ar-date-box"><div class="list-marker">•</div><div><div class="d">${ar.reportDate}</div><div class="m">${ar.savedAtDisplay}</div></div></div>
       <div class="ar-info">
         <div class="ar-title">${esc(ar.projectName)} — ${ar.reportNr}</div>
-        <div class="ar-sub">Gespeichert: ${ar.savedAtDisplay} · ${ar.bauleiter}</div>
+        <div class="ar-sub">${ar.bauleiter}</div>
         <div class="ar-tags">
           <span class="ar-tag">👷 ${ar.totalPersonnel} Pers.</span>
           <span class="ar-tag">🔨 ${ar.workCount} Arb.</span>
@@ -4106,6 +4281,7 @@ function updateBadges() {
   const kbT=(S.kanban?.today||[]).length+(S.kanban?.tomorrow||[]).length;
   document.getElementById('nb-kanban').textContent=kbT;
   document.getElementById('nb-firms').textContent=(S.contractors||[]).length;
+  const nbc = document.getElementById('nb-contacts'); if (nbc) nbc.textContent=(S.contacts||[]).length;
   document.getElementById('nb-ct').textContent=(S.containers||[]).length;
   document.getElementById('nb-meet').textContent=(S.meetings||[]).length;
   document.getElementById('nb-files').textContent=(S.photos||[]).length+(S.docs||[]).length;
@@ -4976,7 +5152,7 @@ function showToast(msg,type='ok'){
         return `
           <div class="con-card" style="${active}">
             <div class="con-hd" onclick="applyNUToQuickContext('${h(c.nuCode||'')}','${h(c.name)}','${h(c.id)}')">
-              <div class="con-av" style="background:${h(c.color||'#3b82f6')}">${h((c.name||'').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase())}</div>
+              <div class="list-marker">•</div>
               <div class="con-info">
                 <div class="con-name">${h(c.nuCode||'')} ${h(c.name)}</div>
                 <div class="con-trade">${h(c.contact||'')}${c.phone?' · '+h(c.phone):''}</div>
