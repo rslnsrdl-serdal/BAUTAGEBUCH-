@@ -1476,6 +1476,15 @@ body{
 .note-expand.full .note-short{display:none}
 .note-expand:not(.full) .note-full{display:none}
 
+
+.progress-phase-strip{display:grid;grid-template-columns:repeat(8,1fr);gap:6px;margin-top:10px}
+.progress-phase-step{padding:8px 6px;border:1px solid var(--border);border-radius:10px;background:var(--bg4);font-size:10px;line-height:1.35;color:var(--text2);text-align:center}
+.progress-phase-step.done{background:rgba(16,185,129,.10);color:var(--accent3);border-color:rgba(16,185,129,.22)}
+.progress-phase-step.active{background:rgba(59,130,246,.10);color:var(--accent2);border-color:rgba(59,130,246,.22);font-weight:700}
+.progress-phase-step.warn{background:rgba(245,158,11,.12);color:var(--gold);border-color:rgba(245,158,11,.22)}
+.progress-measure-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+@media(max-width:760px){.progress-phase-strip{grid-template-columns:repeat(2,1fr)}.progress-measure-grid{grid-template-columns:1fr}}
+
 /* ═══════════════════════════════════════════════════
    RESPONSIVE
 ═══════════════════════════════════════════════════ */
@@ -1825,34 +1834,48 @@ body{
             <div class="fg"><div class="fl">Monat übernehmen</div><button class="btn btn-ghost" style="width:100%;justify-content:center;" onclick="applySuggestedMonthlyProgress()">Terminplan übernehmen</button></div>
           </div>
           <div class="fg"><div class="fl">Bemerkung <span class="tr">Monatsnotiz</span></div><textarea class="fta" id="progNote" style="min-height:58px;" placeholder="z. B. leichter Verzug wegen Wetter / Vorlauf / Lieferung" oninput="setProgressField('note',this.value)"></textarea></div>
-          <div style="margin-top:8px;padding:12px;background:var(--bg3);border:1px solid var(--border);border-radius:12px;">
-            <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap;">
-              <div>
-                <div style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text3);margin-bottom:4px;">Live-Status</div>
-                <div id="progStatusBadge" style="display:inline-flex;align-items:center;gap:8px;padding:7px 10px;border-radius:999px;background:var(--bg4);border:1px solid var(--border);font-size:12px;font-weight:700;color:var(--text);">—</div>
-              </div>
-              <div style="min-width:140px;text-align:right;">
-                <div style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text3);margin-bottom:4px;">Monatslage</div>
-                <div id="progDeltaText" style="font-size:13px;font-weight:700;color:var(--text);">—</div>
-              </div>
-            </div>
-            <div style="margin-top:12px;">
-              <div style="display:flex;justify-content:space-between;align-items:center;font-size:10px;color:var(--text3);margin-bottom:6px;">
-                <span>Terminplan</span><span>Baustelle</span>
-              </div>
-              <div style="position:relative;height:16px;background:var(--bg4);border:1px solid var(--border);border-radius:999px;overflow:hidden;">
-                <div id="progSollBar" style="position:absolute;left:0;top:0;bottom:0;width:0%;background:rgba(59,130,246,.25);"></div>
-                <div id="progIstBar" style="position:absolute;left:0;top:3px;bottom:3px;width:0%;background:var(--accent2);border-radius:999px;"></div>
-              </div>
-              <div style="display:flex;justify-content:space-between;align-items:center;font-size:11px;color:var(--text2);margin-top:6px;">
-                <span id="progSollLbl">Soll: —</span>
-                <span id="progIstLbl">Ist: —</span>
-              </div>
-            </div>
-            <div id="progPhaseCard" style="margin-top:12px;padding:10px 12px;border-radius:10px;background:var(--bg2);border:1px solid var(--border);">
-              <div style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text3);margin-bottom:4px;">Interpretation</div>
-              <div id="progInterpretation" style="font-size:12px;line-height:1.65;color:var(--text2);">—</div>
-            </div>
+          
+<div style="margin-top:8px;padding:12px;background:var(--bg3);border:1px solid var(--border);border-radius:12px;">
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap;">
+    <div>
+      <div style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text3);margin-bottom:4px;">Bauphasen-Karte</div>
+      <div id="progStatusBadge" style="display:inline-flex;align-items:center;gap:8px;padding:7px 10px;border-radius:999px;background:var(--bg4);border:1px solid var(--border);font-size:12px;font-weight:700;color:var(--text);">—</div>
+    </div>
+    <div style="min-width:140px;text-align:right;">
+      <div style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text3);margin-bottom:4px;">Abweichung</div>
+      <div id="progDeltaText" style="font-size:13px;font-weight:700;color:var(--text);">—</div>
+    </div>
+  </div>
+
+  <div class="progress-phase-strip" id="progressPhaseStrip"></div>
+
+  <div class="progress-measure-grid">
+    <div style="padding:10px 12px;border-radius:10px;background:var(--bg2);border:1px solid var(--border);">
+      <div style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text3);margin-bottom:4px;">Aktuelle Phase</div>
+      <div id="progCurrentPhase" style="font-size:12px;line-height:1.65;color:var(--text);font-weight:700;">—</div>
+      <div id="progInterpretation" style="font-size:12px;line-height:1.65;color:var(--text2);margin-top:6px;">—</div>
+    </div>
+    <div style="padding:10px 12px;border-radius:10px;background:var(--bg2);border:1px solid var(--border);">
+      <div style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text3);margin-bottom:4px;">Maßnahme heute</div>
+      <textarea class="fta" id="progActionToday" style="min-height:88px;" placeholder="z. B. Liefertermin klären, Folgegewerk abstimmen, Restarbeiten abschließen" oninput="setProgressActionToday(this.value)"></textarea>
+    </div>
+  </div>
+
+  <div style="margin-top:12px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;font-size:10px;color:var(--text3);margin-bottom:6px;">
+      <span>Terminplan</span><span>Baustelle</span>
+    </div>
+    <div style="position:relative;height:16px;background:var(--bg4);border:1px solid var(--border);border-radius:999px;overflow:hidden;">
+      <div id="progSollBar" style="position:absolute;left:0;top:0;bottom:0;width:0%;background:rgba(59,130,246,.25);"></div>
+      <div id="progIstBar" style="position:absolute;left:0;top:3px;bottom:3px;width:0%;background:var(--accent2);border-radius:999px;"></div>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;font-size:11px;color:var(--text2);margin-top:6px;">
+      <span id="progSollLbl">Soll: —</span>
+      <span id="progIstLbl">Ist: —</span>
+    </div>
+  </div>
+</div>
+
           </div>
 
         </div>
@@ -3216,8 +3239,9 @@ function renderProgressPanel() {
 
 
 
+
 function renderProgressLive(){
-  if (!S.progressPlan) S.progressPlan = {month:'',soll:'',ist:'',phase:'',note:''};
+  if (!S.progressPlan) S.progressPlan = {month:'',soll:'',ist:'',phase:'',note:'',actionToday:''};
   const soll = parseInt(S.progressPlan.soll || '0') || 0;
   const ist = parseInt(S.progressPlan.ist || '0') || 0;
   const delta = ist - soll;
@@ -3229,11 +3253,15 @@ function renderProgressLive(){
   const statusBadge = document.getElementById('progStatusBadge');
   const deltaText = document.getElementById('progDeltaText');
   const interp = document.getElementById('progInterpretation');
+  const currentPhase = document.getElementById('progCurrentPhase');
+  const strip = document.getElementById('progressPhaseStrip');
+  const actionToday = document.getElementById('progActionToday');
 
   if (sollBar) sollBar.style.width = Math.max(0, Math.min(100, soll)) + '%';
   if (istBar) istBar.style.width = Math.max(0, Math.min(100, ist)) + '%';
   if (sollLbl) sollLbl.textContent = 'Soll: ' + soll + ' %';
   if (istLbl) istLbl.textContent = 'Ist: ' + ist + ' %';
+  if (actionToday) actionToday.value = S.progressPlan.actionToday || '';
 
   let status = 'Im Plan';
   let badgeBg = 'rgba(16,185,129,.12)';
@@ -3271,11 +3299,28 @@ function renderProgressLive(){
     deltaText.textContent = (delta > 0 ? '+' : '') + delta + ' %';
     deltaText.style.color = delta < 0 ? 'var(--red)' : (delta > 0 ? 'var(--accent2)' : 'var(--text)');
   }
+
+  const phases = getPhaseNames();
+  const activeIdx = getPhaseByProgress(ist);
+  const planIdx = getPhaseByProgress(soll);
+
+  if (strip) {
+    strip.innerHTML = phases.map((name, idx) => {
+      let cls = 'progress-phase-step';
+      if (idx < activeIdx) cls += ' done';
+      if (idx === activeIdx) cls += ' active';
+      if (idx > activeIdx && idx <= planIdx && delta < 0) cls += ' warn';
+      return `<div class="${cls}">${name}</div>`;
+    }).join('');
+  }
+
+  if (currentPhase) currentPhase.textContent = phases[activeIdx] || '—';
   if (interp) {
-    const phase = S.progressPlan.phase ? ('Geplante Phase: ' + S.progressPlan.phase + ' ') : '';
+    const phase = S.progressPlan.phase ? ('Terminplan-Basis: ' + S.progressPlan.phase + '. ') : '';
     interp.textContent = phase + interpText;
   }
 }
+
 
 
 function openPhotoViewer(src, title){
@@ -3291,6 +3336,36 @@ function closePhotoViewer(){
   const img = document.getElementById('photoViewerImg');
   if (img) img.src = '';
   if (modal) modal.classList.remove('open');
+}
+
+
+function getPhaseByProgress(pct){
+  const p = parseInt(pct || 0) || 0;
+  if (p < 10) return 0;
+  if (p < 25) return 1;
+  if (p < 40) return 2;
+  if (p < 55) return 3;
+  if (p < 68) return 4;
+  if (p < 82) return 5;
+  if (p < 96) return 6;
+  return 7;
+}
+function getPhaseNames(){
+  return [
+    'Baustelleneinrichtung',
+    'Erdarbeiten',
+    'Fundamente',
+    'Tragwerk',
+    'Dach / Fassade',
+    'TGA',
+    'Ausbau',
+    'Übergabe'
+  ];
+}
+function setProgressActionToday(val){
+  if (!S.progressPlan) S.progressPlan = {month:'',soll:'',ist:'',phase:'',note:'',actionToday:''};
+  S.progressPlan.actionToday = val;
+  autoSave();
 }
 
 // ═══════════════════════════════════════════════════
