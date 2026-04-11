@@ -1507,6 +1507,33 @@ body{
   border: 1px solid rgba(255,255,255,0.14) !important;
 }
 
+
+.contact-link{
+  color: var(--accent2);
+  text-decoration: none;
+}
+.contact-link:hover{
+  text-decoration: underline;
+}
+
+
+.todo-priority-high{color:var(--red);font-weight:700}
+.todo-priority-medium{color:var(--gold);font-weight:700}
+.todo-priority-low{color:var(--accent3);font-weight:700}
+.todo-status-chip{display:inline-flex;align-items:center;gap:6px;padding:4px 8px;border-radius:999px;font-size:10px;font-weight:700;border:1px solid var(--border);background:var(--bg3);color:var(--text2)}
+.todo-mini-list .slim-list-card{margin-bottom:7px}
+.todo-board-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:14px}
+.todo-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.todo-toolbar{display:flex;gap:8px;flex-wrap:wrap}
+@media(max-width:900px){.todo-board-grid{grid-template-columns:1fr}.todo-form-grid{grid-template-columns:1fr}}
+.weather-auto-line{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+
+
+.todo-history-box{margin-top:10px;padding:10px 12px;border:1px solid var(--border);border-radius:10px;background:var(--bg2)}
+.todo-history-item{padding:6px 0;border-bottom:1px dashed var(--border);font-size:12px;color:var(--text2);line-height:1.6}
+.todo-history-item:last-child{border-bottom:none}
+.todo-history-date{font-size:10px;color:var(--text3);font-weight:700;letter-spacing:.5px;text-transform:uppercase}
+
 /* ═══════════════════════════════════════════════════
    RESPONSIVE
 ═══════════════════════════════════════════════════ */
@@ -3003,6 +3030,7 @@ function loadArchiveIntoCurrent(id) {
   renderWorkEntries();
   renderKanban();
   renderFirms();
+  ensureTodoState();
   renderContacts();
   renderContainers();
   renderMeetings();
@@ -3093,6 +3121,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   renderArchive();
   renderContacts();
   updateWeatherSummary();
+  populateTodoFirmSelects();
+  renderTodoPage();
+  refreshDash();
   renderProgressLive();
   updateWorkSummary();
   runConverters();
@@ -3407,6 +3438,240 @@ function closePdfViewer(){
   const frame = document.getElementById('pdfViewerFrame');
   if(frame) frame.src = '';
   if(modal) modal.classList.remove('open');
+}
+
+
+function ensureTodoState(){
+  if(!S.todos) S.todos = [];
+}
+function todoStatusChip(status){
+  return `<span class="todo-status-chip">${esc(status||'Offen')}</span>`;
+}
+function todoPriorityClass(p){
+  return p==='Hoch' ? 'todo-priority-high' : (p==='Mittel' ? 'todo-priority-medium' : 'todo-priority-low');
+}
+function populateTodoFirmSelects(){
+  const firmOptions = (S.contractors||[]).map(f=>`<option value="${esc(f.id)}">${esc(f.name)}</option>`).join('');
+  const tdFirm = document.getElementById('tdFirm');
+  if(tdFirm){
+    const cur = tdFirm.value;
+    tdFirm.innerHTML = '<option value="">— Keine Firma</option>' + firmOptions;
+    if(cur) tdFirm.value = cur;
+  }
+  const tdFilterFirm = document.getElementById('tdFilterFirm');
+  if(tdFilterFirm){
+    const cur = tdFilterFirm.value;
+    tdFilterFirm.innerHTML = '<option value="">Alle Firmen</option>' + firmOptions;
+    if(cur) tdFilterFirm.value = cur;
+  }
+}
+function resetTodoForm(){
+  ['tdEditId','tdTitle','tdDesc','tdDue','tdComment'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
+  const pr=document.getElementById('tdPriority'); if(pr) pr.value='Mittel';
+  const st=document.getElementById('tdStatus'); if(st) st.value='Offen';
+  const ct=document.getElementById('tdCategory'); if(ct) ct.value='Allgemein';
+  const fi=document.getElementById('tdFirm'); if(fi) fi.value='';
+}
+function saveTodoItem(){
+  ensureTodoState();
+  const title = (document.getElementById('tdTitle')?.value || '').trim();
+  if(!title){ showToast('Titel eingeben','warn'); return; }
+  const item = {
+    id: document.getElementById('tdEditId')?.value || ('td_'+Date.now()),
+    title,
+    desc: (document.getElementById('tdDesc')?.value || '').trim(),
+    firmId: document.getElementById('tdFirm')?.value || '',
+    category: document.getElementById('tdCategory')?.value || 'Allgemein',
+    priority: document.getElementById('tdPriority')?.value || 'Mittel',
+    status: document.getElementById('tdStatus')?.value || 'Offen',
+    due: document.getElementById('tdDue')?.value || '',
+    comment: document.getElementById('tdComment')?.value || '',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  };
+  const idx = S.todos.findIndex(x=>x.id===item.id);
+  if(idx>=0){
+    const prev = S.todos[idx];
+    item.createdAt = prev.createdAt || item.createdAt;
+    item.history = Array.isArray(prev.history) ? prev.history.slice() : [];
+    if((prev.status||'') !== (item.status||'')) addTodoHistoryEntry(item, `Status geändert: ${item.status}`);
+    if((prev.comment||'') !== (item.comment||'') && item.comment) addTodoHistoryEntry(item, `Kommentar: ${item.comment}`);
+    if((prev.due||'') !== (item.due||'') && item.due) addTodoHistoryEntry(item, `Fälligkeit geändert: ${item.due}`);
+    S.todos[idx]=item;
+  } else {
+    item.history = [];
+    addTodoHistoryEntry(item, 'Punkt erstellt');
+    if(item.comment) addTodoHistoryEntry(item, `Kommentar: ${item.comment}`);
+    S.todos.unshift(item);
+  }
+  autoSave();
+  resetTodoForm();
+  renderTodoPage();
+  refreshDash();
+  showToast('Punkt gespeichert','ok');
+}
+function editTodoItem(id){
+  ensureTodoState();
+  const t = S.todos.find(x=>x.id===id); if(!t) return;
+  const map = {tdEditId:t.id,tdTitle:t.title||'',tdDesc:t.desc||'',tdDue:t.due||'',tdComment:t.comment||''};
+  Object.entries(map).forEach(([id,v])=>{ const el=document.getElementById(id); if(el) el.value=v; });
+  const tdFirm = document.getElementById('tdFirm'); if(tdFirm) tdFirm.value = t.firmId || '';
+  const tdCategory = document.getElementById('tdCategory'); if(tdCategory) tdCategory.value = t.category || 'Allgemein';
+  const tdPriority = document.getElementById('tdPriority'); if(tdPriority) tdPriority.value = t.priority || 'Mittel';
+  const tdStatus = document.getElementById('tdStatus'); if(tdStatus) tdStatus.value = t.status || 'Offen';
+  goPageById('pg-todos');
+}
+function deleteTodoItem(id){
+  ensureTodoState();
+  S.todos = S.todos.filter(x=>x.id!==id);
+  autoSave();
+  renderTodoPage();
+  refreshDash();
+  showToast('Punkt gelöscht','ok');
+}
+function quickSetTodoStatus(id,status){
+  ensureTodoState();
+  const t=S.todos.find(x=>x.id===id); if(!t) return;
+  if((t.status||'') !== status){
+    t.status=status;
+    addTodoHistoryEntry(t, `Status geändert: ${status}`);
+    t.updatedAt=new Date().toISOString();
+    autoSave();
+    renderTodoPage();
+    refreshDash();
+  }
+}
+function renderTodoPage(){
+  ensureTodoState();
+  populateTodoFirmSelects();
+  const wrap = document.getElementById('todoListWrap');
+  const badge = document.getElementById('nb-todos');
+  if(badge) badge.textContent = String((S.todos||[]).filter(t=>!['Erledigt','Entfällt'].includes(t.status)).length);
+  if(!wrap) return;
+  let rows = [...(S.todos||[])];
+  const q = (document.getElementById('tdSearch')?.value || '').toLowerCase().trim();
+  const s = document.getElementById('tdFilterStatus')?.value || '';
+  const f = document.getElementById('tdFilterFirm')?.value || '';
+  if(q) rows = rows.filter(t => [t.title,t.desc,t.comment,(S.contractors||[]).find(c=>c.id===t.firmId)?.name||'', ...(t.history||[]).map(h=>h.text||'')].join(' ').toLowerCase().includes(q));
+  if(s) rows = rows.filter(t => t.status===s);
+  if(f) rows = rows.filter(t => t.firmId===f);
+  if(!rows.length){
+    wrap.innerHTML = '<div class="empty-state"><div class="ei">🗂️</div><h4>Keine Punkte</h4><p>Noch nichts erfasst</p></div>';
+    return;
+  }
+  const today = (typeof todayStr==='function') ? todayStr() : new Date().toISOString().slice(0,10);
+  wrap.innerHTML = rows.map(t=>{
+    ensureTodoHistory(t);
+    const firm=(S.contractors||[]).find(c=>c.id===t.firmId)?.name || '';
+    const overdue = t.due && t.due < today && !['Erledigt','Entfällt'].includes(t.status);
+    const hist = (t.history||[]).slice(0,6).map(h=>`<div class="todo-history-item"><div class="todo-history-date">${esc(h.date||'')} ${esc(h.time||'')}</div><div>${esc(h.text||'')}</div></div>`).join('');
+    return `<div class="con-card">
+      <div class="con-hd" style="cursor:default;">
+        <div class="list-marker">•</div>
+        <div class="con-info">
+          <div class="con-name">${esc(t.title||'')}</div>
+          <div class="con-trade">${firm?esc(firm)+' · ':''}${esc(t.category||'')}${t.due?' · Fällig: '+esc(t.due):''}${overdue?' · Überfällig':''}</div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;">
+          ${todoStatusChip(t.status)}
+          <div class="${todoPriorityClass(t.priority)}">${esc(t.priority||'Mittel')}</div>
+        </div>
+      </div>
+      <div class="con-body open" style="display:block;padding:0 15px 13px;border-top:1px solid var(--border);">
+        ${t.desc?`<div style="font-size:12px;color:var(--text2);margin-top:10px;line-height:1.65;">${esc(t.desc)}</div>`:''}
+        ${t.comment?`<div style="font-size:12px;color:var(--text3);margin-top:8px;">Kommentar: ${esc(t.comment)}</div>`:''}
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;">
+          <button class="btn btn-ghost btn-xs" onclick="editTodoItem('${t.id}')">✏️ Bearbeiten</button>
+          <button class="btn btn-ghost btn-xs" onclick="quickSetTodoStatus('${t.id}','Erledigt')">✓ Erledigt</button>
+          <button class="btn btn-ghost btn-xs" onclick="quickSetTodoStatus('${t.id}','In Arbeit')">→ In Arbeit</button>
+          <button class="btn btn-ghost btn-xs" onclick="quickSetTodoStatus('${t.id}','Verschoben')">↷ Verschoben</button>
+          <button class="btn btn-ghost btn-xs" onclick="quickSetTodoStatus('${t.id}','Entfällt')">✕ Entfällt</button>
+          <button class="btn btn-ghost btn-xs" onclick="deleteTodoItem('${t.id}')">🗑 Löschen</button>
+        </div>
+        <div class="todo-history-box">
+          <div style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text3);margin-bottom:6px;">Verlauf</div>
+          ${hist || '<div style="font-size:12px;color:var(--text3);">Noch kein Verlauf</div>'}
+          <div style="display:flex;gap:8px;align-items:center;margin-top:10px;flex-wrap:wrap;">
+            <input class="fi" id="tdHistInp_${t.id}" type="text" placeholder="Verlauf ergänzen..." style="flex:1;min-width:180px;">
+            <button class="btn btn-ghost btn-xs" onclick="saveTodoHistoryNote('${t.id}')">+ Verlauf</button>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+function todoMiniCard(t){
+  ensureTodoHistory(t);
+  const firm=(S.contractors||[]).find(c=>c.id===t.firmId)?.name || '';
+  const latest = t.history && t.history.length ? t.history[0].text : '';
+  return `<div class="slim-list-card">
+    <div style="display:flex;justify-content:space-between;gap:8px;align-items:flex-start;">
+      <div>
+        <div style="font-size:12px;font-weight:700;color:var(--text);">${esc(t.title||'')}</div>
+        <div style="font-size:10px;color:var(--text3);margin-top:3px;">${firm?esc(firm)+' · ':''}${esc(t.status||'')}${t.due?' · '+esc(t.due):''}</div>
+        ${latest ? `<div style="font-size:10px;color:var(--text3);margin-top:4px;line-height:1.5;">${esc(latest)}</div>` : ''}
+      </div>
+      <div class="${todoPriorityClass(t.priority)}" style="font-size:10px;">${esc(t.priority||'Mittel')}</div>
+    </div>
+  </div>`;
+}
+async function loadDashboardWeather(){
+  const box = document.getElementById('dash-weather-auto');
+  if(box) box.textContent = 'Wetter wird geladen…';
+  const place = (S.standort || S.projectLocation || S.projectOrt || '').trim();
+  if(!place){ if(box) box.textContent='Projekt-Ort fehlt'; return; }
+  try{
+    const gRes = await fetch('https://geocoding-api.open-meteo.com/v1/search?name=' + encodeURIComponent(place) + '&count=1&language=de&format=json');
+    const gJson = await gRes.json();
+    if(!gJson || !gJson.results || !gJson.results.length){ if(box) box.textContent='Ort nicht gefunden'; return; }
+    const loc = gJson.results[0];
+    const wRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${loc.latitude}&longitude=${loc.longitude}&current=temperature_2m,weather_code,wind_speed_10m&daily=temperature_2m_max,temperature_2m_min&timezone=auto`);
+    const wJson = await wRes.json();
+    const current = wJson.current || {};
+    const daily = wJson.daily || {};
+    const map = {0:'Klar',1:'Überwiegend klar',2:'Teilweise bewölkt',3:'Bewölkt',45:'Nebel',48:'Raureifnebel',51:'Nieselregen',53:'Nieselregen',55:'Starker Nieselregen',61:'Regen',63:'Regen',65:'Starker Regen',71:'Schnee',73:'Schnee',75:'Starker Schnee',80:'Regenschauer',81:'Regenschauer',82:'Starke Schauer',95:'Gewitter'};
+    const txt = `${loc.name}: ${map[current.weather_code]||'Wetter'} · ${Math.round(current.temperature_2m||0)} °C · Wind ${Math.round(current.wind_speed_10m||0)} km/h · Heute ${Math.round((daily.temperature_2m_min||[])[0]||0)} / ${Math.round((daily.temperature_2m_max||[])[0]||0)} °C`;
+    if(box) box.textContent = txt;
+  }catch(err){
+    if(box) box.textContent = 'Wetter konnte nicht geladen werden';
+  }
+}
+
+
+function todoNowStamp(){
+  const d = new Date();
+  const date = d.toISOString().slice(0,10);
+  const hh = String(d.getHours()).padStart(2,'0');
+  const mm = String(d.getMinutes()).padStart(2,'0');
+  return {date, time: `${hh}:${mm}`, iso: d.toISOString()};
+}
+function ensureTodoHistory(item){
+  if(!item.history) item.history = [];
+}
+function addTodoHistoryEntry(item, text){
+  ensureTodoHistory(item);
+  const ts = todoNowStamp();
+  item.history.unshift({
+    id: 'th_'+Date.now()+'_'+Math.random().toString(36).slice(2,6),
+    date: ts.date,
+    time: ts.time,
+    text: text
+  });
+}
+function saveTodoHistoryNote(id){
+  ensureTodoState();
+  const inp = document.getElementById('tdHistInp_'+id);
+  if(!inp) return;
+  const txt = (inp.value || '').trim();
+  if(!txt){ showToast('Verlaufstext eingeben','warn'); return; }
+  const t = S.todos.find(x=>x.id===id); if(!t) return;
+  addTodoHistoryEntry(t, txt);
+  t.updatedAt = new Date().toISOString();
+  inp.value = '';
+  autoSave();
+  renderTodoPage();
+  refreshDash();
+  showToast('Verlauf ergänzt','ok');
 }
 
 // ═══════════════════════════════════════════════════
@@ -4126,6 +4391,9 @@ function renderContacts() {
   }
   box.innerHTML = '<div class="con-list">' + rows.map(c => {
     const firmName = (S.contractors||[]).find(f=>f.id===c.firmId)?.name || '';
+    const safePhone = String(c.phone||'').replace(/[^0-9+]/g,'');
+    const phoneHtml = c.phone ? `<a class="contact-link" href="tel:${safePhone}" onclick="event.stopPropagation()">📞 ${esc(c.phone)}</a>` : '';
+    const mailHtml = c.mail ? `<a class="contact-link" href="mailto:${esc(c.mail)}" onclick="event.stopPropagation()">✉️ ${esc(c.mail)}</a>` : '';
     return `
       <div class="con-card">
         <div class="con-hd" style="cursor:default;">
@@ -4141,8 +4409,9 @@ function renderContacts() {
           </div>
         </div>
         <div class="con-body open" style="display:block;padding:0 15px 13px;border-top:1px solid var(--border);">
-          ${c.mail?`<div style="font-size:12px;color:var(--text2);margin-top:10px;">✉️ ${esc(c.mail)}</div>`:''}
-          ${c.note?`<div style="font-size:12px;color:var(--text2);margin-top:8px;line-height:1.6;">${esc(c.note)}</div>`:''}
+          ${phoneHtml ? `<div style="font-size:12px;color:var(--text2);margin-top:10px;">${phoneHtml}</div>` : ''}
+          ${mailHtml ? `<div style="font-size:12px;color:var(--text2);margin-top:8px;">${mailHtml}</div>` : ''}
+          ${c.note ? `<div style="font-size:12px;color:var(--text2);margin-top:8px;line-height:1.6;">${esc(c.note)}</div>` : ''}
         </div>
       </div>`;
   }).join('') + '</div>';
@@ -4897,6 +5166,25 @@ function refreshDash() {
     <div style="font-size:12px;color:var(--text3);">${S.tempMin||'—'}°C — ${S.tempMax||'—'}°C</div>
     <div style="font-size:11px;color:var(--text3);margin-top:3px;">${S.wind||''} ${S.boden?'· '+S.boden:''}</div>
   </div>`;}
+  ensureTodoState();
+  const today = (typeof todayStr==='function') ? todayStr() : new Date().toISOString().slice(0,10);
+  const openRows = (S.todos||[]).filter(t => !['Erledigt','Entfällt'].includes(t.status));
+  const important = openRows.filter(t => t.priority==='Hoch').slice(0,5);
+  const waiting = openRows.filter(t => ['Wartet auf Firma','Wartet auf Freigabe'].includes(t.status)).slice(0,5);
+  const overdue = openRows.filter(t => t.due && t.due < today).slice(0,5);
+  const openShort = openRows.slice(0,6);
+
+  [
+    ['dash-today-important', important, 'Keine priorisierten Punkte'],
+    ['dash-open-points', openShort, 'Keine offenen Punkte'],
+    ['dash-waiting-points', waiting, 'Keine wartenden Punkte'],
+    ['dash-overdue-points', overdue, 'Keine überfälligen Punkte'],
+  ].forEach(([id,rows,emptyTxt])=>{
+    const box=document.getElementById(id);
+    if(!box) return;
+    box.innerHTML = rows.length ? rows.map(todoMiniCard).join('') : `<div class="empty-state" style="padding:16px;"><p>${emptyTxt}</p></div>`;
+  });
+
 }
 
 
@@ -5117,6 +5405,9 @@ function startNewDay(){
     S.remarks = '';
     S.workEntries = [];
     S.photos = [];
+    const carryStatuses = ['Offen','In Arbeit','Wartet auf Firma','Wartet auf Freigabe','Verschoben'];
+    ensureTodoState();
+    S.todos = (S.todos||[]).map(t => carryStatuses.includes(t.status) ? ({...t, updatedAt:new Date().toISOString()}) : t);
     S.progressPlan = {month:'',soll:'',ist:'',phase:'',note:'',actionToday:''};
     S.progress = 0;
 
