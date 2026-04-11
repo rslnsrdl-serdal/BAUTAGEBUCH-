@@ -5095,6 +5095,71 @@ function ensureGewerkExistsForFirm(gewerkCode, gewerkName){
   }
 }
 
+
+function startNewDay(){
+  try{
+    if (typeof collectFormToState === 'function') collectFormToState();
+
+    if (typeof saveReport === 'function') {
+      try { saveReport(); } catch(e) {}
+    }
+
+    const today = (typeof todayStr === 'function')
+      ? todayStr()
+      : new Date().toISOString().slice(0,10);
+
+    S.reportDate = today;
+    S.weather = '';
+    S.tempMin = '';
+    S.tempMax = '';
+    S.wind = '';
+    S.boden = '';
+    S.remarks = '';
+    S.workEntries = [];
+    S.photos = [];
+    S.progressPlan = {month:'',soll:'',ist:'',phase:'',note:'',actionToday:''};
+    S.progress = 0;
+
+    if (S.personnelCounts) Object.keys(S.personnelCounts).forEach(k => S.personnelCounts[k] = 0);
+    if (S.personnelNames) Object.keys(S.personnelNames).forEach(k => S.personnelNames[k] = []);
+
+    if (Array.isArray(S.signatures)) {
+      S.signatures = [{id:'sig_'+Date.now(), role:'Bauleiter', name:S.bauleiter||'', firmId:''}];
+    }
+    S.sig1 = S.bauleiter || '';
+    S.sig2 = '';
+    S.sig3 = '';
+    S.sig1Firm = '';
+    S.sig2Firm = '';
+    S.sig3Firm = '';
+
+    const resetIds = ['tMin','tMax','wSel','bSel','rBem','progSoll','progIst','progAbw','progPhase','progNote','progActionToday'];
+    resetIds.forEach(id => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.value = '';
+    });
+
+    const rDate = document.getElementById('rDate');
+    if (rDate) rDate.value = today;
+
+    if (typeof renderWorkEntries === 'function') renderWorkEntries();
+    if (typeof renderPhotos === 'function') renderPhotos();
+    if (typeof buildPersonnel === 'function') buildPersonnel();
+    if (typeof renderSigGrid === 'function') renderSigGrid();
+    if (typeof renderProgressPanel === 'function') renderProgressPanel();
+    if (typeof renderProgressLive === 'function') renderProgressLive();
+    if (typeof updateWeatherSummary === 'function') updateWeatherSummary();
+    if (typeof updateBadges === 'function') updateBadges();
+    if (typeof autoSave === 'function') autoSave();
+
+    if (typeof showToast === 'function') showToast('Neuer Tag gestartet','ok');
+  }catch(e){
+    console.error(e);
+    if (typeof showToast === 'function') showToast('Neuer Tag konnte nicht gestartet werden','err');
+  }
+}
+
 // BADGES
 // ═══════════════════════════════════════════════════
 function updateBadges() {
