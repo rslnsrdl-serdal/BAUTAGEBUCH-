@@ -2789,11 +2789,6 @@ function makeStateSafeForStorage(stateObj) {
     delete q.data;
     return q;
   });
-  clone.docs = (clone.docs || []).map(d => {
-    const q = { ...d };
-    delete q.data;
-    return q;
-  });
   return clone;
 }
 
@@ -2977,7 +2972,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   renderContacts();
   updateWeatherSummary();
   updateWorkSummary();
-  runConverters();
   renderTimeline();
   renderWorkAreas();
   renderWeeklyReports();
@@ -4196,6 +4190,23 @@ function renderPhotos() {
     }
   });
 }
+
+function openDocFile(doc){
+  if(!doc || !doc.data){ showToast('Dateiinhalt nicht verfügbar. Bitte Datei erneut hochladen.','warn'); return; }
+  const isPdf = String(doc.type||'').includes('pdf') || String(doc.name||'').toLowerCase().endsWith('.pdf');
+  if(isPdf){
+    const win = window.open('', '_blank');
+    if(win){
+      const safeTitle = String(doc.name||'PDF').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+      win.document.write('<!doctype html><html><head><meta charset="utf-8"><title>'+safeTitle+'</title><style>html,body,iframe{margin:0;width:100%;height:100%;border:0;background:#fff}</style></head><body><iframe src="'+doc.data+'"></iframe></body></html>');
+      win.document.close();
+    }else{
+      const a=document.createElement('a');a.href=doc.data;a.target='_blank';a.rel='noopener';a.click();
+    }
+  }else{
+    const a=document.createElement('a');a.href=doc.data;a.download=doc.name||'Datei';a.click();
+  }
+}
 function renderDocs() {
   const grid=document.getElementById('docGrid');
   const cnt=document.getElementById('docCount');
@@ -4205,22 +4216,13 @@ function renderDocs() {
   const dIcons={pdf:'📕','msword':'📘','wordprocessingml':'📘','ms-excel':'📗','spreadsheetml':'📗'};
   (S.docs||[]).forEach(doc=>{
     const icon=Object.entries(dIcons).find(([k])=>String(doc.type||'').includes(k))?.[1]||'📄';
-    const isPdf = String(doc.type||'').includes('pdf') || String(doc.name||'').toLowerCase().endswith('.pdf');
     const t=document.createElement('div'); t.className='doc-thumb';
-    t.innerHTML=`<span class="doc-icon">${icon}</span><div class="doc-name">${esc(doc.name)}</div><div class="doc-size">${doc.size}</div>
+    t.innerHTML=`<span class="doc-icon">${icon}</span><div class="doc-name">${esc(doc.name)}</div><div class="doc-size">${doc.size||''}</div>
       <button class="ph-del" style="opacity:1;" onclick="event.stopPropagation();delDoc('${doc.id}')">✕</button>`;
-    t.onclick=()=>{
-      if(isPdf){
-        const w = window.open(doc.data, '_blank');
-        if(!w){ const a=document.createElement('a');a.href=doc.data;a.target='_blank';a.rel='noopener';a.click(); }
-      }else{
-        const a=document.createElement('a');a.href=doc.data;a.download=doc.name;a.click();
-      }
-    };
+    t.onclick=()=>openDocFile(doc);
     grid.appendChild(t);
   });
 }
-async function delPhoto(id){S.photos=(S.photos||[]).filter(p=>p.id!==id); try{await idbDeletePhoto(id);}catch(e){} autoSave();renderPhotos();updateBadges();}
 function delDoc(id){S.docs=(S.docs||[]).filter(d=>d.id!==id);autoSave();renderDocs();updateBadges();}
 function openLbox(id){const p=(S.photos||[]).find(x=>x.id===id);if(!p)return;document.getElementById('lbox-img').src=p.data;document.getElementById('lbox').classList.add('open');}
 function closeLbox(){document.getElementById('lbox').classList.remove('open');}
@@ -4569,10 +4571,9 @@ function refreshDash() {
     (S.contractors||[]).forEach(c=>(c.notes||[]).forEach(n=>notes.push({firm:c.name,color:c.color,...n})));
     notes.sort((a,b)=>String(b.date||'').localeCompare(String(a.date||'')));
     dn.innerHTML=notes.length===0?'<div class="empty-state" style="padding:16px;"><p>Henüz not yok</p></div>':
-    notes.map((n,i)=>`<div class="note-expand" onclick="this.classList.toggle('full')" style="padding:8px 11px;background:var(--bg3);border-radius:var(--radius-xs);margin-bottom:5px;border-left:3px solid ${n.color||'var(--accent2)'};">
-      <div style="font-size:9px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--text3);margin-bottom:2px;">${esc(n.firm)} · ${n.date}</div>
-      <div class="note-short" style="font-size:12px;color:var(--text2);">${esc((n.text||'').substring(0,110))}${(n.text||'').length>110?'…':''}</div>
-      <div class="note-full" style="font-size:12px;color:var(--text2);line-height:1.6;">${esc(n.text||'')}</div>
+    notes.map(n=>`<div style="padding:8px 11px;background:var(--bg3);border-radius:var(--radius-xs);margin-bottom:5px;border-left:3px solid ${n.color||'var(--accent2)'};">
+      <div style="font-size:9px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--text3);margin-bottom:4px;">${esc(n.firm)} · ${n.date}</div>
+      <div style="font-size:12px;color:var(--text2);line-height:1.65;white-space:pre-wrap;">${esc(n.text||'')}</div>
     </div>`).join('');
   }
 
@@ -4780,6 +4781,103 @@ renderMonthlyProgressTable = function(){
   _origRenderMonthlyProgressTable();
   renderProgressChart();
 };
+
+
+function pickPhoneContacts(){
+  if(navigator.contacts && navigator.contacts.select){
+    navigator.contacts.select(['name','tel','email'], {multiple:true}).then(results=>{
+      if(!results || !results.length){ showToast('Keine Kontakte ausgewählt','warn'); return; }
+      if(!S.contacts) S.contacts=[];
+      results.forEach(r=>{
+        S.contacts.unshift({
+          id:'co_'+Date.now()+'_'+Math.random().toString(36).slice(2,7),
+          name:(r.name||[])[0]||'',
+          firmId:'',
+          role:'',
+          group:'Sonstige',
+          phone:(r.tel||[])[0]||'',
+          mail:(r.email||[])[0]||'',
+          note:'Importiert aus Telefon-Rehber'
+        });
+      });
+      autoSave(); renderContacts(); showToast('Kontakte importiert','ok');
+    }).catch(()=>showToast('Kontaktimport abgebrochen','warn'));
+  }else{
+    showToast('Telefon-Rehber wird hier nicht direkt unterstützt. Bitte CSV oder VCF nutzen.','warn');
+  }
+}
+function parseCsvLine(line){
+  const result=[]; let current=''; let inQuotes=false;
+  for(let i=0;i<line.length;i++){
+    const ch=line[i];
+    if(ch === '"'){
+      if(inQuotes && line[i+1] === '"'){ current += '"'; i++; }
+      else inQuotes = !inQuotes;
+    }else if(ch === ',' && !inQuotes){
+      result.push(current.trim()); current='';
+    }else current += ch;
+  }
+  result.push(current.trim());
+  return result;
+}
+function importContactsCSV(inp){
+  const file = inp.files && inp.files[0]; if(!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const txt = String(e.target.result||'').trim();
+    if(!txt){ showToast('CSV ist leer','warn'); return; }
+    const lines = txt.split(/\r?\n/).filter(Boolean);
+    if(lines.length < 2){ showToast('CSV enthält keine Datensätze','warn'); return; }
+    const headers = parseCsvLine(lines[0]).map(x=>x.trim().toLowerCase());
+    if(!S.contacts) S.contacts=[];
+    for(let i=1;i<lines.length;i++){
+      const cols = parseCsvLine(lines[i]);
+      const obj = {};
+      headers.forEach((h,idx)=>obj[h]=cols[idx]||'');
+      const name = obj.name || obj.fullname || obj.kontakt || '';
+      if(!name) continue;
+      S.contacts.unshift({
+        id:'co_'+Date.now()+'_'+Math.random().toString(36).slice(2,7),
+        name:name,
+        firmId:'',
+        role:obj.funktion||obj.role||'',
+        group:obj.kategorie||obj.group||'Sonstige',
+        phone:obj.telefon||obj.phone||obj.mobil||'',
+        mail:obj.email||obj.mail||'',
+        note:obj.bemerkung||obj.note||'CSV Import'
+      });
+    }
+    autoSave(); renderContacts(); inp.value=''; showToast('CSV importiert','ok');
+  };
+  reader.readAsText(file,'utf-8');
+}
+function importContactsVCF(inp){
+  const file = inp.files && inp.files[0]; if(!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const txt = String(e.target.result||'');
+    const cards = txt.split(/END:VCARD/i);
+    if(!S.contacts) S.contacts=[];
+    cards.forEach(card=>{
+      const name = (card.match(/FN:(.+)/i)||[])[1] || '';
+      if(!name) return;
+      const tel = (card.match(/TEL[^:]*:(.+)/i)||[])[1] || '';
+      const mail = (card.match(/EMAIL[^:]*:(.+)/i)||[])[1] || '';
+      S.contacts.unshift({
+        id:'co_'+Date.now()+'_'+Math.random().toString(36).slice(2,7),
+        name:name.trim(),
+        firmId:'',
+        role:'',
+        group:'Sonstige',
+        phone:tel.trim(),
+        mail:mail.trim(),
+        note:'VCF Import'
+      });
+    });
+    autoSave(); renderContacts(); inp.value=''; showToast('VCF importiert','ok');
+  };
+  reader.readAsText(file,'utf-8');
+}
 
 // BADGES
 // ═══════════════════════════════════════════════════
@@ -6107,252 +6205,6 @@ function showToast(msg,type='ok'){
     patchInit();
   }
   window.addEventListener('load', patchInit);
-})();
-</script>
-
-
-<style id="sero-user-fix-style">
-/* remove converter */
-#pg-settings .card:has(#convLengthVal),
-#pg-settings .card:has(#convAreaVal),
-#pg-settings .card:has(#convVolVal),
-#pg-settings .card:has(#convMassVal),
-#pg-settings .card:has(#convPressureVal),
-#pg-settings .card:has(#convTempVal){display:none !important;}
-/* safer fallback if :has unsupported */
-#sero-hide-converter{display:none;}
-.note-expandable{cursor:pointer}
-.note-expandable.expanded .short-note{display:none}
-.note-expandable:not(.expanded) .full-note{display:none}
-</style>
-<div id="sero-hide-converter"></div>
-<script id="sero-user-fix-script">
-(function(){
-  function ready(fn){ if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', fn); else fn(); }
-
-  // missing helpers from previous patch set
-  window.toggleCollapse = function(panelId, btnId, showText, hideText){
-    const panel = document.getElementById(panelId);
-    const btn = document.getElementById(btnId);
-    if(!panel || !btn) return;
-    const open = panel.classList.toggle('open');
-    btn.textContent = open ? hideText : showText;
-  };
-  window.openCollapse = function(panelId, btnId, hideText){
-    const panel = document.getElementById(panelId);
-    const btn = document.getElementById(btnId);
-    if(!panel || !btn) return;
-    panel.classList.add('open');
-    btn.textContent = hideText;
-  };
-  window.updateWeatherSummary = function(){
-    const txt = [window.S?.weather || 'Nicht erfasst', document.getElementById('tMin')?.value ? document.getElementById('tMin').value+'°C' : '', document.getElementById('tMax')?.value ? document.getElementById('tMax').value+'°C' : '', document.getElementById('wSel')?.value || '', document.getElementById('bSel')?.value || ''].filter(Boolean).join(' · ');
-    const el = document.getElementById('weatherSummaryText'); if(el) el.textContent = txt || 'Nicht erfasst';
-  };
-  window.updateWorkSummary = function(){
-    const el = document.getElementById('workSummaryText');
-    if(el) el.textContent = ((window.S?.workEntries||[]).length ? ((window.S.workEntries||[]).length + ' Einträge') : 'Keine Einträge');
-  };
-  // converter canceled
-  window.runConverters = function(){};
-
-  // keep docs data in localStorage so PDFs still open after reload
-  window.makeStateSafeForStorage = function(stateObj){
-    const clone = JSON.parse(JSON.stringify(stateObj));
-    clone.photos = (clone.photos || []).map(p => {
-      const q = { ...p };
-      delete q.data;
-      return q;
-    });
-    return clone;
-  };
-
-  window.openDocFile = function(doc){
-    if(!doc || !doc.data){
-      if(window.showToast) showToast('Dateiinhalt nicht verfügbar. Bitte Datei erneut hochladen.','warn');
-      return;
-    }
-    const isPdf = String(doc.type||'').includes('pdf') || String(doc.name||'').toLowerCase().endsWith('.pdf');
-    if(isPdf){
-      const w = window.open('', '_blank');
-      if(w){
-        const safeTitle = String(doc.name||'PDF').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-        w.document.write('<!doctype html><html><head><meta charset="utf-8"><title>'+safeTitle+'</title><style>html,body,iframe{margin:0;width:100%;height:100%;border:0;background:#fff}</style></head><body><iframe src="'+doc.data+'"></iframe></body></html>');
-        w.document.close();
-      }else{
-        window.open(doc.data, '_blank');
-      }
-    }else{
-      const a=document.createElement('a');a.href=doc.data;a.download=doc.name||'Datei';a.click();
-    }
-  };
-
-  window.renderDocs = function() {
-    const grid=document.getElementById('docGrid');
-    const cnt=document.getElementById('docCount');
-    if(!grid)return;
-    grid.innerHTML='';
-    if(cnt)cnt.textContent=(window.S?.docs||[]).length+' Dokumente';
-    const dIcons={pdf:'📕','msword':'📘','wordprocessingml':'📘','ms-excel':'📗','spreadsheetml':'📗'};
-    (window.S?.docs||[]).forEach(doc=>{
-      const icon=Object.entries(dIcons).find(([k])=>String(doc.type||'').includes(k))?.[1]||'📄';
-      const t=document.createElement('div'); t.className='doc-thumb';
-      t.innerHTML=`<span class="doc-icon">${icon}</span><div class="doc-name">${window.esc?esc(doc.name):doc.name}</div><div class="doc-size">${doc.size||''}</div>
-        <button class="ph-del" style="opacity:1;" onclick="event.stopPropagation();delDoc('${doc.id}')">✕</button>`;
-      t.onclick=()=>openDocFile(doc);
-      grid.appendChild(t);
-    });
-  };
-
-  // contacts import helpers
-  function parseCsvLine(line){
-    const result=[]; let current=''; let inQuotes=false;
-    for(let i=0;i<line.length;i++){
-      const ch=line[i];
-      if(ch === '"'){
-        if(inQuotes && line[i+1] === '"'){ current += '"'; i++; }
-        else inQuotes = !inQuotes;
-      }else if(ch === ',' && !inQuotes){
-        result.push(current.trim()); current='';
-      }else current += ch;
-    }
-    result.push(current.trim());
-    return result;
-  }
-
-  window.pickPhoneContacts = async function(){
-    try{
-      if(navigator.contacts && navigator.contacts.select){
-        const results = await navigator.contacts.select(['name','tel','email'], {multiple:true});
-        if(!results || !results.length){ if(window.showToast) showToast('Keine Kontakte ausgewählt','warn'); return; }
-        if(!window.S.contacts) S.contacts = [];
-        results.forEach(r=>{
-          S.contacts.unshift({
-            id:'co_'+Date.now()+'_'+Math.random().toString(36).slice(2,7),
-            name:(r.name||[])[0]||'',
-            firmId:'',
-            role:'',
-            group:'Sonstige',
-            phone:(r.tel||[])[0]||'',
-            mail:(r.email||[])[0]||'',
-            note:'Importiert aus Telefon-Rehber'
-          });
-        });
-        if(window.autoSave) autoSave();
-        if(window.renderContacts) renderContacts();
-        if(window.showToast) showToast('Kontakte importiert','ok');
-      } else {
-        if(window.showToast) showToast('Telefon-Rehber hier nicht direkt unterstützt. Bitte CSV oder VCF nutzen.','warn');
-      }
-    }catch(e){
-      if(window.showToast) showToast('Kontaktimport abgebrochen','warn');
-    }
-  };
-
-  window.importContactsCSV = function(inp){
-    const file = inp.files && inp.files[0]; if(!file) return;
-    const reader = new FileReader();
-    reader.onload = e => {
-      const txt = String(e.target.result||'').trim();
-      if(!txt){ if(window.showToast) showToast('CSV ist leer','warn'); return; }
-      const lines = txt.split(/\r?\n/).filter(Boolean);
-      if(lines.length < 2){ if(window.showToast) showToast('CSV enthält keine Datensätze','warn'); return; }
-      const headers = parseCsvLine(lines[0]).map(x=>x.trim().toLowerCase());
-      if(!window.S.contacts) S.contacts = [];
-      for(let i=1;i<lines.length;i++){
-        const cols = parseCsvLine(lines[i]);
-        const obj={}; headers.forEach((h,idx)=>obj[h]=cols[idx]||'');
-        const name = obj.name || obj.fullname || obj.kontakt || '';
-        if(!name) continue;
-        S.contacts.unshift({
-          id:'co_'+Date.now()+'_'+Math.random().toString(36).slice(2,7),
-          name:name,
-          firmId:'',
-          role:obj.funktion || obj.role || '',
-          group:obj.kategorie || obj.group || 'Sonstige',
-          phone:obj.telefon || obj.phone || obj.mobil || '',
-          mail:obj.email || obj.mail || '',
-          note:obj.bemerkung || obj.note || 'CSV Import'
-        });
-      }
-      if(window.autoSave) autoSave();
-      if(window.renderContacts) renderContacts();
-      inp.value='';
-      if(window.showToast) showToast('CSV importiert','ok');
-    };
-    reader.readAsText(file,'utf-8');
-  };
-
-  window.importContactsVCF = function(inp){
-    const file = inp.files && inp.files[0]; if(!file) return;
-    const reader = new FileReader();
-    reader.onload = e => {
-      const txt = String(e.target.result||'');
-      const cards = txt.split(/END:VCARD/i);
-      if(!window.S.contacts) S.contacts = [];
-      cards.forEach(card=>{
-        const name = (card.match(/FN:(.+)/i)||[])[1] || '';
-        if(!name) return;
-        const tel = (card.match(/TEL[^:]*:(.+)/i)||[])[1] || '';
-        const mail = (card.match(/EMAIL[^:]*:(.+)/i)||[])[1] || '';
-        S.contacts.unshift({
-          id:'co_'+Date.now()+'_'+Math.random().toString(36).slice(2,7),
-          name:name.trim(),
-          firmId:'',
-          role:'',
-          group:'Sonstige',
-          phone:tel.trim(),
-          mail:mail.trim(),
-          note:'VCF Import'
-        });
-      });
-      if(window.autoSave) autoSave();
-      if(window.renderContacts) renderContacts();
-      inp.value='';
-      if(window.showToast) showToast('VCF importiert','ok');
-    };
-    reader.readAsText(file,'utf-8');
-  };
-
-  // dashboard full notes
-  const _refreshDash = window.refreshDash;
-  window.refreshDash = function(){
-    if(typeof _refreshDash === 'function') _refreshDash();
-    const dn=document.getElementById('dash-notes');
-    if(dn){
-      const notes=[];
-      (window.S?.contractors||[]).forEach(c=>(c.notes||[]).forEach(n=>notes.push({firm:c.name,color:c.color,text:n.text,date:n.date})));
-      notes.sort((a,b)=>String(b.date||'').localeCompare(String(a.date||'')));
-      dn.innerHTML = notes.length ? notes.map(n=>`
-        <div class="note-expandable" onclick="this.classList.toggle('expanded')" style="padding:8px 11px;background:var(--bg3);border-radius:var(--radius-xs);margin-bottom:6px;border-left:3px solid ${n.color||'var(--accent2)'};">
-          <div style="font-size:9px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--text3);margin-bottom:3px;">${window.esc?esc(n.firm):n.firm} · ${window.esc?esc(n.date):n.date}</div>
-          <div class="short-note" style="font-size:12px;color:var(--text2);line-height:1.6;">${window.esc?esc((n.text||'').slice(0,120)):n.text}${(n.text||'').length>120?'…':''}</div>
-          <div class="full-note" style="font-size:12px;color:var(--text2);line-height:1.7;">${window.esc?esc(n.text||''):n.text||''}</div>
-        </div>`).join('') : '<div class="empty-state" style="padding:16px;"><p>Henüz not yok</p></div>';
-    }
-  };
-
-  ready(function(){
-    // hide converter card robustly
-    const cards = Array.from(document.querySelectorAll('#pg-settings .card'));
-    cards.forEach(card=>{
-      const txt = card.textContent || '';
-      if(txt.includes('Baustellen-Umrechner') || txt.includes('İnşaat çevirici')) card.style.display='none';
-    });
-    // ensure notes modal has edit id hidden input
-    const noteBody = document.querySelector('#modal-addNote .modal-body');
-    if(noteBody && !document.getElementById('note-edit-id')){
-      const hid = document.createElement('input'); hid.type='hidden'; hid.id='note-edit-id'; noteBody.prepend(hid);
-    }
-    // rerender critical sections after original init
-    setTimeout(()=>{
-      if(window.renderDocs) renderDocs();
-      if(window.renderContacts) renderContacts();
-      if(window.refreshDash) refreshDash();
-      if(window.updateWeatherSummary) updateWeatherSummary();
-      if(window.updateWorkSummary) updateWorkSummary();
-    }, 150);
-  });
 })();
 </script>
 
