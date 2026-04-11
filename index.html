@@ -2118,7 +2118,7 @@ body{
             <div class="fl">Länge</div>
             <input type="number" class="fi" id="convLengthVal" placeholder="Wert" oninput="runConverters()">
             <select class="fs" id="convLengthUnit" onchange="runConverters()">
-              <option value="m">m</option><option value="cm">cm</option><option value="mm">mm</option><option value="km">km</option><option value="ft">ft</option><option value="yd">yd</option><option value="inch">in</option>
+              <option value="m">m</option><option value="cm">cm</option><option value="mm">mm</option><option value="km">km</option>
             </select>
             <div id="convLengthOut" style="font-size:12px;color:var(--text2);margin-top:8px;line-height:1.7;"></div>
           </div>
@@ -2126,7 +2126,7 @@ body{
             <div class="fl">Fläche</div>
             <input type="number" class="fi" id="convAreaVal" placeholder="Wert" oninput="runConverters()">
             <select class="fs" id="convAreaUnit" onchange="runConverters()">
-              <option value="m2">m²</option><option value="cm2">cm²</option><option value="mm2">mm²</option><option value="ha">ha</option><option value="km2">km²</option><option value="ft2">ft²</option>
+              <option value="m2">m²</option><option value="cm2">cm²</option><option value="ha">ha</option>
             </select>
             <div id="convAreaOut" style="font-size:12px;color:var(--text2);margin-top:8px;line-height:1.7;"></div>
           </div>
@@ -2134,7 +2134,7 @@ body{
             <div class="fl">Volumen</div>
             <input type="number" class="fi" id="convVolVal" placeholder="Wert" oninput="runConverters()">
             <select class="fs" id="convVolUnit" onchange="runConverters()">
-              <option value="m3">m³</option><option value="l">l</option><option value="cm3">cm³</option><option value="ft3">ft³</option>
+              <option value="m3">m³</option><option value="l">l</option><option value="cm3">cm³</option>
             </select>
             <div id="convVolOut" style="font-size:12px;color:var(--text2);margin-top:8px;line-height:1.7;"></div>
           </div>
@@ -2142,7 +2142,7 @@ body{
             <div class="fl">Gewicht</div>
             <input type="number" class="fi" id="convMassVal" placeholder="Wert" oninput="runConverters()">
             <select class="fs" id="convMassUnit" onchange="runConverters()">
-              <option value="kg">kg</option><option value="g">g</option><option value="t">t</option><option value="lb">lb</option>
+              <option value="kg">kg</option><option value="g">g</option><option value="t">t</option>
             </select>
             <div id="convMassOut" style="font-size:12px;color:var(--text2);margin-top:8px;line-height:1.7;"></div>
           </div>
@@ -2150,7 +2150,7 @@ body{
             <div class="fl">Druck</div>
             <input type="number" class="fi" id="convPressureVal" placeholder="Wert" oninput="runConverters()">
             <select class="fs" id="convPressureUnit" onchange="runConverters()">
-              <option value="bar">bar</option><option value="kpa">kPa</option><option value="mpa">MPa</option><option value="pa">Pa</option><option value="nmm2">N/mm²</option><option value="psi">psi</option>
+              <option value="bar">bar</option><option value="kpa">kPa</option><option value="mpa">MPa</option>
             </select>
             <div id="convPressureOut" style="font-size:12px;color:var(--text2);margin-top:8px;line-height:1.7;"></div>
           </div>
@@ -2158,7 +2158,7 @@ body{
             <div class="fl">Temperatur</div>
             <input type="number" class="fi" id="convTempVal" placeholder="Wert" oninput="runConverters()">
             <select class="fs" id="convTempUnit" onchange="runConverters()">
-              <option value="c">°C</option><option value="f">°F</option><option value="k">K</option>
+              <option value="c">°C</option><option value="f">°F</option>
             </select>
             <div id="convTempOut" style="font-size:12px;color:var(--text2);margin-top:8px;line-height:1.7;"></div>
           </div>
@@ -2786,6 +2786,11 @@ function makeStateSafeForStorage(stateObj) {
   const clone = JSON.parse(JSON.stringify(stateObj));
   clone.photos = (clone.photos || []).map(p => {
     const q = { ...p };
+    delete q.data;
+    return q;
+  });
+  clone.docs = (clone.docs || []).map(d => {
+    const q = { ...d };
     delete q.data;
     return q;
   });
@@ -3467,7 +3472,6 @@ function renderWorkEntries() {
     if (empty) empty.style.display='block'; updateWorkSummary(); return;
   }
   if (empty) empty.style.display='none';
-  updateWorkSummary();
   updateWorkSummary();
   const firmOpts = '<option value="">— Alle / Tümü</option>' + (S.contractors||[]).map(c=>`<option value="${esc(c.id)}">${esc(c.name)}</option>`).join('');
   S.workEntries.forEach((e, idx) => {
@@ -4192,35 +4196,6 @@ function renderPhotos() {
     }
   });
 }
-function dataURLToBlob(dataUrl){
-  const arr = String(dataUrl||'').split(',');
-  if(arr.length < 2) return null;
-  const mime = (arr[0].match(/:(.*?);/)||[])[1] || 'application/octet-stream';
-  const bstr = atob(arr[1]);
-  let n = bstr.length;
-  const u8arr = new Uint8Array(n);
-  while(n--) u8arr[n] = bstr.charCodeAt(n);
-  return new Blob([u8arr], {type:mime});
-}
-function openDocFile(doc){
-  if(!doc || !doc.data){ showToast('Dateiinhalt nicht verfügbar. Bitte Datei erneut hochladen.','warn'); return; }
-  const isPdf = String(doc.type||'').includes('pdf') || String(doc.name||'').toLowerCase().endsWith('.pdf');
-  if(isPdf){
-    try{
-      const win = window.open('', '_blank', 'noopener');
-      if(win){
-        win.document.write('<!doctype html><html><head><meta charset="utf-8"><title>'+ (doc.name||'PDF') +'</title><style>html,body,iframe{margin:0;width:100%;height:100%;border:0;background:#fff}</style></head><body><iframe src="'+doc.data+'"></iframe></body></html>');
-        win.document.close();
-      }else{
-        window.open(doc.data, '_blank', 'noopener');
-      }
-    }catch(e){
-      window.open(doc.data, '_blank', 'noopener');
-    }
-  }else{
-    const a=document.createElement('a'); a.href=doc.data; a.download=doc.name||'Datei'; a.click();
-  }
-}
 function renderDocs() {
   const grid=document.getElementById('docGrid');
   const cnt=document.getElementById('docCount');
@@ -4230,14 +4205,21 @@ function renderDocs() {
   const dIcons={pdf:'📕','msword':'📘','wordprocessingml':'📘','ms-excel':'📗','spreadsheetml':'📗'};
   (S.docs||[]).forEach(doc=>{
     const icon=Object.entries(dIcons).find(([k])=>String(doc.type||'').includes(k))?.[1]||'📄';
+    const isPdf = String(doc.type||'').includes('pdf') || String(doc.name||'').toLowerCase().endswith('.pdf');
     const t=document.createElement('div'); t.className='doc-thumb';
-    t.innerHTML=`<span class="doc-icon">${icon}</span><div class="doc-name">${esc(doc.name)}</div><div class="doc-size">${doc.size||''}</div>
+    t.innerHTML=`<span class="doc-icon">${icon}</span><div class="doc-name">${esc(doc.name)}</div><div class="doc-size">${doc.size}</div>
       <button class="ph-del" style="opacity:1;" onclick="event.stopPropagation();delDoc('${doc.id}')">✕</button>`;
-    t.onclick=()=>openDocFile(doc);
+    t.onclick=()=>{
+      if(isPdf){
+        const w = window.open(doc.data, '_blank');
+        if(!w){ const a=document.createElement('a');a.href=doc.data;a.target='_blank';a.rel='noopener';a.click(); }
+      }else{
+        const a=document.createElement('a');a.href=doc.data;a.download=doc.name;a.click();
+      }
+    };
     grid.appendChild(t);
   });
 }
-
 async function delPhoto(id){S.photos=(S.photos||[]).filter(p=>p.id!==id); try{await idbDeletePhoto(id);}catch(e){} autoSave();renderPhotos();updateBadges();}
 function delDoc(id){S.docs=(S.docs||[]).filter(d=>d.id!==id);autoSave();renderDocs();updateBadges();}
 function openLbox(id){const p=(S.photos||[]).find(x=>x.id===id);if(!p)return;document.getElementById('lbox-img').src=p.data;document.getElementById('lbox').classList.add('open');}
@@ -4798,208 +4780,6 @@ renderMonthlyProgressTable = function(){
   _origRenderMonthlyProgressTable();
   renderProgressChart();
 };
-
-
-function toggleCollapse(panelId, btnId, showText, hideText){
-  const p=document.getElementById(panelId), b=document.getElementById(btnId);
-  if(!p || !b) return;
-  const isOpen = p.classList.toggle('open');
-  b.textContent = isOpen ? hideText : showText;
-}
-function openCollapse(panelId, btnId, hideText){
-  const p=document.getElementById(panelId), b=document.getElementById(btnId);
-  if(!p || !b) return;
-  p.classList.add('open');
-  b.textContent = hideText;
-}
-function updateWeatherSummary(){
-  const parts = [];
-  if(S.weather) parts.push(S.weather);
-  if(gv('tMin') || gv('tMax')) parts.push(`${gv('tMin')||'—'}°C bis ${gv('tMax')||'—'}°C`);
-  if(gv('wSel')) parts.push(gv('wSel'));
-  if(gv('bSel')) parts.push(gv('bSel'));
-  const el = document.getElementById('weatherSummaryText');
-  if(el) el.textContent = parts.length ? parts.join(' · ') : 'Nicht erfasst';
-}
-function updateWorkSummary(){
-  const count = (S.workEntries||[]).length;
-  const el = document.getElementById('workSummaryText');
-  if(el) el.textContent = count ? `${count} Einträge erfasst` : 'Keine Einträge';
-}
-function pickPhoneContacts(){
-  if (navigator.contacts && navigator.contacts.select) {
-    navigator.contacts.select(['name','tel','email'], {multiple:true}).then(results=>{
-      if(!results || !results.length){ showToast('Keine Kontakte ausgewählt','warn'); return; }
-      if(!S.contacts) S.contacts=[];
-      results.forEach(r=>{
-        S.contacts.unshift({
-          id:'co_'+Date.now()+'_'+Math.random().toString(36).slice(2,7),
-          name:(r.name&&r.name[0])||'',
-          firmId:'',
-          role:'',
-          group:'Sonstige',
-          phone:(r.tel&&r.tel[0])||'',
-          mail:(r.email&&r.email[0])||'',
-          note:'Import aus Telefon-Rehber'
-        });
-      });
-      autoSave(); renderContacts(); showToast('Kontakte importiert','ok');
-    }).catch(()=>showToast('Kontaktimport abgebrochen','warn'));
-  } else {
-    showToast('Direkter Rehber-Import wird hier nicht unterstützt. Bitte CSV oder VCF nutzen.','warn');
-  }
-}
-
-function parseCsvLine(line){
-  const result = [];
-  let current = '';
-  let inQuotes = false;
-  for(let i=0;i<line.length;i++){
-    const ch = line[i];
-    if(ch === '"'){
-      if(inQuotes && line[i+1] === '"'){
-        current += '"';
-        i++;
-      }else{
-        inQuotes = !inQuotes;
-      }
-    }else if(ch === ',' && !inQuotes){
-      result.push(current.trim());
-      current = '';
-    }else{
-      current += ch;
-    }
-  }
-  result.push(current.trim());
-  return result;
-}
-function importContactsCSV(inp){
-  const file = inp.files && inp.files[0];
-  if(!file) return;
-  const reader = new FileReader();
-  reader.onload = e => {
-    const txt = String(e.target.result||'').trim();
-    if(!txt){ showToast('CSV ist leer','warn'); return; }
-    const lines = txt.split(/
-?
-/).filter(Boolean);
-    if(lines.length < 2){ showToast('CSV enthält keine Datensätze','warn'); return; }
-    const headers = parseCsvLine(lines[0]).map(x=>x.trim().toLowerCase());
-    if(!S.contacts) S.contacts = [];
-    for(let i=1;i<lines.length;i++){
-      const cols = parseCsvLine(lines[i]);
-      const obj = {};
-      headers.forEach((h,idx)=>obj[h]=cols[idx]||'');
-      const name = obj.name || obj.fullname || obj.kontakt || obj['anzeige'] || '';
-      if(!name) continue;
-      S.contacts.unshift({
-        id:'co_'+Date.now()+'_'+Math.random().toString(36).slice(2,7),
-        name:name,
-        firmId:'',
-        role:obj.funktion || obj.role || '',
-        group:obj.kategorie || obj.group || 'Sonstige',
-        phone:obj.telefon || obj.phone || obj.mobil || '',
-        mail:obj.email || obj.mail || '',
-        note:obj.bemerkung || obj.note || 'CSV Import'
-      });
-    }
-    autoSave(); renderContacts(); inp.value=''; showToast('CSV importiert','ok');
-  };
-  reader.readAsText(file,'utf-8');
-}
-function importContactsVCF(inp){
-
-  const file = inp.files && inp.files[0];
-  if(!file) return;
-  const reader = new FileReader();
-  reader.onload = e => {
-    const txt = String(e.target.result||'');
-    const cards = txt.split(/END:VCARD/i);
-    if(!S.contacts) S.contacts=[];
-    cards.forEach(card=>{
-      const name = (card.match(/FN:(.+)/i)||[])[1] || '';
-      if(!name) return;
-      const tel = (card.match(/TEL[^:]*:(.+)/i)||[])[1] || '';
-      const mail = (card.match(/EMAIL[^:]*:(.+)/i)||[])[1] || '';
-      S.contacts.unshift({
-        id:'co_'+Date.now()+'_'+Math.random().toString(36).slice(2,7),
-        name:name.trim(),
-        firmId:'',
-        role:'',
-        group:'Sonstige',
-        phone:tel.trim(),
-        mail:mail.trim(),
-        note:'VCF Import'
-      });
-    });
-    autoSave(); renderContacts(); inp.value=''; showToast('VCF importiert','ok');
-  };
-  reader.readAsText(file,'utf-8');
-}
-function fmtNum(v){
-  const n = Number(v);
-  return Number.isFinite(n) ? String(Math.round(n*1000)/1000) : '';
-}
-function runConverters(){
-  const lengthVal=parseFloat(gv('convLengthVal'));
-  const lengthUnit=gv('convLengthUnit');
-  const areaVal=parseFloat(gv('convAreaVal'));
-  const areaUnit=gv('convAreaUnit');
-  const volVal=parseFloat(gv('convVolVal'));
-  const volUnit=gv('convVolUnit');
-  const massVal=parseFloat(gv('convMassVal'));
-  const massUnit=gv('convMassUnit');
-  const pressureVal=parseFloat(gv('convPressureVal'));
-  const pressureUnit=gv('convPressureUnit');
-  const tempVal=parseFloat(gv('convTempVal'));
-  const tempUnit=gv('convTempUnit');
-
-  const L = document.getElementById('convLengthOut');
-  const A = document.getElementById('convAreaOut');
-  const V = document.getElementById('convVolOut');
-  const M = document.getElementById('convMassOut');
-  const P = document.getElementById('convPressureOut');
-  const T = document.getElementById('convTempOut');
-
-  if(L){
-    if(Number.isFinite(lengthVal)){
-      const meters = {mm:lengthVal/1000, cm:lengthVal/100, m:lengthVal, km:lengthVal*1000, inch:lengthVal*0.0254, ft:lengthVal*0.3048, yd:lengthVal*0.9144}[lengthUnit] ?? lengthVal;
-      L.innerHTML = `${fmtNum(meters)} m<br>${fmtNum(meters*100)} cm<br>${fmtNum(meters*1000)} mm<br>${fmtNum(meters/1000)} km<br>${fmtNum(meters/0.3048)} ft<br>${fmtNum(meters/0.9144)} yd<br>${fmtNum(meters/0.0254)} in`;
-    } else L.innerHTML='';
-  }
-  if(A){
-    if(Number.isFinite(areaVal)){
-      const m2 = {mm2:areaVal/1_000_000, cm2:areaVal/10_000, m2:areaVal, ha:areaVal*10_000, km2:areaVal*1_000_000, ft2:areaVal*0.092903}[areaUnit] ?? areaVal;
-      A.innerHTML = `${fmtNum(m2)} m²<br>${fmtNum(m2*10_000)} cm²<br>${fmtNum(m2*1_000_000)} mm²<br>${fmtNum(m2/10_000)} ha<br>${fmtNum(m2/1_000_000)} km²<br>${fmtNum(m2/0.092903)} ft²`;
-    } else A.innerHTML='';
-  }
-  if(V){
-    if(Number.isFinite(volVal)){
-      const m3 = {cm3:volVal/1_000_000, l:volVal/1000, m3:volVal, ft3:volVal*0.0283168}[volUnit] ?? volVal;
-      V.innerHTML = `${fmtNum(m3)} m³<br>${fmtNum(m3*1000)} l<br>${fmtNum(m3*1_000_000)} cm³<br>${fmtNum(m3/0.0283168)} ft³`;
-    } else V.innerHTML='';
-  }
-  if(M){
-    if(Number.isFinite(massVal)){
-      const kg = {g:massVal/1000, kg:massVal, t:massVal*1000, lb:massVal*0.45359237}[massUnit] ?? massVal;
-      M.innerHTML = `${fmtNum(kg)} kg<br>${fmtNum(kg*1000)} g<br>${fmtNum(kg/1000)} t<br>${fmtNum(kg/0.45359237)} lb`;
-    } else M.innerHTML='';
-  }
-  if(P){
-    if(Number.isFinite(pressureVal)){
-      const kpa = {pa:pressureVal/1000, kpa:pressureVal, mpa:pressureVal*1000, bar:pressureVal*100, nmm2:pressureVal*1000, psi:pressureVal*6.89476}[pressureUnit] ?? pressureVal;
-      P.innerHTML = `${fmtNum(kpa)} kPa<br>${fmtNum(kpa/100)} bar<br>${fmtNum(kpa/1000)} MPa<br>${fmtNum(kpa)} kN/m²<br>${fmtNum(kpa/6.89476)} psi<br>${fmtNum(kpa/1000)} N/mm²`;
-    } else P.innerHTML='';
-  }
-  if(T){
-    if(Number.isFinite(tempVal)){
-      const c = tempUnit==='c' ? tempVal : tempUnit==='f' ? (tempVal-32)*5/9 : tempVal-273.15;
-      const f = c*9/5+32;
-      const k = c+273.15;
-      T.innerHTML = `${fmtNum(c)} °C<br>${fmtNum(f)} °F<br>${fmtNum(k)} K`;
-    } else T.innerHTML='';
-  }
-}
 
 // BADGES
 // ═══════════════════════════════════════════════════
@@ -6327,6 +6107,252 @@ function showToast(msg,type='ok'){
     patchInit();
   }
   window.addEventListener('load', patchInit);
+})();
+</script>
+
+
+<style id="sero-user-fix-style">
+/* remove converter */
+#pg-settings .card:has(#convLengthVal),
+#pg-settings .card:has(#convAreaVal),
+#pg-settings .card:has(#convVolVal),
+#pg-settings .card:has(#convMassVal),
+#pg-settings .card:has(#convPressureVal),
+#pg-settings .card:has(#convTempVal){display:none !important;}
+/* safer fallback if :has unsupported */
+#sero-hide-converter{display:none;}
+.note-expandable{cursor:pointer}
+.note-expandable.expanded .short-note{display:none}
+.note-expandable:not(.expanded) .full-note{display:none}
+</style>
+<div id="sero-hide-converter"></div>
+<script id="sero-user-fix-script">
+(function(){
+  function ready(fn){ if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', fn); else fn(); }
+
+  // missing helpers from previous patch set
+  window.toggleCollapse = function(panelId, btnId, showText, hideText){
+    const panel = document.getElementById(panelId);
+    const btn = document.getElementById(btnId);
+    if(!panel || !btn) return;
+    const open = panel.classList.toggle('open');
+    btn.textContent = open ? hideText : showText;
+  };
+  window.openCollapse = function(panelId, btnId, hideText){
+    const panel = document.getElementById(panelId);
+    const btn = document.getElementById(btnId);
+    if(!panel || !btn) return;
+    panel.classList.add('open');
+    btn.textContent = hideText;
+  };
+  window.updateWeatherSummary = function(){
+    const txt = [window.S?.weather || 'Nicht erfasst', document.getElementById('tMin')?.value ? document.getElementById('tMin').value+'°C' : '', document.getElementById('tMax')?.value ? document.getElementById('tMax').value+'°C' : '', document.getElementById('wSel')?.value || '', document.getElementById('bSel')?.value || ''].filter(Boolean).join(' · ');
+    const el = document.getElementById('weatherSummaryText'); if(el) el.textContent = txt || 'Nicht erfasst';
+  };
+  window.updateWorkSummary = function(){
+    const el = document.getElementById('workSummaryText');
+    if(el) el.textContent = ((window.S?.workEntries||[]).length ? ((window.S.workEntries||[]).length + ' Einträge') : 'Keine Einträge');
+  };
+  // converter canceled
+  window.runConverters = function(){};
+
+  // keep docs data in localStorage so PDFs still open after reload
+  window.makeStateSafeForStorage = function(stateObj){
+    const clone = JSON.parse(JSON.stringify(stateObj));
+    clone.photos = (clone.photos || []).map(p => {
+      const q = { ...p };
+      delete q.data;
+      return q;
+    });
+    return clone;
+  };
+
+  window.openDocFile = function(doc){
+    if(!doc || !doc.data){
+      if(window.showToast) showToast('Dateiinhalt nicht verfügbar. Bitte Datei erneut hochladen.','warn');
+      return;
+    }
+    const isPdf = String(doc.type||'').includes('pdf') || String(doc.name||'').toLowerCase().endsWith('.pdf');
+    if(isPdf){
+      const w = window.open('', '_blank');
+      if(w){
+        const safeTitle = String(doc.name||'PDF').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+        w.document.write('<!doctype html><html><head><meta charset="utf-8"><title>'+safeTitle+'</title><style>html,body,iframe{margin:0;width:100%;height:100%;border:0;background:#fff}</style></head><body><iframe src="'+doc.data+'"></iframe></body></html>');
+        w.document.close();
+      }else{
+        window.open(doc.data, '_blank');
+      }
+    }else{
+      const a=document.createElement('a');a.href=doc.data;a.download=doc.name||'Datei';a.click();
+    }
+  };
+
+  window.renderDocs = function() {
+    const grid=document.getElementById('docGrid');
+    const cnt=document.getElementById('docCount');
+    if(!grid)return;
+    grid.innerHTML='';
+    if(cnt)cnt.textContent=(window.S?.docs||[]).length+' Dokumente';
+    const dIcons={pdf:'📕','msword':'📘','wordprocessingml':'📘','ms-excel':'📗','spreadsheetml':'📗'};
+    (window.S?.docs||[]).forEach(doc=>{
+      const icon=Object.entries(dIcons).find(([k])=>String(doc.type||'').includes(k))?.[1]||'📄';
+      const t=document.createElement('div'); t.className='doc-thumb';
+      t.innerHTML=`<span class="doc-icon">${icon}</span><div class="doc-name">${window.esc?esc(doc.name):doc.name}</div><div class="doc-size">${doc.size||''}</div>
+        <button class="ph-del" style="opacity:1;" onclick="event.stopPropagation();delDoc('${doc.id}')">✕</button>`;
+      t.onclick=()=>openDocFile(doc);
+      grid.appendChild(t);
+    });
+  };
+
+  // contacts import helpers
+  function parseCsvLine(line){
+    const result=[]; let current=''; let inQuotes=false;
+    for(let i=0;i<line.length;i++){
+      const ch=line[i];
+      if(ch === '"'){
+        if(inQuotes && line[i+1] === '"'){ current += '"'; i++; }
+        else inQuotes = !inQuotes;
+      }else if(ch === ',' && !inQuotes){
+        result.push(current.trim()); current='';
+      }else current += ch;
+    }
+    result.push(current.trim());
+    return result;
+  }
+
+  window.pickPhoneContacts = async function(){
+    try{
+      if(navigator.contacts && navigator.contacts.select){
+        const results = await navigator.contacts.select(['name','tel','email'], {multiple:true});
+        if(!results || !results.length){ if(window.showToast) showToast('Keine Kontakte ausgewählt','warn'); return; }
+        if(!window.S.contacts) S.contacts = [];
+        results.forEach(r=>{
+          S.contacts.unshift({
+            id:'co_'+Date.now()+'_'+Math.random().toString(36).slice(2,7),
+            name:(r.name||[])[0]||'',
+            firmId:'',
+            role:'',
+            group:'Sonstige',
+            phone:(r.tel||[])[0]||'',
+            mail:(r.email||[])[0]||'',
+            note:'Importiert aus Telefon-Rehber'
+          });
+        });
+        if(window.autoSave) autoSave();
+        if(window.renderContacts) renderContacts();
+        if(window.showToast) showToast('Kontakte importiert','ok');
+      } else {
+        if(window.showToast) showToast('Telefon-Rehber hier nicht direkt unterstützt. Bitte CSV oder VCF nutzen.','warn');
+      }
+    }catch(e){
+      if(window.showToast) showToast('Kontaktimport abgebrochen','warn');
+    }
+  };
+
+  window.importContactsCSV = function(inp){
+    const file = inp.files && inp.files[0]; if(!file) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+      const txt = String(e.target.result||'').trim();
+      if(!txt){ if(window.showToast) showToast('CSV ist leer','warn'); return; }
+      const lines = txt.split(/\r?\n/).filter(Boolean);
+      if(lines.length < 2){ if(window.showToast) showToast('CSV enthält keine Datensätze','warn'); return; }
+      const headers = parseCsvLine(lines[0]).map(x=>x.trim().toLowerCase());
+      if(!window.S.contacts) S.contacts = [];
+      for(let i=1;i<lines.length;i++){
+        const cols = parseCsvLine(lines[i]);
+        const obj={}; headers.forEach((h,idx)=>obj[h]=cols[idx]||'');
+        const name = obj.name || obj.fullname || obj.kontakt || '';
+        if(!name) continue;
+        S.contacts.unshift({
+          id:'co_'+Date.now()+'_'+Math.random().toString(36).slice(2,7),
+          name:name,
+          firmId:'',
+          role:obj.funktion || obj.role || '',
+          group:obj.kategorie || obj.group || 'Sonstige',
+          phone:obj.telefon || obj.phone || obj.mobil || '',
+          mail:obj.email || obj.mail || '',
+          note:obj.bemerkung || obj.note || 'CSV Import'
+        });
+      }
+      if(window.autoSave) autoSave();
+      if(window.renderContacts) renderContacts();
+      inp.value='';
+      if(window.showToast) showToast('CSV importiert','ok');
+    };
+    reader.readAsText(file,'utf-8');
+  };
+
+  window.importContactsVCF = function(inp){
+    const file = inp.files && inp.files[0]; if(!file) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+      const txt = String(e.target.result||'');
+      const cards = txt.split(/END:VCARD/i);
+      if(!window.S.contacts) S.contacts = [];
+      cards.forEach(card=>{
+        const name = (card.match(/FN:(.+)/i)||[])[1] || '';
+        if(!name) return;
+        const tel = (card.match(/TEL[^:]*:(.+)/i)||[])[1] || '';
+        const mail = (card.match(/EMAIL[^:]*:(.+)/i)||[])[1] || '';
+        S.contacts.unshift({
+          id:'co_'+Date.now()+'_'+Math.random().toString(36).slice(2,7),
+          name:name.trim(),
+          firmId:'',
+          role:'',
+          group:'Sonstige',
+          phone:tel.trim(),
+          mail:mail.trim(),
+          note:'VCF Import'
+        });
+      });
+      if(window.autoSave) autoSave();
+      if(window.renderContacts) renderContacts();
+      inp.value='';
+      if(window.showToast) showToast('VCF importiert','ok');
+    };
+    reader.readAsText(file,'utf-8');
+  };
+
+  // dashboard full notes
+  const _refreshDash = window.refreshDash;
+  window.refreshDash = function(){
+    if(typeof _refreshDash === 'function') _refreshDash();
+    const dn=document.getElementById('dash-notes');
+    if(dn){
+      const notes=[];
+      (window.S?.contractors||[]).forEach(c=>(c.notes||[]).forEach(n=>notes.push({firm:c.name,color:c.color,text:n.text,date:n.date})));
+      notes.sort((a,b)=>String(b.date||'').localeCompare(String(a.date||'')));
+      dn.innerHTML = notes.length ? notes.map(n=>`
+        <div class="note-expandable" onclick="this.classList.toggle('expanded')" style="padding:8px 11px;background:var(--bg3);border-radius:var(--radius-xs);margin-bottom:6px;border-left:3px solid ${n.color||'var(--accent2)'};">
+          <div style="font-size:9px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--text3);margin-bottom:3px;">${window.esc?esc(n.firm):n.firm} · ${window.esc?esc(n.date):n.date}</div>
+          <div class="short-note" style="font-size:12px;color:var(--text2);line-height:1.6;">${window.esc?esc((n.text||'').slice(0,120)):n.text}${(n.text||'').length>120?'…':''}</div>
+          <div class="full-note" style="font-size:12px;color:var(--text2);line-height:1.7;">${window.esc?esc(n.text||''):n.text||''}</div>
+        </div>`).join('') : '<div class="empty-state" style="padding:16px;"><p>Henüz not yok</p></div>';
+    }
+  };
+
+  ready(function(){
+    // hide converter card robustly
+    const cards = Array.from(document.querySelectorAll('#pg-settings .card'));
+    cards.forEach(card=>{
+      const txt = card.textContent || '';
+      if(txt.includes('Baustellen-Umrechner') || txt.includes('İnşaat çevirici')) card.style.display='none';
+    });
+    // ensure notes modal has edit id hidden input
+    const noteBody = document.querySelector('#modal-addNote .modal-body');
+    if(noteBody && !document.getElementById('note-edit-id')){
+      const hid = document.createElement('input'); hid.type='hidden'; hid.id='note-edit-id'; noteBody.prepend(hid);
+    }
+    // rerender critical sections after original init
+    setTimeout(()=>{
+      if(window.renderDocs) renderDocs();
+      if(window.renderContacts) renderContacts();
+      if(window.refreshDash) refreshDash();
+      if(window.updateWeatherSummary) updateWeatherSummary();
+      if(window.updateWorkSummary) updateWorkSummary();
+    }, 150);
+  });
 })();
 </script>
 
