@@ -3922,9 +3922,20 @@ function onDDrop(e,to){
 function saveFirm() {
   const name = gv('af-name').trim();
   if (!name) { showToast('Firmenname eingeben!','warn'); return; }
+  const gewerkName = (gv('af-trade') || '').trim();
+  const gewerkCode = (gv('af-gewerkCode') || gv('af-gcode') || gv('af-code') || gv('gewerk-code') || '').trim();
+  const nuCodeVal = (gv('af-nuCode') || gv('af-nucode') || gv('af-nu') || '').trim();
+  const editId = gv('af-edit-id') || '';
+  if (!gewerkCode) { showToast('Gewerk-Code fehlt','warn'); return; }
+  ensureGewerkExistsForFirm(gewerkCode, gewerkName);
+  if (!nuCodeVal) { showToast('NU-Code fehlt','warn'); return; }
+  const nuExists = (S.contractors||[]).some(c => String(c.nuCode||'') === String(nuCodeVal) && String(c.id||'') !== String(editId));
+  if (nuExists) { showToast('NU-Code existiert bereits','warn'); return; }
   const firm = {
     id:'f_'+Date.now(), name,
-    trade:gv('af-trade'), contact:gv('af-contact'), phone:gv('af-phone'),
+    trade:gv('af-trade'),
+    gewerkCode: gewerkCode,
+    nuCode: nuCodeVal, contact:gv('af-contact'), phone:gv('af-phone'),
     status:gv('af-status'), color:gv('af-color')||COLORS[S.contractors.length%COLORS.length],
     notes:[],
   };
@@ -5066,6 +5077,16 @@ function updateWorkSummary(){
     updateWorkSummary();
   };
 })();
+
+
+function ensureGewerkExistsForFirm(gewerkCode, gewerkName){
+  if(!gewerkCode) return;
+  if(!S.gewerkePresets) S.gewerkePresets = [];
+  const exists = (S.gewerkePresets||[]).some(g => String(g.code) === String(gewerkCode));
+  if(!exists){
+    S.gewerkePresets.push({ code: String(gewerkCode), name: String(gewerkName || 'Gewerk') });
+  }
+}
 
 // BADGES
 // ═══════════════════════════════════════════════════
