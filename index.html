@@ -1825,16 +1825,36 @@ body{
             <div class="fg"><div class="fl">Monat übernehmen</div><button class="btn btn-ghost" style="width:100%;justify-content:center;" onclick="applySuggestedMonthlyProgress()">Terminplan übernehmen</button></div>
           </div>
           <div class="fg"><div class="fl">Bemerkung <span class="tr">Monatsnotiz</span></div><textarea class="fta" id="progNote" style="min-height:58px;" placeholder="z. B. leichter Verzug wegen Wetter / Vorlauf / Lieferung" oninput="setProgressField('note',this.value)"></textarea></div>
-          <div style="margin-top:8px;padding:10px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:12px;">
-            <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:8px;">
-              <div style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text3);">Soll / Ist Verlauf</div>
-              <div style="display:flex;gap:10px;font-size:10px;color:var(--text2);">
-                <span>— Soll</span>
-                <span style="opacity:.7;">— Ist</span>
+          <div style="margin-top:8px;padding:12px;background:var(--bg3);border:1px solid var(--border);border-radius:12px;">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap;">
+              <div>
+                <div style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text3);margin-bottom:4px;">Live-Status</div>
+                <div id="progStatusBadge" style="display:inline-flex;align-items:center;gap:8px;padding:7px 10px;border-radius:999px;background:var(--bg4);border:1px solid var(--border);font-size:12px;font-weight:700;color:var(--text);">—</div>
+              </div>
+              <div style="min-width:140px;text-align:right;">
+                <div style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text3);margin-bottom:4px;">Monatslage</div>
+                <div id="progDeltaText" style="font-size:13px;font-weight:700;color:var(--text);">—</div>
               </div>
             </div>
-            <canvas id="progressChart" style="width:100%;height:220px;display:block;"></canvas>
+            <div style="margin-top:12px;">
+              <div style="display:flex;justify-content:space-between;align-items:center;font-size:10px;color:var(--text3);margin-bottom:6px;">
+                <span>Terminplan</span><span>Baustelle</span>
+              </div>
+              <div style="position:relative;height:16px;background:var(--bg4);border:1px solid var(--border);border-radius:999px;overflow:hidden;">
+                <div id="progSollBar" style="position:absolute;left:0;top:0;bottom:0;width:0%;background:rgba(59,130,246,.25);"></div>
+                <div id="progIstBar" style="position:absolute;left:0;top:3px;bottom:3px;width:0%;background:var(--accent2);border-radius:999px;"></div>
+              </div>
+              <div style="display:flex;justify-content:space-between;align-items:center;font-size:11px;color:var(--text2);margin-top:6px;">
+                <span id="progSollLbl">Soll: —</span>
+                <span id="progIstLbl">Ist: —</span>
+              </div>
+            </div>
+            <div id="progPhaseCard" style="margin-top:12px;padding:10px 12px;border-radius:10px;background:var(--bg2);border:1px solid var(--border);">
+              <div style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text3);margin-bottom:4px;">Interpretation</div>
+              <div id="progInterpretation" style="font-size:12px;line-height:1.65;color:var(--text2);">—</div>
+            </div>
           </div>
+
         </div>
       </div>
 
@@ -2420,6 +2440,23 @@ body{
 </div>
 
 
+
+<div class="modal-ov" id="photoViewerModal">
+  <div class="modal" style="max-width:1100px;max-height:90vh;display:flex;flex-direction:column;">
+    <div class="modal-hd">
+      <h3 id="photoViewerTitle">Foto</h3>
+      <button class="modal-close" onclick="closePhotoViewer()">✕</button>
+    </div>
+    <div class="modal-body" style="padding:12px;display:flex;align-items:center;justify-content:center;background:var(--bg3);">
+      <img id="photoViewerImg" src="" alt="" style="max-width:100%;max-height:72vh;border-radius:12px;display:block;">
+    </div>
+    <div class="modal-ft">
+      <button class="btn btn-ghost" onclick="closePhotoViewer()">Schließen</button>
+    </div>
+  </div>
+</div>
+
+
 <!-- Toast -->
 <div id="toast"><div class="td"></div><span id="toast-msg">OK</span></div>
 
@@ -2719,7 +2756,6 @@ function applyStateToForm() {
   sv('rDate', S.reportDate || todayStr());
   renderMonthlyProgressPanel();
   renderMonthlyProgressTable();
-  renderProgressChart();
   syncMonthlyProgressFromDate(S.reportDate || todayStr(), false);
   sv('rNr', S.reportNr || autoRNr());
   sv('tMin', S.tempMin);
@@ -2727,7 +2763,7 @@ function applyStateToForm() {
   svs('wSel', S.wind);
   svs('bSel', S.boden);
   renderProgressPanel();
-  renderProgressChart();
+  renderProgressLive();
   sv('rBem', S.remarks);
   // weather button
   if (S.weather) {
@@ -3002,7 +3038,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   renderArchive();
   renderContacts();
   updateWeatherSummary();
-  renderProgressChart();
+  renderProgressLive();
   updateWorkSummary();
   runConverters();
   renderTimeline();
@@ -3086,7 +3122,7 @@ function updProg(val, doSave = true) {
   S.progressPlan.ist = String(val || '0');
   S.progress = parseInt(S.progressPlan.ist || '0') || 0;
   renderProgressPanel();
-  renderProgressChart();
+  renderProgressLive();
   if (doSave) autoSave();
 }
 
@@ -3134,7 +3170,7 @@ function syncMonthlyProgressFromDate(dateStr, overwriteIst=false) {
   if (overwriteIst && String(S.progressPlan.ist||'') === '') S.progressPlan.ist = String(sug.soll || '');
   S.progress = parseInt(S.progressPlan.ist || '0') || 0;
   renderProgressPanel();
-  renderProgressChart();
+  renderProgressLive();
 }
 
 function applySuggestedMonthlyProgress() {
@@ -3167,6 +3203,84 @@ function renderProgressPanel() {
   }
 }
 
+
+
+function renderProgressLive(){
+  if (!S.progressPlan) S.progressPlan = {month:'',soll:'',ist:'',phase:'',note:''};
+  const soll = parseInt(S.progressPlan.soll || '0') || 0;
+  const ist = parseInt(S.progressPlan.ist || '0') || 0;
+  const delta = ist - soll;
+
+  const sollBar = document.getElementById('progSollBar');
+  const istBar = document.getElementById('progIstBar');
+  const sollLbl = document.getElementById('progSollLbl');
+  const istLbl = document.getElementById('progIstLbl');
+  const statusBadge = document.getElementById('progStatusBadge');
+  const deltaText = document.getElementById('progDeltaText');
+  const interp = document.getElementById('progInterpretation');
+
+  if (sollBar) sollBar.style.width = Math.max(0, Math.min(100, soll)) + '%';
+  if (istBar) istBar.style.width = Math.max(0, Math.min(100, ist)) + '%';
+  if (sollLbl) sollLbl.textContent = 'Soll: ' + soll + ' %';
+  if (istLbl) istLbl.textContent = 'Ist: ' + ist + ' %';
+
+  let status = 'Im Plan';
+  let badgeBg = 'rgba(16,185,129,.12)';
+  let badgeColor = 'var(--accent3)';
+  let interpText = 'Die Baustelle liegt aktuell im erwarteten Bereich des Terminplans.';
+  if (delta <= -10) {
+    status = 'Kritischer Verzug';
+    badgeBg = 'rgba(239,68,68,.12)';
+    badgeColor = 'var(--red)';
+    interpText = 'Die Baustelle liegt deutlich hinter dem Terminplan. Ursachen und Gegenmaßnahmen sollten zeitnah festgehalten werden.';
+  } else if (delta < 0) {
+    status = 'Leichter Verzug';
+    badgeBg = 'rgba(245,158,11,.14)';
+    badgeColor = 'var(--gold)';
+    interpText = 'Die Baustelle liegt leicht hinter dem Terminplan. Der Monatskommentar sollte den Grund kurz dokumentieren.';
+  } else if (delta >= 10) {
+    status = 'Deutlich voraus';
+    badgeBg = 'rgba(59,130,246,.12)';
+    badgeColor = 'var(--accent2)';
+    interpText = 'Die Baustelle liegt spürbar vor dem Terminplan. Dieser Vorsprung kann im Monatsstand vermerkt werden.';
+  } else if (delta > 0) {
+    status = 'Leicht voraus';
+    badgeBg = 'rgba(59,130,246,.10)';
+    badgeColor = 'var(--accent2)';
+    interpText = 'Die Baustelle liegt leicht vor dem Terminplan.';
+  }
+
+  if (statusBadge) {
+    statusBadge.textContent = status;
+    statusBadge.style.background = badgeBg;
+    statusBadge.style.color = badgeColor;
+    statusBadge.style.borderColor = 'transparent';
+  }
+  if (deltaText) {
+    deltaText.textContent = (delta > 0 ? '+' : '') + delta + ' %';
+    deltaText.style.color = delta < 0 ? 'var(--red)' : (delta > 0 ? 'var(--accent2)' : 'var(--text)');
+  }
+  if (interp) {
+    const phase = S.progressPlan.phase ? ('Geplante Phase: ' + S.progressPlan.phase + ' ') : '';
+    interp.textContent = phase + interpText;
+  }
+}
+
+
+function openPhotoViewer(src, title){
+  const modal = document.getElementById('photoViewerModal');
+  const img = document.getElementById('photoViewerImg');
+  const lbl = document.getElementById('photoViewerTitle');
+  if (img) img.src = src || '';
+  if (lbl) lbl.textContent = title || 'Foto';
+  if (modal) modal.classList.add('open');
+}
+function closePhotoViewer(){
+  const modal = document.getElementById('photoViewerModal');
+  const img = document.getElementById('photoViewerImg');
+  if (img) img.src = '';
+  if (modal) modal.classList.remove('open');
+}
 
 // ═══════════════════════════════════════════════════
 // PERSONNEL
@@ -3590,6 +3704,7 @@ document.querySelectorAll('.modal-ov').forEach(m => {
   m.addEventListener('click', e => { 
     if(e.target===m){
       if(m.id === 'pdfViewerModal') closePdfViewer();
+      else if(m.id === 'photoViewerModal') closePhotoViewer();
       else m.classList.remove('open');
     }
   });
@@ -4693,7 +4808,6 @@ function applyTerminplanProgress(){
   sv('fpMonthLabel', t.label);
   calcMonthlyDeviation();
   renderMonthlyProgressTable();
-  renderProgressChart();
   autoSave();
   showToast('Terminplan übernommen','ok');
 }
@@ -4728,7 +4842,6 @@ function saveMonthlyProgress(){
   rec.savedAt = new Date().toISOString();
   persistState();
   renderMonthlyProgressTable();
-  renderProgressChart();
   showToast('Monatsstand gespeichert','ok');
 }
 function renderMonthlyProgressPanel(){
@@ -4785,107 +4898,12 @@ function renderMonthlyProgressTable(){
 // ═══════════════════════════════════════════════════
 
 
-function renderProgressChart(){
-  const canvas = document.getElementById('progressChart');
-  if(!canvas || typeof TERMINPLAN_MONTHS === 'undefined') return;
 
-  const ctx = canvas.getContext('2d');
-  const width = Math.max(canvas.clientWidth || 320, 320);
-  const height = 220;
-  if(canvas.width !== width) canvas.width = width;
-  if(canvas.height !== height) canvas.height = height;
-
-  ctx.clearRect(0,0,width,height);
-
-  const padL = 34, padR = 10, padT = 10, padB = 26;
-  const cw = width - padL - padR;
-  const ch = height - padT - padB;
-  const maxY = 100;
-  const months = TERMINPLAN_MONTHS;
-  if(!months.length) return;
-  const activeKey = (S.progressPlan && S.progressPlan.month) ? S.progressPlan.month : String(gv('rDate') || S.reportDate || todayStr()).slice(0,7);
-
-  function x(i){ return padL + (i/(months.length-1))*cw; }
-  function y(v){ return padT + ch - (Math.max(0,Math.min(maxY, Number(v)||0))/maxY)*ch; }
-
-  // axes
-  ctx.strokeStyle = 'rgba(120,120,120,.35)';
-  ctx.lineWidth = 1;
-  ctx.beginPath();
-  ctx.moveTo(padL, padT);
-  ctx.lineTo(padL, padT+ch);
-  ctx.lineTo(padL+cw, padT+ch);
-  ctx.stroke();
-
-  [0,25,50,75,100].forEach(v=>{
-    const yy = y(v);
-    ctx.strokeStyle = 'rgba(120,120,120,.16)';
-    ctx.beginPath(); ctx.moveTo(padL,yy); ctx.lineTo(padL+cw,yy); ctx.stroke();
-    ctx.fillStyle = 'rgba(120,120,120,.8)';
-    ctx.font = '10px sans-serif';
-    ctx.fillText(String(v), 4, yy+3);
-  });
-
-  // Soll line
-  ctx.strokeStyle = '#111827';
-  ctx.lineWidth = 2;
-  ctx.beginPath();
-  months.forEach((m,i)=>{
-    const px=x(i), py=y(m.soll);
-    if(i===0) ctx.moveTo(px,py); else ctx.lineTo(px,py);
-  });
-  ctx.stroke();
-
-  // Ist line from saved monthly records + current month fields
-  ctx.strokeStyle = '#6b7280';
-  ctx.lineWidth = 2;
-  let hasIst = false;
-  ctx.beginPath();
-  months.forEach((m,i)=>{
-    let rec = (S.monthlyProgress||{})[m.key];
-    let istVal = rec && rec.ist !== '' ? parseFloat(rec.ist) : null;
-    if(m.key === activeKey){
-      const liveIst = parseFloat(gv('fpIst') || gv('progIstInput') || '');
-      if(!isNaN(liveIst)) istVal = liveIst;
-    }
-    if(istVal !== null && !isNaN(istVal)){
-      const px=x(i), py=y(istVal);
-      if(!hasIst){ ctx.moveTo(px,py); hasIst = true; }
-      else ctx.lineTo(px,py);
-    }
-  });
-  if(hasIst) ctx.stroke();
-
-  // points + month labels
-  months.forEach((m,i)=>{
-    const px=x(i);
-    const pySoll=y(m.soll);
-    ctx.fillStyle = (m.key===activeKey) ? '#f97316' : '#111827';
-    ctx.beginPath(); ctx.arc(px, pySoll, m.key===activeKey ? 4 : 3, 0, Math.PI*2); ctx.fill();
-
-    let rec = (S.monthlyProgress||{})[m.key];
-    let istVal = rec && rec.ist !== '' ? parseFloat(rec.ist) : null;
-    if(m.key === activeKey){
-      const liveIst = parseFloat(gv('fpIst') || gv('progIstInput') || '');
-      if(!isNaN(liveIst)) istVal = liveIst;
-    }
-    if(istVal !== null && !isNaN(istVal)){
-      ctx.fillStyle = (m.key===activeKey) ? '#f97316' : '#6b7280';
-      ctx.beginPath(); ctx.arc(px, y(istVal), m.key===activeKey ? 4 : 3, 0, Math.PI*2); ctx.fill();
-    }
-
-    ctx.fillStyle = 'rgba(120,120,120,.9)';
-    ctx.font = '10px sans-serif';
-    const label = (m.label||'').slice(0,3);
-    ctx.fillText(label, px-10, height-8);
-  });
-}
 
 
 const _origRenderMonthlyProgressTable = renderMonthlyProgressTable;
 renderMonthlyProgressTable = function(){
   _origRenderMonthlyProgressTable();
-  renderProgressChart();
 };
 
 
