@@ -5922,21 +5922,26 @@ window.saveFirm = function saveFirmPatched() {
     const existing = editId ? (S.contractors||[]).find(c=>c.id===editId) : null;
     const name = (window.gv ? gv('af-name') : e('af-name')?.value || '').trim();
     if (!name) { if (window.showToast) showToast('Firmenname eingeben!','warn'); return; }
+
     const gewerkCode = (e('af-gewerkCode')?.value || existing?.gewerkCode || (S.gewerkePresets[0]?.code || '902')).trim();
-    let nuCode = (e('af-nuCode')?.value || existing?.nuCode || nextNUCode(gewerkCode, editId || undefined)).trim();
+    const nuCode = (e('af-nuCode')?.value || existing?.nuCode || nextNUCode(gewerkCode, editId || undefined)).trim();
     const tradeValue = ((window.gv ? gv('af-trade') : e('af-trade')?.value || '') || getGewerkName(gewerkCode) || gewerkCode).trim();
     const firstNote = (window.gv ? gv('af-note') : e('af-note')?.value || '').trim();
+
     if (!gewerkCode) { if (window.showToast) showToast('Gewerk-Code eingeben','warn'); return; }
     if (!nuCode) { if (window.showToast) showToast('NU-Code eingeben','warn'); return; }
-    let dup = (S.contractors||[]).find(c => String(c.nuCode||'').trim()===nuCode && c.id!==editId);
-    if (dup && (!e('af-nuCode')?.dataset.autoFill || e('af-nuCode')?.dataset.autoFill === '1')) {
-      nuCode = nextNUCode(gewerkCode, editId || undefined);
-      if (e('af-nuCode')) e('af-nuCode').value = nuCode;
-      dup = (S.contractors||[]).find(c => String(c.nuCode||'').trim()===nuCode && c.id!==editId);
-    }
+
+    const dup = (S.contractors||[]).find(c => String(c.nuCode||'').trim()===nuCode && c.id!==editId);
     if (dup) { if (window.showToast) showToast('NU-Code existiert bereits','warn'); return; }
-    const upsert = upsertGewerk(gewerkCode, tradeValue);
-    if (!upsert.ok) { if (window.showToast) showToast(upsert.message,'warn'); return; }
+
+    // Important: existing Gewerk code must be allowed when adding a firm.
+    const gewerkExists = (S.gewerkePresets||[]).find(g => String(g.code).trim() === String(gewerkCode).trim());
+    if (!gewerkExists) {
+      const upsert = upsertGewerk(gewerkCode, tradeValue);
+      if (!upsert.ok) { if (window.showToast) showToast(upsert.message,'warn'); return; }
+    } else if (tradeValue && !gewerkExists.name) {
+      gewerkExists.name = tradeValue;
+    }
 
     if (existing) {
       existing.name = name;
@@ -5969,6 +5974,7 @@ window.saveFirm = function saveFirmPatched() {
       window.currentFirmId = firm.id;
       window.currentNUCode = firm.nuCode;
     }
+
     if (typeof closeModal === 'function') closeModal('addFirm');
     if (typeof autoSave === 'function') autoSave(); else if (typeof persistState === 'function') persistState();
     if (typeof renderFirms === 'function') renderFirms();
