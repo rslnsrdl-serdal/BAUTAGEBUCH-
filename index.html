@@ -3148,6 +3148,7 @@ function setProgressField(field, value) {
   S.progressPlan[field] = value;
   if (field === 'ist') S.progress = parseInt(value || '0') || 0;
   renderProgressPanel();
+  if (typeof renderProgressLive === 'function') renderProgressLive();
   autoSave();
 }
 
