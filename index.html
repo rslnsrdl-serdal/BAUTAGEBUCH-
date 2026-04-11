@@ -2533,6 +2533,9 @@ function openPhotoDB() {
       if (!db.objectStoreNames.contains(DOC_STORE)) {
         db.createObjectStore(DOC_STORE, { keyPath: 'id' });
       }
+      if (!db.objectStoreNames.contains(DOC_STORE)) {
+        db.createObjectStore(DOC_STORE, { keyPath: 'id' });
+      }
     };
     req.onsuccess = () => {
       photoDB = req.result;
@@ -2865,6 +2868,8 @@ async function exportBackup() {
   try {
     collectFormToState();
     await hydratePhotosFromIDB();
+    await hydrateDocsFromIDB();
+  await hydrateDocsFromIDB();
   await hydrateDocsFromIDB();
     const backup = {
       exportedAt: new Date().toISOString(),
@@ -2898,6 +2903,11 @@ function importBackup(inp) {
       for (const p of (S.photos || [])) {
         if (p.id && p.data) {
           try { await idbSavePhoto({ id: p.id, data: p.data, name: p.name || '', savedAt: new Date().toISOString() }); } catch(err) {}
+        }
+      }
+      for (const d of (S.docs || [])) {
+        if (d.id && d.data) {
+          try { await idbSaveDoc({ id: d.id, data: d.data, name: d.name || '', type: d.type || '', savedAt: new Date().toISOString() }); } catch(err) {}
         }
       }
       for (const d of (S.docs || [])) {
@@ -4177,11 +4187,17 @@ function addPhoto(file) {
 }
 function addDoc(file) {
   const reader=new FileReader();
-  reader.onload=e=>{
+  reader.onload=async e=>{
     if(!S.docs)S.docs=[];
     const sz=file.size>1024*1024?(file.size/1024/1024).toFixed(1)+' MB':Math.round(file.size/1024)+' KB';
-    S.docs.push({id:'dc_'+Date.now()+'_'+Math.random().toString(36).slice(2),name:file.name,type:file.type||'',size:sz,data:e.target.result});
-    autoSave(); renderDocs(); updateBadges();
+    const docObj = {id:'dc_'+Date.now()+'_'+Math.random().toString(36).slice(2),name:file.name,type:file.type||'',size:sz,data:e.target.result};
+    S.docs.push(docObj);
+    try {
+      await idbSaveDoc({ id: docObj.id, data: docObj.data, name: docObj.name, type: docObj.type, savedAt: new Date().toISOString() });
+      autoSave(); renderDocs(); updateBadges();
+    } catch(err) {
+      showToast('Dokument konnte nicht gespeichert werden','err');
+    }
   };
   reader.readAsDataURL(file);
 }
@@ -4351,28 +4367,24 @@ async function openDocFile(doc){
       if(saved && saved.data) data = saved.data;
     }catch(e){}
   }
-  if(!data){ showToast('Dateiinhalt nicht verfügbar. Bitte Datei erneut hochladen.','warn'); return; }
+  if(!data){
+    showToast('Dateiinhalt nicht verfügbar. Bitte Datei erneut hochladen.','warn');
+    return;
+  }
   const isPdf = String(doc.type||'').includes('pdf') || String(doc.name||'').toLowerCase().endsWith('.pdf');
   if(isPdf){
     const modal = document.getElementById('pdfViewerModal');
     const frame = document.getElementById('pdfViewerFrame');
     const title = document.getElementById('pdfViewerTitle');
-    if(modal && frame){
-      if(title) title.textContent = doc.name || 'PDF';
-      frame.src = data;
-      modal.classList.add('open');
-    }else{
-      const a=document.createElement('a');a.href=data;a.target='_blank';a.rel='noopener';a.click();
-    }
-  }else{
-    const a=document.createElement('a');a.href=data;a.download=doc.name||'Datei';a.click();
+    if(title) title.textContent = doc.name || 'PDF';
+    if(frame) frame.src = data;
+    if(modal) modal.classList.add('open');
+  } else {
+    const a=document.createElement('a');
+    a.href=data;
+    a.download=doc.name||'Datei';
+    a.click();
   }
-}
-function closePdfViewer(){
-  const modal = document.getElementById('pdfViewerModal');
-  const frame = document.getElementById('pdfViewerFrame');
-  if(frame) frame.src = '';
-  if(modal) modal.classList.remove('open');
 }
 function renderDocs() {
   const grid=document.getElementById('docGrid');
@@ -4383,7 +4395,8 @@ function renderDocs() {
   const dIcons={pdf:'📕','msword':'📘','wordprocessingml':'📘','ms-excel':'📗','spreadsheetml':'📗'};
   (S.docs||[]).forEach(doc=>{
     const icon=Object.entries(dIcons).find(([k])=>String(doc.type||'').includes(k))?.[1]||'📄';
-    const t=document.createElement('div'); t.className='doc-thumb';
+    const t=document.createElement('div'); 
+    t.className='doc-thumb';
     t.innerHTML=`<span class="doc-icon">${icon}</span><div class="doc-name">${esc(doc.name)}</div><div class="doc-size">${doc.size||''}</div>
       <button class="ph-del" style="opacity:1;" onclick="event.stopPropagation();delDoc('${doc.id}')">✕</button>`;
     t.onclick=()=>openDocFile(doc);
