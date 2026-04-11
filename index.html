@@ -1465,6 +1465,17 @@ body{
 .monthly-progress-table .zero{color:var(--text2);font-weight:700}
 .monthly-progress-table tr.active{background:var(--bg3)}
 
+
+.collapse-panel{display:none}
+.collapse-panel.open{display:block}
+.section-toggle-row{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px}
+.section-toggle-row .summary-text{font-size:12px;color:var(--text3)}
+.unit-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+@media(max-width:700px){.unit-grid{grid-template-columns:1fr}}
+.note-expand{cursor:pointer}
+.note-expand.full .note-short{display:none}
+.note-expand:not(.full) .note-full{display:none}
+
 /* ═══════════════════════════════════════════════════
    RESPONSIVE
 ═══════════════════════════════════════════════════ */
@@ -1725,23 +1736,29 @@ body{
       <div class="card">
         <div class="card-hd"><div class="card-hd-l"><div class="ci ci-gl">🌤</div><h3>Wetter <small>Hava</small></h3></div></div>
         <div class="card-body">
-          <div class="wx-grid">
-            <button class="wx-btn" onclick="selWx(this,'☀️','Sonnig')"><span>☀️</span><span>Sonnig</span></button>
-            <button class="wx-btn" onclick="selWx(this,'⛅','Bewölkt')"><span>⛅</span><span>Bewölkt</span></button>
-            <button class="wx-btn" onclick="selWx(this,'🌧','Regen')"><span>🌧</span><span>Regen</span></button>
-            <button class="wx-btn" onclick="selWx(this,'⛈','Gewitter')"><span>⛈</span><span>Gewitter</span></button>
-            <button class="wx-btn" onclick="selWx(this,'🌨','Schnee')"><span>🌨</span><span>Schnee</span></button>
-            <button class="wx-btn" onclick="selWx(this,'🌫','Nebel')"><span>🌫</span><span>Nebel</span></button>
+          <div class="section-toggle-row">
+            <div class="summary-text" id="weatherSummaryText">Nicht erfasst</div>
+            <button class="btn btn-ghost btn-sm" id="weatherToggleBtn" onclick="toggleCollapse('weatherPanel','weatherToggleBtn','Wetter anzeigen','Wetter ausblenden')">Wetter anzeigen</button>
           </div>
-          <div class="fr2">
-            <div class="fg"><div class="fl">Min °C</div><input type="number" class="fi" id="tMin" placeholder="—" style="text-align:center" oninput="autoSave()"></div>
-            <div class="fg"><div class="fl">Max °C</div><input type="number" class="fi" id="tMax" placeholder="—" style="text-align:center" oninput="autoSave()"></div>
-          </div>
-          <div class="fr2">
-            <div class="fg"><div class="fl">Wind</div>
-              <select class="fs" id="wSel" oninput="autoSave()"><option value="">—</option><option>Windstill</option><option>Leicht</option><option>Mittel</option><option>Stark</option><option>Sturm</option></select></div>
-            <div class="fg"><div class="fl">Boden <span class="tr">Zemin</span></div>
-              <select class="fs" id="bSel" oninput="autoSave()"><option value="">—</option><option>Trocken</option><option>Feucht</option><option>Nass</option><option>Gefroren</option></select></div>
+          <div id="weatherPanel" class="collapse-panel">
+            <div class="wx-grid">
+              <button class="wx-btn" onclick="selWx(this,'☀️','Sonnig')"><span>☀️</span><span>Sonnig</span></button>
+              <button class="wx-btn" onclick="selWx(this,'⛅','Bewölkt')"><span>⛅</span><span>Bewölkt</span></button>
+              <button class="wx-btn" onclick="selWx(this,'🌧','Regen')"><span>🌧</span><span>Regen</span></button>
+              <button class="wx-btn" onclick="selWx(this,'⛈','Gewitter')"><span>⛈</span><span>Gewitter</span></button>
+              <button class="wx-btn" onclick="selWx(this,'🌨','Schnee')"><span>🌨</span><span>Schnee</span></button>
+              <button class="wx-btn" onclick="selWx(this,'🌫','Nebel')"><span>🌫</span><span>Nebel</span></button>
+            </div>
+            <div class="fr2">
+              <div class="fg"><div class="fl">Min °C</div><input type="number" class="fi" id="tMin" placeholder="—" style="text-align:center" oninput="autoSave();updateWeatherSummary()"></div>
+              <div class="fg"><div class="fl">Max °C</div><input type="number" class="fi" id="tMax" placeholder="—" style="text-align:center" oninput="autoSave();updateWeatherSummary()"></div>
+            </div>
+            <div class="fr2">
+              <div class="fg"><div class="fl">Wind</div>
+                <select class="fs" id="wSel" oninput="autoSave();updateWeatherSummary()"><option value="">—</option><option>Windstill</option><option>Leicht</option><option>Mittel</option><option>Stark</option><option>Sturm</option></select></div>
+              <div class="fg"><div class="fl">Boden <span class="tr">Zemin</span></div>
+                <select class="fs" id="bSel" oninput="autoSave();updateWeatherSummary()"><option value="">—</option><option>Trocken</option><option>Feucht</option><option>Nass</option><option>Gefroren</option></select></div>
+            </div>
           </div>
         </div>
       </div>
@@ -1750,14 +1767,18 @@ body{
       <div class="card">
         <div class="card-hd">
           <div class="card-hd-l"><div class="ci ci-o">👷</div><h3>Personal <small>Personel</small></h3></div>
-          <button class="btn btn-primary btn-xs" onclick="openModal('addPers')">+ Hinzufügen</button>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span id="persActiveBadge" class="nav-badge">0</span>
+            <button class="btn btn-primary btn-xs" onclick="openModal('addPers')">+ Hinzufügen</button>
+          </div>
         </div>
         <div class="card-body">
-          <div id="persList"></div>
-          <div class="divider"></div>
-          <div style="display:flex;justify-content:space-between;align-items:center;padding:2px 0;">
-            <span style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text3);">GESAMT</span>
-            <span id="totalPers" style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:var(--accent);">0</span>
+          <div class="section-toggle-row">
+            <div class="summary-text"><span id="totalPers">0</span> aktiv</div>
+            <button class="btn btn-ghost btn-sm" id="persToggleBtn" onclick="toggleCollapse('persPanel','persToggleBtn','Personal anzeigen','Personal ausblenden')">Personal anzeigen</button>
+          </div>
+          <div id="persPanel" class="collapse-panel">
+            <div id="persList"></div>
           </div>
         </div>
       </div>
@@ -1814,11 +1835,17 @@ body{
       <div class="card">
         <div class="card-hd">
           <div class="card-hd-l"><div class="ci ci-o">🔨</div><h3>Bauarbeiten <small>İnşaat İşleri</small></h3></div>
-          <button class="btn btn-primary btn-sm" onclick="addWorkEntry()">+ Hinzufügen</button>
+          <button class="btn btn-primary btn-sm" onclick="addWorkEntry();openCollapse('workPanel','workToggleBtn','Bauarbeiten ausblenden')">+ Hinzufügen</button>
         </div>
         <div class="card-body">
-          <div id="weList"></div>
-          <div id="weEmpty" class="empty-state" style="padding:20px;"><div class="ei">🔨</div><h4>Keine Einträge</h4><p>İş kalemi ekle</p></div>
+          <div class="section-toggle-row">
+            <div class="summary-text" id="workSummaryText">Keine Einträge</div>
+            <button class="btn btn-ghost btn-sm" id="workToggleBtn" onclick="toggleCollapse('workPanel','workToggleBtn','Bauarbeiten anzeigen','Bauarbeiten ausblenden')">Bauarbeiten anzeigen</button>
+          </div>
+          <div id="workPanel" class="collapse-panel">
+            <div id="weList"></div>
+            <div id="weEmpty" class="empty-state" style="padding:20px;"><div class="ei">🔨</div><h4>Keine Einträge</h4><p>İş kalemi ekle</p></div>
+          </div>
         </div>
       </div>
 
@@ -1866,11 +1893,12 @@ body{
 
       <!-- Unterschriften -->
       <div class="card">
-        <div class="card-hd"><div class="card-hd-l"><div class="ci ci-gl">✍️</div><h3>Unterschriften <small>İmzalar</small></h3></div></div>
+        <div class="card-hd">
+          <div class="card-hd-l"><div class="ci ci-gl">✍️</div><h3>Unterschriften <small>İmzalar</small></h3></div>
+          <button class="btn btn-primary btn-xs" onclick="addSignatureField()">+ Hinzufügen</button>
+        </div>
         <div class="card-body">
-          <div class="fr3" id="sigGrid">
-            <!-- rendered by JS -->
-          </div>
+          <div id="sigGrid"></div>
         </div>
       </div>
 
@@ -1892,7 +1920,14 @@ body{
 <div class="page" id="pg-contacts">
   <div class="sh">
     <h2>Kontakte <span class="sub">İletişim listesi</span></h2>
-    <button class="btn btn-primary" onclick="openModal('addContact')">+ Kontakt hinzufügen</button>
+    <div class="sh-act">
+      <button class="btn btn-primary" onclick="openModal('addContact')">+ Kontakt hinzufügen</button>
+      <button class="btn btn-ghost" onclick="pickPhoneContacts()">Telefon-Rehber</button>
+      <button class="btn btn-ghost" onclick="document.getElementById('contactCsvIn').click()">CSV importieren</button>
+      <button class="btn btn-ghost" onclick="document.getElementById('contactVcfIn').click()">VCF importieren</button>
+      <input type="file" id="contactCsvIn" accept=".csv,text/csv" style="display:none" onchange="importContactsCSV(this)">
+      <input type="file" id="contactVcfIn" accept=".vcf,text/vcard" style="display:none" onchange="importContactsVCF(this)">
+    </div>
   </div>
   <div class="card" style="margin-bottom:14px;">
     <div class="card-body">
@@ -2074,6 +2109,63 @@ body{
         </p>
       </div>
     </div>
+
+    <div class="card" style="grid-column:1/-1;">
+      <div class="card-hd"><div class="card-hd-l"><div class="ci ci-c">🧮</div><h3>Baustellen-Umrechner <small>İnşaat çevirici</small></h3></div></div>
+      <div class="card-body">
+        <div class="unit-grid">
+          <div class="fg">
+            <div class="fl">Länge</div>
+            <input type="number" class="fi" id="convLengthVal" placeholder="Wert" oninput="runConverters()">
+            <select class="fs" id="convLengthUnit" onchange="runConverters()">
+              <option value="m">m</option><option value="cm">cm</option><option value="mm">mm</option><option value="km">km</option>
+            </select>
+            <div id="convLengthOut" style="font-size:12px;color:var(--text2);margin-top:8px;line-height:1.7;"></div>
+          </div>
+          <div class="fg">
+            <div class="fl">Fläche</div>
+            <input type="number" class="fi" id="convAreaVal" placeholder="Wert" oninput="runConverters()">
+            <select class="fs" id="convAreaUnit" onchange="runConverters()">
+              <option value="m2">m²</option><option value="cm2">cm²</option><option value="ha">ha</option>
+            </select>
+            <div id="convAreaOut" style="font-size:12px;color:var(--text2);margin-top:8px;line-height:1.7;"></div>
+          </div>
+          <div class="fg">
+            <div class="fl">Volumen</div>
+            <input type="number" class="fi" id="convVolVal" placeholder="Wert" oninput="runConverters()">
+            <select class="fs" id="convVolUnit" onchange="runConverters()">
+              <option value="m3">m³</option><option value="l">l</option><option value="cm3">cm³</option>
+            </select>
+            <div id="convVolOut" style="font-size:12px;color:var(--text2);margin-top:8px;line-height:1.7;"></div>
+          </div>
+          <div class="fg">
+            <div class="fl">Gewicht</div>
+            <input type="number" class="fi" id="convMassVal" placeholder="Wert" oninput="runConverters()">
+            <select class="fs" id="convMassUnit" onchange="runConverters()">
+              <option value="kg">kg</option><option value="g">g</option><option value="t">t</option>
+            </select>
+            <div id="convMassOut" style="font-size:12px;color:var(--text2);margin-top:8px;line-height:1.7;"></div>
+          </div>
+          <div class="fg">
+            <div class="fl">Druck</div>
+            <input type="number" class="fi" id="convPressureVal" placeholder="Wert" oninput="runConverters()">
+            <select class="fs" id="convPressureUnit" onchange="runConverters()">
+              <option value="bar">bar</option><option value="kpa">kPa</option><option value="mpa">MPa</option>
+            </select>
+            <div id="convPressureOut" style="font-size:12px;color:var(--text2);margin-top:8px;line-height:1.7;"></div>
+          </div>
+          <div class="fg">
+            <div class="fl">Temperatur</div>
+            <input type="number" class="fi" id="convTempVal" placeholder="Wert" oninput="runConverters()">
+            <select class="fs" id="convTempUnit" onchange="runConverters()">
+              <option value="c">°C</option><option value="f">°F</option>
+            </select>
+            <div id="convTempOut" style="font-size:12px;color:var(--text2);margin-top:8px;line-height:1.7;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -2188,7 +2280,7 @@ body{
   <div class="modal">
     <div class="modal-hd"><h3>Notiz hinzufügen <small>Not Ekle</small></h3><button class="modal-close" onclick="closeModal('addNote')">✕</button></div>
     <div class="modal-body">
-      <input type="hidden" id="note-fid">
+      <input type="hidden" id="note-fid"><input type="hidden" id="note-edit-id">
       <div class="fg"><div class="fl">Notiz / Tagesbeobachtung <span class="tr">Günlük Not</span></div>
         <textarea class="fta" id="note-txt" placeholder="Was hat die Firma gemacht?…" style="min-height:110px;"></textarea></div>
       <div class="fg"><div class="fl">Datum <span class="tr">Tarih</span></div><input type="date" class="fi" id="note-date"></div>
@@ -2584,13 +2676,16 @@ function collectFormToState() {
     const el = document.getElementById('pv_'+p.key);
     if (el) { S.personnelCounts[p.key] = parseInt(el.textContent)||0; }
   });
-  // sig
-  S.sig1 = gv('sig1n') || '';
-  S.sig2 = gv('sig2n') || '';
-  S.sig3 = gv('sig3n') || '';
-  S.sig1Firm = gv('sig1f') || '';
-  S.sig2Firm = gv('sig2f') || '';
-  S.sig3Firm = gv('sig3f') || '';
+  ensureSignatures();
+  const sig1 = S.signatures[0] || {name:'', firmId:''};
+  const sig2 = S.signatures[1] || {name:'', firmId:''};
+  const sig3 = S.signatures[2] || {name:'', firmId:''};
+  S.sig1 = sig1.name || '';
+  S.sig2 = sig2.name || '';
+  S.sig3 = sig3.name || '';
+  S.sig1Firm = sig1.firmId || '';
+  S.sig2Firm = sig2.firmId || '';
+  S.sig3Firm = sig3.firmId || '';
 }
 
 function applyStateToForm() {
@@ -2879,6 +2974,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   renderPhotos();
   renderDocs();
   renderArchive();
+  renderContacts();
+  updateWeatherSummary();
+  updateWorkSummary();
+  runConverters();
   renderTimeline();
   renderWorkAreas();
   renderWeeklyReports();
@@ -2948,6 +3047,7 @@ function selWx(btn, emoji, label) {
   document.querySelectorAll('.wx-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
   S.weather = emoji + ' ' + label;
+  updateWeatherSummary();
   autoSave();
 }
 
@@ -3042,63 +3142,73 @@ function renderProgressPanel() {
 // ═══════════════════════════════════════════════════
 // PERSONNEL
 // ═══════════════════════════════════════════════════
+
+function isActivePersonnelType(p){
+  return (parseInt((S.personnelCounts||{})[p.key]||0)||0) > 0 || ((S.personnelNames?.[p.key]||[]).join('').trim() !== '') || !!(S.personnelFirms?.[p.key]);
+}
 function buildPersonnel() {
   const list = document.getElementById('persList');
+  const badge = document.getElementById('persActiveBadge');
   if (!list) return;
   list.innerHTML = '';
   if (!S.personnelTypes) S.personnelTypes = JSON.parse(JSON.stringify(DEFAULT_PERS));
   if (!S.personnelCounts) S.personnelCounts = {};
-  S.personnelTypes.forEach(p => {
-    if (!S.personnelCounts[p.key]) S.personnelCounts[p.key] = 0;
-    const count = S.personnelCounts[p.key] || 0;
-    const names = S.personnelNames?.[p.key] || [];
-    const firmId = S.personnelFirms?.[p.key] || '';
-    const firmName = (S.contractors||[]).find(c=>c.id===firmId)?.name || 'Keine Firma';
-    const row = document.createElement('div');
-    row.className = 'pers-row';
-    row.id = 'pr_'+p.key;
-    const firmOpts = '<option value="">— Keine Firma</option>' + (S.contractors||[]).map(c=>`<option value="${esc(c.id)}" ${firmId===c.id?'selected':''}>${esc(c.name)}</option>`).join('');
-    row.innerHTML = `
-      <div class="pers-main">
-        <div class="pers-label">
-          <div class="de">${esc(p.de)}</div>
-          <div class="tr" style="font-size:9px;color:var(--text3);font-style:italic;">${esc(p.tr||'')}</div>
-          <div style="font-size:10px;color:var(--accent2);margin-top:2px;">${esc(firmName)}</div>
+  const active = S.personnelTypes.filter(isActivePersonnelType);
+  if (badge) badge.textContent = String(active.length);
+  if (!active.length) {
+    list.innerHTML = '<div class="empty-state" style="padding:16px 8px;"><div class="ei">👷</div><h4>Kein aktives Personal</h4><p>Nur erfasste Positionen werden angezeigt</p></div>';
+  } else {
+    active.forEach(p => {
+      if (!S.personnelCounts[p.key]) S.personnelCounts[p.key] = 0;
+      const count = S.personnelCounts[p.key] || 0;
+      const names = S.personnelNames?.[p.key] || [];
+      const firmId = S.personnelFirms?.[p.key] || '';
+      const firmName = (S.contractors||[]).find(c=>c.id===firmId)?.name || 'Keine Firma';
+      const row = document.createElement('div');
+      row.className = 'pers-row';
+      row.id = 'pr_'+p.key;
+      const firmOpts = '<option value="">— Keine Firma</option>' + (S.contractors||[]).map(c=>`<option value="${esc(c.id)}" ${firmId===c.id?'selected':''}>${esc(c.name)}</option>`).join('');
+      row.innerHTML = `
+        <div class="pers-main">
+          <div class="pers-label">
+            <div class="de">${esc(p.de)}</div>
+            <div class="tr" style="font-size:9px;color:var(--text3);font-style:italic;">${esc(p.tr||'')}</div>
+            <div style="font-size:10px;color:var(--accent2);margin-top:2px;">${esc(firmName)}</div>
+          </div>
+          <button class="cnt-btn" onclick="chgPers('${p.key}',-1)">−</button>
+          <div class="cnt-val" id="pv_${p.key}">${count}</div>
+          <button class="cnt-btn" onclick="chgPers('${p.key}',1)">+</button>
+          <button class="btn btn-ghost btn-xs" style="padding:5px 8px;" onclick="togglePersDetail('${p.key}')">Bearbeiten</button>
+          <button class="btn-icon" style="width:24px;height:24px;font-size:11px;" onclick="delPersType('${p.key}')">✕</button>
         </div>
-        <button class="cnt-btn" onclick="chgPers('${p.key}',-1)">−</button>
-        <div class="cnt-val" id="pv_${p.key}">${count}</div>
-        <button class="cnt-btn" onclick="chgPers('${p.key}',1)">+</button>
-        <button class="btn btn-ghost btn-xs" style="padding:5px 8px;" onclick="togglePersDetail('${p.key}')">Bearbeiten</button>
-        <button class="btn-icon" style="width:24px;height:24px;font-size:11px;" onclick="delPersType('${p.key}')">✕</button>
-      </div>
-      <div class="pers-detail" id="pd_${p.key}">
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:6px;">
-          <div>
-            <div style="font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text3);margin-bottom:3px;">NAME 1</div>
-            <input class="fi" type="text" style="padding:5px 8px;font-size:11px;" placeholder="Name…" value="${esc(names[0]||'')}" onchange="setPersName('${p.key}',0,this.value)">
+        <div class="pers-detail" id="pd_${p.key}">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:6px;">
+            <div>
+              <div style="font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text3);margin-bottom:3px;">NAME 1</div>
+              <input class="fi" type="text" style="padding:5px 8px;font-size:11px;" placeholder="Name…" value="${esc(names[0]||'')}" onchange="setPersName('${p.key}',0,this.value)">
+            </div>
+            <div>
+              <div style="font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text3);margin-bottom:3px;">NAME 2</div>
+              <input class="fi" type="text" style="padding:5px 8px;font-size:11px;" placeholder="Name…" value="${esc(names[1]||'')}" onchange="setPersName('${p.key}',1,this.value)">
+            </div>
           </div>
-          <div>
-            <div style="font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text3);margin-bottom:3px;">NAME 2</div>
-            <input class="fi" type="text" style="padding:5px 8px;font-size:11px;" placeholder="Name…" value="${esc(names[1]||'')}" onchange="setPersName('${p.key}',1,this.value)">
-          </div>
-        </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
-          <div>
-            <div style="font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text3);margin-bottom:3px;">NAME 3</div>
-            <input class="fi" type="text" style="padding:5px 8px;font-size:11px;" placeholder="Name…" value="${esc(names[2]||'')}" onchange="setPersName('${p.key}',2,this.value)">
-          </div>
-          <div>
-            <div style="font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text3);margin-bottom:3px;">FIRMA</div>
-            <select class="fs" style="padding:5px 8px;font-size:11px;" onchange="setPersFirm('${p.key}',this.value)">${firmOpts}</select>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+            <div>
+              <div style="font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text3);margin-bottom:3px;">NAME 3</div>
+              <input class="fi" type="text" style="padding:5px 8px;font-size:11px;" placeholder="Name…" value="${esc(names[2]||'')}" onchange="setPersName('${p.key}',2,this.value)">
+            </div>
+            <div>
+              <div style="font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text3);margin-bottom:3px;">FIRMA</div>
+              <select class="fs" style="padding:5px 8px;font-size:11px;" onchange="setPersFirm('${p.key}',this.value)">${firmOpts}</select>
+            </div>
           </div>
         </div>
-      </div>
-    `;
-    list.appendChild(row);
-  });
+      `;
+      list.appendChild(row);
+    });
+  }
   updTotalPers();
 }
-
 function togglePersDetail(key) {
   const detail = document.getElementById('pd_'+key);
   if (detail) detail.classList.toggle('open');
@@ -3275,29 +3385,58 @@ function addGeraet() {
 // ═══════════════════════════════════════════════════
 // UNTERSCHRIFTEN
 // ═══════════════════════════════════════════════════
+
+function ensureSignatures(){
+  if(!S.signatures || !Array.isArray(S.signatures) || !S.signatures.length){
+    S.signatures = [{id:'sig_'+Date.now(), role:'Bauleiter', name:S.bauleiter||'', firmId:''}];
+  }
+}
 function renderSigGrid() {
+  ensureSignatures();
   const grid = document.getElementById('sigGrid');
   if (!grid) return;
-  const sigs = [
-    {id:'sig1', label:'Bauleiter', tr:'Şantiye Şefi', nameId:'sig1n', firmId:'sig1f'},
-    {id:'sig2', label:'Polier', tr:'Formen', nameId:'sig2n', firmId:'sig2f'},
-    {id:'sig3', label:'Auftraggeber', tr:'İşveren', nameId:'sig3n', firmId:'sig3f'},
-  ];
-  const firmOpts = '<option value="">— Keine Firma</option>' + S.contractors.map(c=>`<option value="${esc(c.id)}">${esc(c.name)}</option>`).join('');
-  grid.innerHTML = sigs.map(s => `
-    <div>
-      <div class="fl">${s.label} <span class="tr">${s.tr}</span></div>
-      <input type="text" class="fi" id="${s.nameId}" placeholder="Name…" value="${esc(S[s.id]||'')}" oninput="autoSave()" style="margin-bottom:6px;">
-      <select class="fs" id="${s.firmId}" oninput="autoSave()">
-        ${firmOpts}
-      </select>
-      <div style="height:40px;border:1px dashed var(--border);border-radius:4px;margin-top:8px;display:flex;align-items:center;justify-content:center;font-size:9px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;">Unterschrift / İmza</div>
-    </div>
-  `).join('');
-  // set firm selections
-  setTimeout(() => {
-    svs('sig1f', S.sig1Firm); svs('sig2f', S.sig2Firm); svs('sig3f', S.sig3Firm);
-  }, 50);
+  grid.innerHTML = S.signatures.map((s,idx)=>{
+    const firmOpts = '<option value="">— Keine Firma</option>' + (S.contractors||[]).map(c=>`<option value="${esc(c.id)}" ${s.firmId===c.id?'selected':''}>${esc(c.name)}</option>`).join('');
+    return `<div style="background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:10px;">
+      <div class="fr2">
+        <div>
+          <div class="fl">Rolle</div>
+          <input type="text" class="fi" value="${esc(s.role||'')}" onchange="setSignatureField('${s.id}','role',this.value)">
+        </div>
+        <div>
+          <div class="fl">Name</div>
+          <input type="text" class="fi" value="${esc(s.name||'')}" onchange="setSignatureField('${s.id}','name',this.value)">
+        </div>
+      </div>
+      <div class="fr2" style="margin-top:8px;">
+        <div>
+          <div class="fl">Firma</div>
+          <select class="fs" onchange="setSignatureField('${s.id}','firmId',this.value)">${firmOpts}</select>
+        </div>
+        <div style="display:flex;align-items:end;justify-content:flex-end;">
+          ${idx===0 ? '' : '<button class="btn-icon" onclick="removeSignatureField(\''+s.id+'\')">✕</button>'}
+        </div>
+      </div>
+      <div style="height:40px;border:1px dashed var(--border);border-radius:8px;margin-top:10px;display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--text3);">Unterschrift</div>
+    </div>`;
+  }).join('');
+}
+function addSignatureField(){
+  ensureSignatures();
+  S.signatures.push({id:'sig_'+Date.now(), role:'', name:'', firmId:''});
+  renderSigGrid();
+  autoSave();
+}
+function removeSignatureField(id){
+  ensureSignatures();
+  S.signatures = S.signatures.filter(s=>s.id!==id);
+  renderSigGrid();
+  autoSave();
+}
+function setSignatureField(id, field, value){
+  ensureSignatures();
+  const s = S.signatures.find(x=>x.id===id);
+  if(s){ s[field]=value; autoSave(); }
 }
 
 // ═══════════════════════════════════════════════════
@@ -3330,9 +3469,10 @@ function renderWorkEntries() {
   if (!list) return;
   list.innerHTML = '';
   if (!S.workEntries || S.workEntries.length === 0) {
-    if (empty) empty.style.display='block'; return;
+    if (empty) empty.style.display='block'; updateWorkSummary(); return;
   }
   if (empty) empty.style.display='none';
+  updateWorkSummary();
   const firmOpts = '<option value="">— Alle / Tümü</option>' + (S.contractors||[]).map(c=>`<option value="${esc(c.id)}">${esc(c.name)}</option>`).join('');
   S.workEntries.forEach((e, idx) => {
     const div = document.createElement('div');
@@ -3406,7 +3546,7 @@ function openModal(name, col) {
     if (photoSel) photoSel.innerHTML = '<option value="">— Kein Foto</option>' + (S.photos||[]).map(p=>`<option value="${esc(p.id)}">${esc((p.caption||p.name||'Foto').slice(0,60))}</option>`).join('');
   }
   if (name === 'addNote') {
-    sv('note-txt',''); sv('note-date', todayStr());
+    sv('note-edit-id',''); sv('note-txt',''); sv('note-date', todayStr());
   }
   if (name === 'addContact') {
     sv('contact-id',''); sv('contact-name',''); sv('contact-role',''); sv('contact-phone',''); sv('contact-mail',''); sv('contact-note','');
@@ -3555,7 +3695,10 @@ function renderFirms() {
         <div style="flex:1;"><div class="con-note-txt">${esc(n.text)}</div></div>
         <div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px;">
           <span class="con-note-date">${n.date}</span>
-          <button class="btn-icon" style="width:22px;height:22px;font-size:10px;" onclick="delNote('${c.id}','${n.id}')">✕</button>
+          <div style="display:flex;gap:4px;">
+            <button class="btn-icon edit" style="width:22px;height:22px;font-size:10px;" onclick="editNote('${c.id}','${n.id}')">✎</button>
+            <button class="btn-icon" style="width:22px;height:22px;font-size:10px;" onclick="delNote('${c.id}','${n.id}')">✕</button>
+          </div>
         </div>
       </div>
     `).join('');
@@ -3597,19 +3740,31 @@ function renderFirms() {
 function toggleFirm(id){ document.getElementById('cb_'+id)?.classList.toggle('open'); }
 function chgFirmStatus(id,st){ const c=(S.contractors||[]).find(x=>x.id===id); if(c){c.status=st;autoSave();renderFirms();} }
 function openNoteModal(fid){ sv('note-fid',fid); openModal('addNote'); }
+function editNote(fid,nid){
+  const c=(S.contractors||[]).find(x=>x.id===fid); if(!c) return;
+  const n=(c.notes||[]).find(x=>x.id===nid); if(!n) return;
+  sv('note-fid',fid); sv('note-edit-id',nid); sv('note-txt',n.text||''); sv('note-date',n.date||todayStr());
+  document.getElementById('modal-addNote')?.classList.add('open');
+}
 function saveNote(){
-  const fid=gv('note-fid'), txt=gv('note-txt').trim();
+  const fid=gv('note-fid'), txt=gv('note-txt').trim(), editId = gv('note-edit-id');
   if(!txt){showToast('Notiz eingeben!','warn');return;}
   const c=(S.contractors||[]).find(x=>x.id===fid);
   if(c){
     if(!c.notes)c.notes=[];
-    c.notes.unshift({id:'n_'+Date.now(),text:txt,date:gv('note-date')||todayStr()});
-    closeModal('addNote'); autoSave(); renderFirms();
+    if(editId){
+      const n=(c.notes||[]).find(x=>x.id===editId);
+      if(n){ n.text=txt; n.date=gv('note-date')||todayStr(); }
+    }else{
+      c.notes.unshift({id:'n_'+Date.now(),text:txt,date:gv('note-date')||todayStr()});
+    }
+    sv('note-edit-id','');
+    closeModal('addNote'); autoSave(); renderFirms(); refreshDash();
     setTimeout(()=>{const b=document.getElementById('cb_'+fid);if(b)b.classList.add('open');},60);
     showToast('Notiz gespeichert','ok');
   }
 }
-function delNote(fid,nid){ const c=(S.contractors||[]).find(x=>x.id===fid); if(c){c.notes=(c.notes||[]).filter(n=>n.id!==nid);autoSave();renderFirms();} }
+function delNote(fid,nid){ const c=(S.contractors||[]).find(x=>x.id===fid); if(c){c.notes=(c.notes||[]).filter(n=>n.id!==nid);autoSave();renderFirms();refreshDash();} }
 function delFirm(id){ S.contractors=(S.contractors||[]).filter(c=>c.id!==id); autoSave(); renderFirms(); renderSigGrid(); buildPersonnel(); showToast('Firma gelöscht','ok'); }
 
 // ═══════════════════════════════════════════════════
@@ -3678,7 +3833,7 @@ function renderContacts() {
   if (g) rows = rows.filter(c => c.group === g);
   if (f) rows = rows.filter(c => c.firmId === f);
   if (!rows.length) {
-    box.innerHTML = '<div class="empty-state"><div class="ei">📇</div><h4>Keine Kontakte</h4><p>Önemli kişi ekle</p></div>';
+    box.innerHTML = '<div class="empty-state"><div class="ei">📇</div><h4>Keine Kontakte</h4><p>Wichtige Kontakte hinzufügen</p></div>';
     updateBadges();
     return;
   }
@@ -4049,11 +4204,19 @@ function renderDocs() {
   if(cnt)cnt.textContent=(S.docs||[]).length+' Dokumente';
   const dIcons={pdf:'📕','msword':'📘','wordprocessingml':'📘','ms-excel':'📗','spreadsheetml':'📗'};
   (S.docs||[]).forEach(doc=>{
-    const icon=Object.entries(dIcons).find(([k])=>doc.type.includes(k))?.[1]||'📄';
+    const icon=Object.entries(dIcons).find(([k])=>String(doc.type||'').includes(k))?.[1]||'📄';
+    const isPdf = String(doc.type||'').includes('pdf') || String(doc.name||'').toLowerCase().endswith('.pdf');
     const t=document.createElement('div'); t.className='doc-thumb';
     t.innerHTML=`<span class="doc-icon">${icon}</span><div class="doc-name">${esc(doc.name)}</div><div class="doc-size">${doc.size}</div>
       <button class="ph-del" style="opacity:1;" onclick="event.stopPropagation();delDoc('${doc.id}')">✕</button>`;
-    t.onclick=()=>{const a=document.createElement('a');a.href=doc.data;a.download=doc.name;a.click();};
+    t.onclick=()=>{
+      if(isPdf){
+        const w = window.open(doc.data, '_blank');
+        if(!w){ const a=document.createElement('a');a.href=doc.data;a.target='_blank';a.rel='noopener';a.click(); }
+      }else{
+        const a=document.createElement('a');a.href=doc.data;a.download=doc.name;a.click();
+      }
+    };
     grid.appendChild(t);
   });
 }
@@ -4403,12 +4566,13 @@ function refreshDash() {
   const dn=document.getElementById('dash-notes');
   if(dn){
     const notes=[];
-    (S.contractors||[]).forEach(c=>(c.notes||[]).slice(0,2).forEach(n=>notes.push({firm:c.name,color:c.color,...n})));
-    notes.sort((a,b)=>b.date.localeCompare(a.date));
+    (S.contractors||[]).forEach(c=>(c.notes||[]).forEach(n=>notes.push({firm:c.name,color:c.color,...n})));
+    notes.sort((a,b)=>String(b.date||'').localeCompare(String(a.date||'')));
     dn.innerHTML=notes.length===0?'<div class="empty-state" style="padding:16px;"><p>Henüz not yok</p></div>':
-    notes.slice(0,5).map(n=>`<div style="padding:8px 11px;background:var(--bg3);border-radius:var(--radius-xs);margin-bottom:5px;border-left:3px solid ${n.color||'var(--accent2)'};">
+    notes.map((n,i)=>`<div class="note-expand" onclick="this.classList.toggle('full')" style="padding:8px 11px;background:var(--bg3);border-radius:var(--radius-xs);margin-bottom:5px;border-left:3px solid ${n.color||'var(--accent2)'};">
       <div style="font-size:9px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--text3);margin-bottom:2px;">${esc(n.firm)} · ${n.date}</div>
-      <div style="font-size:12px;color:var(--text2);">${esc(n.text.substring(0,110))}${n.text.length>110?'…':''}</div>
+      <div class="note-short" style="font-size:12px;color:var(--text2);">${esc((n.text||'').substring(0,110))}${(n.text||'').length>110?'…':''}</div>
+      <div class="note-full" style="font-size:12px;color:var(--text2);line-height:1.6;">${esc(n.text||'')}</div>
     </div>`).join('');
   }
 
@@ -4627,6 +4791,7 @@ function updateBadges() {
   document.getElementById('nb-ct').textContent=(S.containers||[]).length;
   document.getElementById('nb-meet').textContent=(S.meetings||[]).length;
   document.getElementById('nb-files').textContent=(S.photos||[]).length+(S.docs||[]).length;
+  const nbc=document.getElementById('nb-contacts'); if(nbc) nbc.textContent=(S.contacts||[]).length;
   const nbm = document.getElementById('nb-mangel'); if (nbm) nbm.textContent=(S.maengel||[]).length;
   document.getElementById('nb-archive').textContent=archive.length;
 }
