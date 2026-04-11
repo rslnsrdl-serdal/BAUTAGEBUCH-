@@ -1668,6 +1668,7 @@ body{
       <button class="nav-tab" data-page="pg-files" onclick="goPage(this)"><span class="ti">📂</span>Dateien <span class="nav-badge" id="nb-files">0</span></button>
       <button class="nav-tab" data-page="pg-mangel" onclick="goPage(this)"><span class="ti">⚠️</span>Mängel <span class="nav-badge" id="nb-mangel">0</span></button>
       <button class="nav-tab" data-page="pg-archive" onclick="goPage(this)"><span class="ti">🗃</span>Archiv <span class="nav-badge" id="nb-archive">0</span></button>
+      <button class="nav-tab" data-page="pg-todos" onclick="goPage(this)"><span class="ti">🗂️</span>To-do <span class="nav-badge" id="nb-todos">0</span></button>
       <button class="nav-tab" data-page="pg-settings" onclick="goPage(this)"><span class="ti">⚙️</span>Einstellungen</button>
     </div>
   </div>
@@ -1712,6 +1713,32 @@ body{
     <div class="card">
       <div class="card-hd"><div class="card-hd-l"><div class="ci ci-gl">🌤</div><h3>Wetter <small>Hava</small></h3></div></div>
       <div class="card-body" id="dash-weather"></div>
+    </div>
+    <div class="card">
+      <div class="card-hd"><div class="card-hd-l"><div class="ci ci-gl">🌤</div><h3>Wetter automatisch</h3></div></div>
+      <div class="card-body">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px;">
+          <div id="dash-weather-auto" style="font-size:12px;color:var(--text2);line-height:1.7;">Noch nicht geladen</div>
+          <button class="btn btn-ghost btn-xs" onclick="loadDashboardWeather()">Wetter laden</button>
+        </div>
+        <div style="font-size:11px;color:var(--text3);">Automatisch nach Projekt-Ort. Im Tagesbericht weiter bearbeitbar.</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-hd"><div class="card-hd-l"><div class="ci ci-b">⭐</div><h3>Heute wichtig</h3></div></div>
+      <div class="card-body" id="dash-today-important"></div>
+    </div>
+    <div class="card">
+      <div class="card-hd"><div class="card-hd-l"><div class="ci ci-o">📌</div><h3>Offene Punkte</h3></div></div>
+      <div class="card-body" id="dash-open-points"></div>
+    </div>
+    <div class="card">
+      <div class="card-hd"><div class="card-hd-l"><div class="ci ci-c">⏳</div><h3>Warten auf</h3></div></div>
+      <div class="card-body" id="dash-waiting-points"></div>
+    </div>
+    <div class="card">
+      <div class="card-hd"><div class="card-hd-l"><div class="ci ci-r">⚠️</div><h3>Überfällig</h3></div></div>
+      <div class="card-body" id="dash-overdue-points"></div>
     </div>
   </div>
 </div>
@@ -2159,6 +2186,53 @@ body{
   <div id="archiveList"><div class="empty-state"><div class="ei">🗃</div><h4>Kein Archiv</h4><p>"Bericht speichern" ile rapor kaydet</p></div></div>
 </div>
 
+
+
+<!-- ═══════════ PAGE: TO-DO ═══════════ -->
+<div class="page" id="pg-todos">
+  <div class="sh">
+    <h2>Offene Punkte <span class="sub">To-do / Maßnahmen</span></h2>
+    <div class="sh-act">
+      <button class="btn btn-primary" onclick="saveTodoItem()">+ Speichern</button>
+      <button class="btn btn-ghost" onclick="resetTodoForm()">Neu</button>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1.1fr .9fr;gap:14px;">
+    <div class="card">
+      <div class="card-hd"><div class="card-hd-l"><div class="ci ci-b">➕</div><h3>Punkt erfassen</h3></div></div>
+      <div class="card-body">
+        <input type="hidden" id="tdEditId">
+        <div class="fg"><div class="fl">Titel</div><input class="fi" id="tdTitle" type="text" placeholder="z. B. Containerwechsel organisieren"></div>
+        <div class="fg"><div class="fl">Beschreibung</div><textarea class="fta" id="tdDesc" style="min-height:72px;" placeholder="Kurzbeschreibung..."></textarea></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+          <div class="fg"><div class="fl">Firma</div><select class="fs" id="tdFirm"></select></div>
+          <div class="fg"><div class="fl">Kategorie</div><select class="fs" id="tdCategory"><option>Allgemein</option><option>Container</option><option>Mangel</option><option>Freigabe</option><option>Material</option><option>Nachunternehmer</option><option>Wetter</option><option>Planung</option></select></div>
+          <div class="fg"><div class="fl">Priorität</div><select class="fs" id="tdPriority"><option>Hoch</option><option selected>Mittel</option><option>Niedrig</option></select></div>
+          <div class="fg"><div class="fl">Status</div><select class="fs" id="tdStatus"><option>Offen</option><option>In Arbeit</option><option>Wartet auf Firma</option><option>Wartet auf Freigabe</option><option>Erledigt</option><option>Verschoben</option><option>Entfällt</option></select></div>
+          <div class="fg"><div class="fl">Fällig</div><input class="fi" id="tdDue" type="date"></div>
+          <div class="fg"><div class="fl">Kommentar</div><input class="fi" id="tdComment" type="text" placeholder="Kurzkommentar..."></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-hd"><div class="card-hd-l"><div class="ci ci-g">📋</div><h3>Filter</h3></div></div>
+      <div class="card-body">
+        <div class="fg"><div class="fl">Suche</div><input class="fi" id="tdSearch" type="text" placeholder="Suchen..." oninput="renderTodoPage()"></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+          <div class="fg"><div class="fl">Status</div><select class="fs" id="tdFilterStatus" onchange="renderTodoPage()"><option value="">Alle</option><option>Offen</option><option>In Arbeit</option><option>Wartet auf Firma</option><option>Wartet auf Freigabe</option><option>Erledigt</option><option>Verschoben</option><option>Entfällt</option></select></div>
+          <div class="fg"><div class="fl">Firma</div><select class="fs" id="tdFilterFirm" onchange="renderTodoPage()"></select></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:14px;">
+    <div class="card-hd"><div class="card-hd-l"><div class="ci ci-o">🗂️</div><h3>Liste</h3></div></div>
+    <div class="card-body" id="todoListWrap"></div>
+  </div>
+</div>
 
 <!-- ═══════════ PAGE: SETTINGS ═══════════ -->
 <div class="page" id="pg-settings">
@@ -3030,6 +3104,7 @@ function loadArchiveIntoCurrent(id) {
   renderWorkEntries();
   renderKanban();
   renderFirms();
+  ensureTodoState();
   ensureTodoState();
   renderContacts();
   renderContainers();
