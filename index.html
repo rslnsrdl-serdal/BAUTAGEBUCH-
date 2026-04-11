@@ -1825,6 +1825,16 @@ body{
             <div class="fg"><div class="fl">Monat übernehmen</div><button class="btn btn-ghost" style="width:100%;justify-content:center;" onclick="applySuggestedMonthlyProgress()">Terminplan übernehmen</button></div>
           </div>
           <div class="fg"><div class="fl">Bemerkung <span class="tr">Monatsnotiz</span></div><textarea class="fta" id="progNote" style="min-height:58px;" placeholder="z. B. leichter Verzug wegen Wetter / Vorlauf / Lieferung" oninput="setProgressField('note',this.value)"></textarea></div>
+          <div style="margin-top:8px;padding:10px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:12px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:8px;">
+              <div style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text3);">Soll / Ist Verlauf</div>
+              <div style="display:flex;gap:10px;font-size:10px;color:var(--text2);">
+                <span>— Soll</span>
+                <span style="opacity:.7;">— Ist</span>
+              </div>
+            </div>
+            <canvas id="progressChart" style="width:100%;height:220px;display:block;"></canvas>
+          </div>
         </div>
       </div>
 
@@ -2110,60 +2120,6 @@ body{
       </div>
     </div>
 
-    <div class="card" style="grid-column:1/-1;">
-      <div class="card-hd"><div class="card-hd-l"><div class="ci ci-c">🧮</div><h3>Baustellen-Umrechner <small>İnşaat çevirici</small></h3></div></div>
-      <div class="card-body">
-        <div class="unit-grid">
-          <div class="fg">
-            <div class="fl">Länge</div>
-            <input type="number" class="fi" id="convLengthVal" placeholder="Wert" oninput="runConverters()">
-            <select class="fs" id="convLengthUnit" onchange="runConverters()">
-              <option value="m">m</option><option value="cm">cm</option><option value="mm">mm</option><option value="km">km</option>
-            </select>
-            <div id="convLengthOut" style="font-size:12px;color:var(--text2);margin-top:8px;line-height:1.7;"></div>
-          </div>
-          <div class="fg">
-            <div class="fl">Fläche</div>
-            <input type="number" class="fi" id="convAreaVal" placeholder="Wert" oninput="runConverters()">
-            <select class="fs" id="convAreaUnit" onchange="runConverters()">
-              <option value="m2">m²</option><option value="cm2">cm²</option><option value="ha">ha</option>
-            </select>
-            <div id="convAreaOut" style="font-size:12px;color:var(--text2);margin-top:8px;line-height:1.7;"></div>
-          </div>
-          <div class="fg">
-            <div class="fl">Volumen</div>
-            <input type="number" class="fi" id="convVolVal" placeholder="Wert" oninput="runConverters()">
-            <select class="fs" id="convVolUnit" onchange="runConverters()">
-              <option value="m3">m³</option><option value="l">l</option><option value="cm3">cm³</option>
-            </select>
-            <div id="convVolOut" style="font-size:12px;color:var(--text2);margin-top:8px;line-height:1.7;"></div>
-          </div>
-          <div class="fg">
-            <div class="fl">Gewicht</div>
-            <input type="number" class="fi" id="convMassVal" placeholder="Wert" oninput="runConverters()">
-            <select class="fs" id="convMassUnit" onchange="runConverters()">
-              <option value="kg">kg</option><option value="g">g</option><option value="t">t</option>
-            </select>
-            <div id="convMassOut" style="font-size:12px;color:var(--text2);margin-top:8px;line-height:1.7;"></div>
-          </div>
-          <div class="fg">
-            <div class="fl">Druck</div>
-            <input type="number" class="fi" id="convPressureVal" placeholder="Wert" oninput="runConverters()">
-            <select class="fs" id="convPressureUnit" onchange="runConverters()">
-              <option value="bar">bar</option><option value="kpa">kPa</option><option value="mpa">MPa</option>
-            </select>
-            <div id="convPressureOut" style="font-size:12px;color:var(--text2);margin-top:8px;line-height:1.7;"></div>
-          </div>
-          <div class="fg">
-            <div class="fl">Temperatur</div>
-            <input type="number" class="fi" id="convTempVal" placeholder="Wert" oninput="runConverters()">
-            <select class="fs" id="convTempUnit" onchange="runConverters()">
-              <option value="c">°C</option><option value="f">°F</option>
-            </select>
-            <div id="convTempOut" style="font-size:12px;color:var(--text2);margin-top:8px;line-height:1.7;"></div>
-          </div>
-        </div>
-      </div>
     </div>
 
   </div>
@@ -2708,6 +2664,7 @@ function applyStateToForm() {
   svs('wSel', S.wind);
   svs('bSel', S.boden);
   renderProgressPanel();
+  renderProgressChart();
   sv('rBem', S.remarks);
   // weather button
   if (S.weather) {
@@ -2971,7 +2928,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   renderArchive();
   renderContacts();
   updateWeatherSummary();
+  renderProgressChart();
   updateWorkSummary();
+  runConverters();
   renderTimeline();
   renderWorkAreas();
   renderWeeklyReports();
@@ -3053,6 +3012,7 @@ function updProg(val, doSave = true) {
   S.progressPlan.ist = String(val || '0');
   S.progress = parseInt(S.progressPlan.ist || '0') || 0;
   renderProgressPanel();
+  renderProgressChart();
   if (doSave) autoSave();
 }
 
@@ -3100,6 +3060,7 @@ function syncMonthlyProgressFromDate(dateStr, overwriteIst=false) {
   if (overwriteIst && String(S.progressPlan.ist||'') === '') S.progressPlan.ist = String(sug.soll || '');
   S.progress = parseInt(S.progressPlan.ist || '0') || 0;
   renderProgressPanel();
+  renderProgressChart();
 }
 
 function applySuggestedMonthlyProgress() {
@@ -4190,7 +4151,6 @@ function renderPhotos() {
     }
   });
 }
-
 function openDocFile(doc){
   if(!doc || !doc.data){ showToast('Dateiinhalt nicht verfügbar. Bitte Datei erneut hochladen.','warn'); return; }
   const isPdf = String(doc.type||'').includes('pdf') || String(doc.name||'').toLowerCase().endsWith('.pdf');
@@ -4725,56 +4685,103 @@ function renderMonthlyProgressTable(){
 
 // ═══════════════════════════════════════════════════
 
+
 function renderProgressChart(){
   const canvas = document.getElementById('progressChart');
   if(!canvas || typeof TERMINPLAN_MONTHS === 'undefined') return;
 
   const ctx = canvas.getContext('2d');
-  const w = canvas.width = canvas.offsetWidth;
-  const h = canvas.height = 240;
+  const width = Math.max(canvas.clientWidth || 320, 320);
+  const height = 220;
+  if(canvas.width !== width) canvas.width = width;
+  if(canvas.height !== height) canvas.height = height;
 
-  ctx.clearRect(0,0,w,h);
+  ctx.clearRect(0,0,width,height);
 
-  const padding = 40;
-  const chartW = w - padding*2;
-  const chartH = h - padding*2;
-
+  const padL = 34, padR = 10, padT = 10, padB = 26;
+  const cw = width - padL - padR;
+  const ch = height - padT - padB;
   const maxY = 100;
+  const months = TERMINPLAN_MONTHS;
+  if(!months.length) return;
+  const activeKey = (S.progressPlan && S.progressPlan.month) ? S.progressPlan.month : String(gv('rDate') || S.reportDate || todayStr()).slice(0,7);
 
-  function x(i){ return padding + (i/(TERMINPLAN_MONTHS.length-1))*chartW; }
-  function y(v){ return padding + chartH - (v/maxY)*chartH; }
+  function x(i){ return padL + (i/(months.length-1))*cw; }
+  function y(v){ return padT + ch - (Math.max(0,Math.min(maxY, Number(v)||0))/maxY)*ch; }
 
-  ctx.strokeStyle = '#bbb';
+  // axes
+  ctx.strokeStyle = 'rgba(120,120,120,.35)';
   ctx.lineWidth = 1;
   ctx.beginPath();
-  ctx.moveTo(padding,padding);
-  ctx.lineTo(padding,padding+chartH);
-  ctx.lineTo(padding+chartW,padding+chartH);
+  ctx.moveTo(padL, padT);
+  ctx.lineTo(padL, padT+ch);
+  ctx.lineTo(padL+cw, padT+ch);
   ctx.stroke();
 
-  ctx.strokeStyle = '#000';
+  [0,25,50,75,100].forEach(v=>{
+    const yy = y(v);
+    ctx.strokeStyle = 'rgba(120,120,120,.16)';
+    ctx.beginPath(); ctx.moveTo(padL,yy); ctx.lineTo(padL+cw,yy); ctx.stroke();
+    ctx.fillStyle = 'rgba(120,120,120,.8)';
+    ctx.font = '10px sans-serif';
+    ctx.fillText(String(v), 4, yy+3);
+  });
+
+  // Soll line
+  ctx.strokeStyle = '#111827';
   ctx.lineWidth = 2;
   ctx.beginPath();
-  TERMINPLAN_MONTHS.forEach((m,i)=>{
+  months.forEach((m,i)=>{
     const px=x(i), py=y(m.soll);
-    if(i===0) ctx.moveTo(px,py);
-    else ctx.lineTo(px,py);
+    if(i===0) ctx.moveTo(px,py); else ctx.lineTo(px,py);
   });
   ctx.stroke();
 
-  ctx.strokeStyle = '#666';
+  // Ist line from saved monthly records + current month fields
+  ctx.strokeStyle = '#6b7280';
   ctx.lineWidth = 2;
+  let hasIst = false;
   ctx.beginPath();
-  TERMINPLAN_MONTHS.forEach((m,i)=>{
-    const rec = (S.monthlyProgress||{})[m.key];
-    if(rec && rec.ist!==''){
-      const px=x(i), py=y(parseFloat(rec.ist));
-      if(i===0) ctx.moveTo(px,py);
+  months.forEach((m,i)=>{
+    let rec = (S.monthlyProgress||{})[m.key];
+    let istVal = rec && rec.ist !== '' ? parseFloat(rec.ist) : null;
+    if(m.key === activeKey){
+      const liveIst = parseFloat(gv('fpIst') || gv('progIstInput') || '');
+      if(!isNaN(liveIst)) istVal = liveIst;
+    }
+    if(istVal !== null && !isNaN(istVal)){
+      const px=x(i), py=y(istVal);
+      if(!hasIst){ ctx.moveTo(px,py); hasIst = true; }
       else ctx.lineTo(px,py);
     }
   });
-  ctx.stroke();
+  if(hasIst) ctx.stroke();
+
+  // points + month labels
+  months.forEach((m,i)=>{
+    const px=x(i);
+    const pySoll=y(m.soll);
+    ctx.fillStyle = (m.key===activeKey) ? '#f97316' : '#111827';
+    ctx.beginPath(); ctx.arc(px, pySoll, m.key===activeKey ? 4 : 3, 0, Math.PI*2); ctx.fill();
+
+    let rec = (S.monthlyProgress||{})[m.key];
+    let istVal = rec && rec.ist !== '' ? parseFloat(rec.ist) : null;
+    if(m.key === activeKey){
+      const liveIst = parseFloat(gv('fpIst') || gv('progIstInput') || '');
+      if(!isNaN(liveIst)) istVal = liveIst;
+    }
+    if(istVal !== null && !isNaN(istVal)){
+      ctx.fillStyle = (m.key===activeKey) ? '#f97316' : '#6b7280';
+      ctx.beginPath(); ctx.arc(px, y(istVal), m.key===activeKey ? 4 : 3, 0, Math.PI*2); ctx.fill();
+    }
+
+    ctx.fillStyle = 'rgba(120,120,120,.9)';
+    ctx.font = '10px sans-serif';
+    const label = (m.label||'').slice(0,3);
+    ctx.fillText(label, px-10, height-8);
+  });
 }
+
 
 const _origRenderMonthlyProgressTable = renderMonthlyProgressTable;
 renderMonthlyProgressTable = function(){
@@ -4783,101 +4790,45 @@ renderMonthlyProgressTable = function(){
 };
 
 
-function pickPhoneContacts(){
-  if(navigator.contacts && navigator.contacts.select){
-    navigator.contacts.select(['name','tel','email'], {multiple:true}).then(results=>{
-      if(!results || !results.length){ showToast('Keine Kontakte ausgewählt','warn'); return; }
-      if(!S.contacts) S.contacts=[];
-      results.forEach(r=>{
-        S.contacts.unshift({
-          id:'co_'+Date.now()+'_'+Math.random().toString(36).slice(2,7),
-          name:(r.name||[])[0]||'',
-          firmId:'',
-          role:'',
-          group:'Sonstige',
-          phone:(r.tel||[])[0]||'',
-          mail:(r.email||[])[0]||'',
-          note:'Importiert aus Telefon-Rehber'
-        });
-      });
-      autoSave(); renderContacts(); showToast('Kontakte importiert','ok');
-    }).catch(()=>showToast('Kontaktimport abgebrochen','warn'));
-  }else{
-    showToast('Telefon-Rehber wird hier nicht direkt unterstützt. Bitte CSV oder VCF nutzen.','warn');
-  }
+function toggleCollapse(panelId, btnId, showText, hideText){
+  const panel = document.getElementById(panelId);
+  const btn = document.getElementById(btnId);
+  if(!panel) return;
+  const open = panel.classList.toggle('open');
+  if(btn) btn.textContent = open ? hideText : showText;
 }
-function parseCsvLine(line){
-  const result=[]; let current=''; let inQuotes=false;
-  for(let i=0;i<line.length;i++){
-    const ch=line[i];
-    if(ch === '"'){
-      if(inQuotes && line[i+1] === '"'){ current += '"'; i++; }
-      else inQuotes = !inQuotes;
-    }else if(ch === ',' && !inQuotes){
-      result.push(current.trim()); current='';
-    }else current += ch;
-  }
-  result.push(current.trim());
-  return result;
+function updateWeatherSummary(){
+  const el = document.getElementById('weatherSummaryText');
+  if(!el) return;
+  const parts = [];
+  if(S.weather) parts.push(S.weather);
+  const tmin = gv('tMin') || S.tempMin || '';
+  const tmax = gv('tMax') || S.tempMax || '';
+  if(tmin || tmax) parts.push((tmin||'—') + ' / ' + (tmax||'—') + ' °C');
+  const wind = gv('wSel') || S.wind || '';
+  const boden = gv('bSel') || S.boden || '';
+  if(wind) parts.push(wind);
+  if(boden) parts.push(boden);
+  el.textContent = parts.length ? parts.join(' · ') : 'Nicht erfasst';
 }
-function importContactsCSV(inp){
-  const file = inp.files && inp.files[0]; if(!file) return;
-  const reader = new FileReader();
-  reader.onload = e => {
-    const txt = String(e.target.result||'').trim();
-    if(!txt){ showToast('CSV ist leer','warn'); return; }
-    const lines = txt.split(/\r?\n/).filter(Boolean);
-    if(lines.length < 2){ showToast('CSV enthält keine Datensätze','warn'); return; }
-    const headers = parseCsvLine(lines[0]).map(x=>x.trim().toLowerCase());
-    if(!S.contacts) S.contacts=[];
-    for(let i=1;i<lines.length;i++){
-      const cols = parseCsvLine(lines[i]);
-      const obj = {};
-      headers.forEach((h,idx)=>obj[h]=cols[idx]||'');
-      const name = obj.name || obj.fullname || obj.kontakt || '';
-      if(!name) continue;
-      S.contacts.unshift({
-        id:'co_'+Date.now()+'_'+Math.random().toString(36).slice(2,7),
-        name:name,
-        firmId:'',
-        role:obj.funktion||obj.role||'',
-        group:obj.kategorie||obj.group||'Sonstige',
-        phone:obj.telefon||obj.phone||obj.mobil||'',
-        mail:obj.email||obj.mail||'',
-        note:obj.bemerkung||obj.note||'CSV Import'
-      });
-    }
-    autoSave(); renderContacts(); inp.value=''; showToast('CSV importiert','ok');
+function updateWorkSummary(){
+  const el = document.getElementById('workSummaryText');
+  if(!el) return;
+  const count = (S.workEntries||[]).length;
+  el.textContent = count ? count + ' Einträge erfasst' : 'Keine Einträge';
+}
+(function(){
+  const _selWx = window.selWx;
+  window.selWx = function(btn, emoji, label){
+    _selWx(btn, emoji, label);
+    updateWeatherSummary();
   };
-  reader.readAsText(file,'utf-8');
-}
-function importContactsVCF(inp){
-  const file = inp.files && inp.files[0]; if(!file) return;
-  const reader = new FileReader();
-  reader.onload = e => {
-    const txt = String(e.target.result||'');
-    const cards = txt.split(/END:VCARD/i);
-    if(!S.contacts) S.contacts=[];
-    cards.forEach(card=>{
-      const name = (card.match(/FN:(.+)/i)||[])[1] || '';
-      if(!name) return;
-      const tel = (card.match(/TEL[^:]*:(.+)/i)||[])[1] || '';
-      const mail = (card.match(/EMAIL[^:]*:(.+)/i)||[])[1] || '';
-      S.contacts.unshift({
-        id:'co_'+Date.now()+'_'+Math.random().toString(36).slice(2,7),
-        name:name.trim(),
-        firmId:'',
-        role:'',
-        group:'Sonstige',
-        phone:tel.trim(),
-        mail:mail.trim(),
-        note:'VCF Import'
-      });
-    });
-    autoSave(); renderContacts(); inp.value=''; showToast('VCF importiert','ok');
+  const _renderWorkEntries = window.renderWorkEntries;
+  window.renderWorkEntries = function(){
+    _renderWorkEntries();
+    updateWorkSummary();
   };
-  reader.readAsText(file,'utf-8');
-}
+})();
 
 // BADGES
 // ═══════════════════════════════════════════════════
@@ -5717,7 +5668,42 @@ function showToast(msg,type='ok'){
     if (typeof showToast === 'function') showToast(existing ? 'Firma aktualisiert' : 'Firma gespeichert','ok');
   };
 
-  window.renderFirms = function renderFirmsPatched() {
+  
+  window.editFirmNotePrompt = function(fid, nid){
+    const c = (S.contractors||[]).find(x=>x.id===fid); if(!c) return;
+    const n = (c.notes||[]).find(x=>x.id===nid); if(!n) return;
+    const next = prompt('Notiz bearbeiten', n.text || '');
+    if(next === null) return;
+    const txt = String(next).trim();
+    if(!txt){ showToast('Notiz darf nicht leer sein','warn'); return; }
+    n.text = txt;
+    if (typeof autoSave === 'function') autoSave();
+    renderFirms(); if(typeof refreshDash==='function') refreshDash();
+    showToast('Notiz aktualisiert','ok');
+  };
+
+  window.deleteFirmNote = function(fid, nid){
+    const c = (S.contractors||[]).find(x=>x.id===fid); if(!c) return;
+    c.notes = (c.notes||[]).filter(n => n.id !== nid);
+    if (typeof autoSave === 'function') autoSave();
+    renderFirms(); if(typeof refreshDash==='function') refreshDash();
+    showToast('Notiz gelöscht','ok');
+  };
+
+  window.deleteGewerkPrompt = function(code){
+    ensurePatchState();
+    const hasFirms = (S.contractors||[]).some(c => String(c.gewerkCode) === String(code));
+    if(hasFirms){ showToast('Gewerk hat noch Firmen und kann nicht gelöscht werden','warn'); return; }
+    if(!confirm('Gewerk wirklich löschen?')) return;
+    S.gewerkePresets = (S.gewerkePresets||[]).filter(g => String(g.code)!==String(code));
+    if (typeof autoSave === 'function') autoSave();
+    renderGewerkCodeDataList();
+    renderFirms();
+    showToast('Gewerk gelöscht','ok');
+  };
+
+
+window.renderFirms = function renderFirmsPatched() {
     ensurePatchState();
     populateQuickFirmSelect();
     const cont = e('firmList');
@@ -5737,14 +5723,17 @@ function showToast(msg,type='ok'){
     const html = Object.keys(grouped).sort().map(code => {
       const g = grouped[code];
       const firms = g.firms || [];
+      const headerBtns = `
+        <div style="display:flex;gap:6px;flex-wrap:wrap;">
+          <button class="btn btn-ghost btn-xs" onclick="event.stopPropagation();editGewerkPrompt('${h(code)}')">✏️ Gewerk</button>
+          <button class="btn btn-ghost btn-xs" onclick="event.stopPropagation();deleteGewerkPrompt('${h(code)}')">🗑 Gewerk</button>
+          <button class="btn btn-primary btn-xs" onclick="event.stopPropagation();openModal('addFirm'); setTimeout(()=>{ if(window.resetFirmModalForCreate) resetFirmModalForCreate('${h(code)}'); if(document.getElementById('af-gewerkCode')) document.getElementById('af-gewerkCode').value='${h(code)}'; if(window.populateAddFirmGewerkSelect) populateAddFirmGewerkSelect('${h(code)}'); },30)">+ Firma</button>
+        </div>`;
       if (!firms.length) return `
         <div class="card" style="margin-bottom:10px;">
           <div class="card-hd" style="justify-content:space-between;">
             <div class="card-hd-l"><div class="ci ci-b">📁</div><h3>${h(code)} ${h(g.name)}</h3></div>
-            <div style="display:flex;gap:6px;flex-wrap:wrap;">
-              <button class="btn btn-ghost btn-xs" onclick="editGewerkPrompt('${h(code)}')">✏️ Gewerk</button>
-              <button class="btn btn-primary btn-xs" onclick="openModal('addFirm'); setTimeout(()=>{ if(window.resetFirmModalForCreate) resetFirmModalForCreate('${h(code)}'); if(document.getElementById('af-gewerkCode')) document.getElementById('af-gewerkCode').value='${h(code)}'; if(window.populateAddFirmGewerkSelect) populateAddFirmGewerkSelect('${h(code)}'); },30)">+ Firma</button>
-            </div>
+            ${headerBtns}
           </div>
           <div class="card-body"><div class="empty-state" style="padding:18px 10px;"><p>Noch keine Firma</p></div></div>
         </div>`;
@@ -5753,6 +5742,16 @@ function showToast(msg,type='ok'){
         const statusMap = {active:{lbl:'Aktiv',cls:'cs-a'},pause:{lbl:'Pause',cls:'cs-p'},done:{lbl:'Abgeschlossen',cls:'cs-d'}};
         const sm = statusMap[c.status] || statusMap.active;
         const noteCount = (c.notes||[]).length;
+        const notesHtml = (c.notes||[]).map(n=>`<div class="con-note-item">
+            <div style="flex:1"><div class="con-note-txt">${h(n.text)}</div></div>
+            <div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px;">
+              <div class="con-note-date">${h(n.date)}</div>
+              <div style="display:flex;gap:4px;">
+                <button class="btn-icon edit" style="width:22px;height:22px;font-size:10px;" onclick="event.stopPropagation();editFirmNotePrompt('${h(c.id)}','${h(n.id)}')">✎</button>
+                <button class="btn-icon" style="width:22px;height:22px;font-size:10px;" onclick="event.stopPropagation();deleteFirmNote('${h(c.id)}','${h(n.id)}')">✕</button>
+              </div>
+            </div>
+          </div>`).join('');
         return `
           <div class="con-card" style="${active}">
             <div class="con-hd" onclick="applyNUToQuickContext('${h(c.nuCode||'')}','${h(c.name)}','${h(c.id)}')">
@@ -5768,12 +5767,12 @@ function showToast(msg,type='ok'){
               <span class="con-status-badge ${sm.cls}">${sm.lbl}</span>
             </div>
             <div class="con-body open">
-              ${(c.notes||[]).map(n=>`<div class="con-note-item"><div style="flex:1"><div class="con-note-txt">${h(n.text)}</div></div><div class="con-note-date">${h(n.date)}</div></div>`).join('') || '<div class="empty-state" style="padding:10px 0;"><p>Keine Notizen</p></div>'}
+              ${notesHtml || '<div class="empty-state" style="padding:10px 0;"><p>Keine Notizen</p></div>'}
               <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;">
-                <button class="btn btn-blue btn-xs" onclick="applyNUToQuickContext('${h(c.nuCode||'')}','${h(c.name)}','${h(c.id)}')">Als Kontext</button>
-                <button class="btn btn-ghost btn-xs" onclick="editFirm('${h(c.id)}')">✏️ Bearbeiten</button>
-                <button class="btn btn-ghost btn-xs" onclick="openAddNotePatched('${h(c.id)}')">+ Notiz</button>
-                <button class="btn btn-ghost btn-xs" onclick="if(confirm('Diese Firma löschen?')) delFirm('${h(c.id)}')">🗑 Löschen</button>
+                <button class="btn btn-blue btn-xs" onclick="event.stopPropagation();applyNUToQuickContext('${h(c.nuCode||'')}','${h(c.name)}','${h(c.id)}')">Als Kontext</button>
+                <button class="btn btn-ghost btn-xs" onclick="event.stopPropagation();editFirm('${h(c.id)}')">✏️ Bearbeiten</button>
+                <button class="btn btn-ghost btn-xs" onclick="event.stopPropagation();openAddNotePatched('${h(c.id)}')">+ Notiz</button>
+                <button class="btn btn-ghost btn-xs" onclick="event.stopPropagation();if(confirm('Diese Firma löschen?')) delFirm('${h(c.id)}')">🗑 Löschen</button>
               </div>
             </div>
           </div>`;
@@ -5781,10 +5780,7 @@ function showToast(msg,type='ok'){
       return `<div class="card" style="margin-bottom:10px;">
         <div class="card-hd" style="justify-content:space-between;">
           <div class="card-hd-l"><div class="ci ci-b">📁</div><h3>${h(code)} ${h(g.name)} <small>${firms.length} Firma</small></h3></div>
-          <div style="display:flex;gap:6px;flex-wrap:wrap;">
-            <button class="btn btn-ghost btn-xs" onclick="editGewerkPrompt('${h(code)}')">✏️ Gewerk</button>
-            <button class="btn btn-primary btn-xs" onclick="openModal('addFirm'); setTimeout(()=>{ if(window.resetFirmModalForCreate) resetFirmModalForCreate('${h(code)}'); if(document.getElementById('af-gewerkCode')) document.getElementById('af-gewerkCode').value='${h(code)}'; if(window.populateAddFirmGewerkSelect) populateAddFirmGewerkSelect('${h(code)}'); },30)">+ Firma</button>
-          </div>
+          ${headerBtns}
         </div>
         <div class="card-body">${firmsHtml}</div>
       </div>`;
