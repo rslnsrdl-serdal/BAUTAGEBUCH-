@@ -2461,13 +2461,13 @@ body{
   <div class="modal" style="max-width:1100px;height:88vh;display:flex;flex-direction:column;">
     <div class="modal-hd">
       <h3 id="pdfViewerTitle">PDF</h3>
-      <button class="modal-close" onclick="closePdfViewer()">✕</button>
+      <button type="button" class="modal-close" onclick="closePdfViewer()">✕</button>
     </div>
     <div class="modal-body" style="padding:0;flex:1;display:flex;">
       <iframe id="pdfViewerFrame" style="border:none;width:100%;height:100%;background:#fff;"></iframe>
     </div>
     <div class="modal-ft">
-      <button class="btn btn-ghost" onclick="closePdfViewer()">Schließen</button>
+      <button type="button" class="btn btn-ghost" onclick="closePdfViewer()">Schließen</button>
     </div>
   </div>
 </div>
@@ -3100,6 +3100,17 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('note-date') && (document.getElementById('note-date').value = todayStr());
 });
 
+
+document.addEventListener('click', function(e){
+  const t = e.target;
+  if(!t) return;
+  if (t.matches && (t.matches('#pdfViewerModal .modal-close') || t.matches('#pdfViewerModal .btn.btn-ghost'))) {
+    e.preventDefault();
+    e.stopPropagation();
+    if(typeof closePdfViewer==='function') closePdfViewer();
+  }
+});
+
 // ═══════════════════════════════════════════════════
 // THEME
 // ═══════════════════════════════════════════════════
@@ -3375,6 +3386,14 @@ function setProgressActionToday(val){
   if (!S.progressPlan) S.progressPlan = {month:'',soll:'',ist:'',phase:'',note:'',actionToday:''};
   S.progressPlan.actionToday = val;
   autoSave();
+}
+
+
+function closePdfViewer(){
+  const modal = document.getElementById('pdfViewerModal');
+  const frame = document.getElementById('pdfViewerFrame');
+  if(frame) frame.src = '';
+  if(modal) modal.classList.remove('open');
 }
 
 // ═══════════════════════════════════════════════════
@@ -3798,7 +3817,7 @@ function closeModal(name) { document.getElementById('modal-'+name)?.classList.re
 document.querySelectorAll('.modal-ov').forEach(m => {
   m.addEventListener('click', e => { 
     if(e.target===m){
-      if(m.id === 'pdfViewerModal') closePdfViewer();
+      if(m.id === 'pdfViewerModal'){ if(typeof closePdfViewer==='function') closePdfViewer(); else { const modal=document.getElementById('pdfViewerModal'); const frame=document.getElementById('pdfViewerFrame'); if(frame) frame.src=''; if(modal) modal.classList.remove('open'); } }
       else if(m.id === 'photoViewerModal') closePhotoViewer();
       else m.classList.remove('open');
     }
