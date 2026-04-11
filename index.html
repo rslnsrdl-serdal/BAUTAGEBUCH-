@@ -4791,7 +4791,6 @@ function updateBadges() {
   document.getElementById('nb-ct').textContent=(S.containers||[]).length;
   document.getElementById('nb-meet').textContent=(S.meetings||[]).length;
   document.getElementById('nb-files').textContent=(S.photos||[]).length+(S.docs||[]).length;
-  const nbc=document.getElementById('nb-contacts'); if(nbc) nbc.textContent=(S.contacts||[]).length;
   const nbm = document.getElementById('nb-mangel'); if (nbm) nbm.textContent=(S.maengel||[]).length;
   document.getElementById('nb-archive').textContent=archive.length;
 }
