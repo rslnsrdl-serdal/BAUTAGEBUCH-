@@ -1534,6 +1534,35 @@ body{
 .todo-history-item:last-child{border-bottom:none}
 .todo-history-date{font-size:10px;color:var(--text3);font-weight:700;letter-spacing:.5px;text-transform:uppercase}
 
+
+/* targeted polish */
+.timeline-card{background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:10px}
+.timeline-card-top{display:grid;grid-template-columns:94px 1fr 220px auto;gap:10px;align-items:start}
+.timeline-note{min-height:56px}
+.timeline-meta{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.timeline-photo-strip{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.timeline-photo-thumb{width:72px;height:72px;border-radius:10px;overflow:hidden;border:1px solid var(--border);background:var(--bg4);cursor:pointer}
+.timeline-photo-thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.timeline-toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:8px}
+.area-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin-top:12px}
+.area-card{background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:12px}
+.area-card-hd{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}
+.area-card-name{font-size:13px;font-weight:700;color:var(--text)}
+.area-card-meta{font-size:10px;color:var(--text3);margin-top:4px}
+.doc-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px}
+.doc-thumb{background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:12px;min-height:104px;display:flex;flex-direction:column;justify-content:flex-start;position:relative;cursor:pointer}
+.doc-icon{font-size:22px;margin-bottom:8px}
+.doc-name{font-size:12px;font-weight:700;color:var(--text);line-height:1.45;word-break:break-word}
+.doc-size{font-size:10px;color:var(--text3);margin-top:6px}
+#pg-todos .sh-act,.todo-toolbar{display:flex;gap:8px;flex-wrap:wrap}
+#pg-todos > div[style*="grid-template-columns:1.1fr .9fr"]{display:block !important}
+#pg-todos > div[style*="grid-template-columns:1.1fr .9fr"] > .card{margin-bottom:14px}
+.auto-weather-card{background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:12px}
+.auto-weather-line{font-size:12px;color:var(--text2);line-height:1.7}
+@media(max-width:900px){
+  .timeline-card-top{grid-template-columns:1fr}
+}
+
 /* ═══════════════════════════════════════════════════
    RESPONSIVE
 ═══════════════════════════════════════════════════ */
@@ -1714,15 +1743,6 @@ body{
       <div class="card-hd"><div class="card-hd-l"><div class="ci ci-gl">🌤</div><h3>Wetter <small>Hava</small></h3></div></div>
       <div class="card-body" id="dash-weather"></div>
     </div>
-    <div class="card">
-      <div class="card-hd"><div class="card-hd-l"><div class="ci ci-gl">🌤</div><h3>Wetter automatisch</h3></div></div>
-      <div class="card-body">
-        <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px;">
-          <div id="dash-weather-auto" style="font-size:12px;color:var(--text2);line-height:1.7;">Noch nicht geladen</div>
-          <button class="btn btn-ghost btn-xs" onclick="loadDashboardWeather()">Wetter laden</button>
-        </div>
-        <div style="font-size:11px;color:var(--text3);">Automatisch nach Projekt-Ort. Im Tagesbericht weiter bearbeitbar.</div>
-      </div>
     </div>
     <div class="card">
       <div class="card-hd"><div class="card-hd-l"><div class="ci ci-b">⭐</div><h3>Heute wichtig</h3></div></div>
@@ -1752,7 +1772,7 @@ body{
   <div class="kb-wrap">
     <div class="kb-col kb-today">
       <div class="kb-hd">
-        <div class="kb-hd-l"><div class="kb-dot"></div><div class="kb-title">Heute <span class="tr">Bugün</span></div></div>
+        <div class="kb-hd-l"><div class="kb-dot"></div><div class="kb-title">Offen / In Arbeit <span class="tr">Açık / Devam</span></div></div>
         <span class="kb-cnt" id="kb-cnt-today">0</span>
       </div>
       <div class="kb-cards" id="kbc-today" ondragover="onDOver(event,'today')" ondrop="onDDrop(event,'today')" ondragleave="onDLeave(event)"></div>
@@ -1760,7 +1780,7 @@ body{
     </div>
     <div class="kb-col kb-tmrw">
       <div class="kb-hd">
-        <div class="kb-hd-l"><div class="kb-dot"></div><div class="kb-title">Morgen <span class="tr">Yarın</span></div></div>
+        <div class="kb-hd-l"><div class="kb-dot"></div><div class="kb-title">Wartet <span class="tr">Bekliyor</span></div></div>
         <span class="kb-cnt" id="kb-cnt-tomorrow">0</span>
       </div>
       <div class="kb-cards" id="kbc-tomorrow" ondragover="onDOver(event,'tomorrow')" ondrop="onDDrop(event,'tomorrow')" ondragleave="onDLeave(event)"></div>
@@ -1819,31 +1839,11 @@ body{
 
       <!-- Wetter -->
       <div class="card">
-        <div class="card-hd"><div class="card-hd-l"><div class="ci ci-gl">🌤</div><h3>Wetter <small>Hava</small></h3></div></div>
+        <div class="card-hd"><div class="card-hd-l"><div class="ci ci-gl">🌤</div><h3>Wetter</h3></div></div>
         <div class="card-body">
-          <div class="section-toggle-row">
-            <div class="summary-text" id="weatherSummaryText">Nicht erfasst</div>
-            <button class="btn btn-ghost btn-sm" id="weatherToggleBtn" onclick="toggleCollapse('weatherPanel','weatherToggleBtn','Wetter anzeigen','Wetter ausblenden')">Wetter anzeigen</button>
-          </div>
-          <div id="weatherPanel" class="collapse-panel">
-            <div class="wx-grid">
-              <button class="wx-btn" onclick="selWx(this,'☀️','Sonnig')"><span>☀️</span><span>Sonnig</span></button>
-              <button class="wx-btn" onclick="selWx(this,'⛅','Bewölkt')"><span>⛅</span><span>Bewölkt</span></button>
-              <button class="wx-btn" onclick="selWx(this,'🌧','Regen')"><span>🌧</span><span>Regen</span></button>
-              <button class="wx-btn" onclick="selWx(this,'⛈','Gewitter')"><span>⛈</span><span>Gewitter</span></button>
-              <button class="wx-btn" onclick="selWx(this,'🌨','Schnee')"><span>🌨</span><span>Schnee</span></button>
-              <button class="wx-btn" onclick="selWx(this,'🌫','Nebel')"><span>🌫</span><span>Nebel</span></button>
-            </div>
-            <div class="fr2">
-              <div class="fg"><div class="fl">Min °C</div><input type="number" class="fi" id="tMin" placeholder="—" style="text-align:center" oninput="autoSave();updateWeatherSummary()"></div>
-              <div class="fg"><div class="fl">Max °C</div><input type="number" class="fi" id="tMax" placeholder="—" style="text-align:center" oninput="autoSave();updateWeatherSummary()"></div>
-            </div>
-            <div class="fr2">
-              <div class="fg"><div class="fl">Wind</div>
-                <select class="fs" id="wSel" oninput="autoSave();updateWeatherSummary()"><option value="">—</option><option>Windstill</option><option>Leicht</option><option>Mittel</option><option>Stark</option><option>Sturm</option></select></div>
-              <div class="fg"><div class="fl">Boden <span class="tr">Zemin</span></div>
-                <select class="fs" id="bSel" oninput="autoSave();updateWeatherSummary()"><option value="">—</option><option>Trocken</option><option>Feucht</option><option>Nass</option><option>Gefroren</option></select></div>
-            </div>
+          <div class="auto-weather-card">
+            <div id="tbAutoWeather" class="auto-weather-line">Noch nicht geladen</div>
+            <div style="font-size:11px;color:var(--text3);margin-top:8px;">Automatisch nach Projekt-Ort. Regen und Wind inklusive.</div>
           </div>
         </div>
       </div>
@@ -1991,6 +1991,7 @@ body{
             <input type="text" class="fi" id="waInput" placeholder="z.B. NSHV Raum, Dach, Außenbereich West">
             <button class="btn btn-primary" onclick="addWorkArea()">+ Bereich</button>
           </div>
+          <div class="area-grid" id="workAreaCards"></div>
         </div>
       </div>
 
@@ -2198,7 +2199,7 @@ body{
     </div>
   </div>
 
-  <div style="display:grid;grid-template-columns:1.1fr .9fr;gap:14px;">
+  <div class="todo-board-shell" style="display:block;">
     <div class="card">
       <div class="card-hd"><div class="card-hd-l"><div class="ci ci-b">➕</div><h3>Punkt erfassen</h3></div></div>
       <div class="card-body">
@@ -2302,7 +2303,7 @@ body{
     <div class="modal-hd"><h3>Aufgabe <small>Görev</small></h3><button class="modal-close" onclick="closeModal('km')">✕</button></div>
     <div class="modal-body">
       <div class="fg"><div class="fl">Spalte <span class="tr">Sütun</span></div>
-        <select class="fs" id="km-col"><option value="today">🔥 Heute</option><option value="tomorrow">🔵 Morgen</option><option value="done">✅ Erledigt</option></select></div>
+        <select class="fs" id="km-col"><option value="today">🔵 Offen / In Arbeit</option><option value="tomorrow">🟡 Wartet</option><option value="done">✅ Erledigt</option></select></div>
       <div class="fg"><div class="fl">Aufgabe <span class="tr">Görev</span></div><input type="text" class="fi" id="km-title" placeholder="Was ist zu tun?…"></div>
       <div class="fr2">
         <div class="fg"><div class="fl">Firma</div>
@@ -2564,6 +2565,8 @@ body{
     <button class="fab-item" onclick="quickAction('mangel')"><span class="fi-ico">⚠️</span><span>Mangel</span></button>
     <button class="fab-item" onclick="quickAction('aufgabe')"><span class="fi-ico">📋</span><span>Aufgabe</span></button>
     <button class="fab-item" onclick="quickAction('timeline')"><span class="fi-ico">🕘</span><span>Timeline</span></button>
+    <button class="fab-item" onclick="quickAction('todo')"><span class="fi-ico">🗂️</span><span>To-do</span></button>
+    <button class="fab-item" onclick="quickAction('save')"><span class="fi-ico">💾</span><span>Speichern</span></button>
   </div>
   <button class="fab-main" id="fabMain" onclick="toggleFab()" aria-label="Quick actions">＋</button>
 </div>
@@ -2933,6 +2936,9 @@ function autoSave() {
     persistState();
     updateBadges();
     refreshDash();
+  renderWorkAreas();
+  if((S.standort || S.projectLocation || S.projectOrt) && !S.autoWeather) loadDashboardWeather();
+  else if (typeof renderAutoWeatherToTB === 'function') renderAutoWeatherToTB();
   }, 900);
 }
 
@@ -2983,6 +2989,22 @@ function quickAction(type) {
   if (type === 'timeline') {
     goPageById('pg-tb');
     setTimeout(()=>document.getElementById('tlText')?.focus(),120);
+    return;
+  }
+  if (type === 'todo') {
+    goPageById('pg-todos');
+    setTimeout(()=>document.getElementById('tdTitle')?.focus(),120);
+    return;
+  }
+  if (type === 'save') {
+    const btn = [...document.querySelectorAll('button')]
+      .find(b => (b.textContent || '').includes('Bericht speichern'));
+    if (btn) {
+      btn.click();
+      showToast('Archiv gespeichert','ok');
+    } else {
+      showToast('Bericht speichern Button nicht gefunden','err');
+    }
     return;
   }
 }
@@ -3100,6 +3122,7 @@ function loadArchiveIntoCurrent(id) {
   if (typeof syncProjectInfoToTB === 'function') syncProjectInfoToTB();
   buildPersonnel();
   buildGeraete();
+  ensureTodoKanbanSync();
   renderSigGrid();
   renderWorkEntries();
   renderKanban();
@@ -3581,7 +3604,9 @@ function saveTodoItem(){
   }
   autoSave();
   resetTodoForm();
+  syncTodosToKanban(false);
   renderTodoPage();
+  renderKanban();
   refreshDash();
   showToast('Punkt gespeichert','ok');
 }
@@ -3600,7 +3625,9 @@ function deleteTodoItem(id){
   ensureTodoState();
   S.todos = S.todos.filter(x=>x.id!==id);
   autoSave();
+  syncTodosToKanban(false);
   renderTodoPage();
+  renderKanban();
   refreshDash();
   showToast('Punkt gelöscht','ok');
 }
@@ -3612,7 +3639,9 @@ function quickSetTodoStatus(id,status){
     addTodoHistoryEntry(t, `Status geändert: ${status}`);
     t.updatedAt=new Date().toISOString();
     autoSave();
+    syncTodosToKanban(false);
     renderTodoPage();
+    renderKanban();
     refreshDash();
   }
 }
@@ -3692,23 +3721,40 @@ function todoMiniCard(t){
 }
 async function loadDashboardWeather(){
   const box = document.getElementById('dash-weather-auto');
-  if(box) box.textContent = 'Wetter wird geladen…';
   const place = (S.standort || S.projectLocation || S.projectOrt || '').trim();
-  if(!place){ if(box) box.textContent='Projekt-Ort fehlt'; return; }
+  if(box) box.textContent = 'Wetter wird geladen…';
+  if(!place){ if(box) box.textContent='Projekt-Ort fehlt'; renderAutoWeatherToTB(); return; }
   try{
     const gRes = await fetch('https://geocoding-api.open-meteo.com/v1/search?name=' + encodeURIComponent(place) + '&count=1&language=de&format=json');
     const gJson = await gRes.json();
-    if(!gJson || !gJson.results || !gJson.results.length){ if(box) box.textContent='Ort nicht gefunden'; return; }
+    if(!gJson || !gJson.results || !gJson.results.length){ if(box) box.textContent='Ort nicht gefunden'; renderAutoWeatherToTB(); return; }
     const loc = gJson.results[0];
-    const wRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${loc.latitude}&longitude=${loc.longitude}&current=temperature_2m,weather_code,wind_speed_10m&daily=temperature_2m_max,temperature_2m_min&timezone=auto`);
+    const wRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${loc.latitude}&longitude=${loc.longitude}&current=temperature_2m,weather_code,wind_speed_10m,precipitation,rain&daily=temperature_2m_max,temperature_2m_min,precipitation_sum&timezone=auto`);
     const wJson = await wRes.json();
     const current = wJson.current || {};
     const daily = wJson.daily || {};
     const map = {0:'Klar',1:'Überwiegend klar',2:'Teilweise bewölkt',3:'Bewölkt',45:'Nebel',48:'Raureifnebel',51:'Nieselregen',53:'Nieselregen',55:'Starker Nieselregen',61:'Regen',63:'Regen',65:'Starker Regen',71:'Schnee',73:'Schnee',75:'Starker Schnee',80:'Regenschauer',81:'Regenschauer',82:'Starke Schauer',95:'Gewitter'};
-    const txt = `${loc.name}: ${map[current.weather_code]||'Wetter'} · ${Math.round(current.temperature_2m||0)} °C · Wind ${Math.round(current.wind_speed_10m||0)} km/h · Heute ${Math.round((daily.temperature_2m_min||[])[0]||0)} / ${Math.round((daily.temperature_2m_max||[])[0]||0)} °C`;
-    if(box) box.textContent = txt;
+    const weatherText = map[current.weather_code]||'Wetter';
+    const rainNow = Math.round((current.rain||current.precipitation||0) * 10) / 10;
+    const rainDay = Math.round(((daily.precipitation_sum||[])[0]||0) * 10) / 10;
+    const summary = `${loc.name}: ${weatherText} · ${Math.round(current.temperature_2m||0)} °C · Wind ${Math.round(current.wind_speed_10m||0)} km/h · Regen jetzt ${rainNow} mm · Heute ${rainDay} mm`;
+    S.autoWeather = {
+      place: loc.name,
+      weather: weatherText,
+      temp: Math.round(current.temperature_2m||0),
+      wind: Math.round(current.wind_speed_10m||0),
+      rainNow,
+      rainDay,
+      tempMin: Math.round((daily.temperature_2m_min||[])[0]||0),
+      tempMax: Math.round((daily.temperature_2m_max||[])[0]||0),
+      summary
+    };
+    if(box) box.textContent = summary;
+    renderAutoWeatherToTB();
+    autoSave();
   }catch(err){
     if(box) box.textContent = 'Wetter konnte nicht geladen werden';
+    renderAutoWeatherToTB();
   }
 }
 
@@ -3744,9 +3790,67 @@ function saveTodoHistoryNote(id){
   t.updatedAt = new Date().toISOString();
   inp.value = '';
   autoSave();
+  syncTodosToKanban(false);
   renderTodoPage();
+  renderKanban();
   refreshDash();
   showToast('Verlauf ergänzt','ok');
+}
+
+
+function ensureWorkAreaState(){
+  if(!S.workAreas) S.workAreas = [];
+}
+function renderWorkAreas(){
+  ensureWorkAreaState();
+  const tags = document.getElementById('workAreaTags');
+  const cards = document.getElementById('workAreaCards');
+  if(tags){
+    tags.innerHTML = (S.workAreas||[]).map(a => `<span class="wa-tag">${esc(a.name||a)} <button onclick="removeWorkArea('${esc((a.id||a.name||a)).replace(/'/g,'&#39;')}')">✕</button></span>`).join('');
+  }
+  if(cards){
+    cards.innerHTML = !(S.workAreas||[]).length ? '<div class="empty-state" style="padding:16px;"><p>Keine Bereiche erfasst</p></div>' :
+      (S.workAreas||[]).map((a,idx)=>{
+        const obj = typeof a === 'string' ? {id:'wa_'+idx,name:a,note:''} : a;
+        return `<div class="area-card">
+          <div class="area-card-hd">
+            <div>
+              <div class="area-card-name">${esc(obj.name||'Bereich')}</div>
+              <div class="area-card-meta">${((S.timeline||[]).filter(t=>t.area===(obj.name||'')).length)||0} Einträge</div>
+            </div>
+            <button class="btn-icon" onclick="removeWorkArea('${esc((obj.id||obj.name||'')).replace(/'/g,'&#39;')}')">✕</button>
+          </div>
+          <textarea class="fta" style="min-height:70px;margin-top:10px;" placeholder="Bereichsnotiz..." onchange="setWorkAreaNote('${esc((obj.id||obj.name||'')).replace(/'/g,'&#39;')}', this.value)">${esc(obj.note||'')}</textarea>
+        </div>`;
+      }).join('');
+  }
+}
+function addWorkArea(){
+  ensureWorkAreaState();
+  const inp = document.getElementById('waInput');
+  const val = (inp?.value || '').trim();
+  if(!val){ showToast('Bereich eingeben','warn'); return; }
+  const exists = (S.workAreas||[]).some(a => String((typeof a==='string'?a:a.name)||'').toLowerCase() === val.toLowerCase());
+  if(exists){ showToast('Bereich existiert bereits','warn'); return; }
+  S.workAreas.push({id:'wa_'+Date.now(), name:val, note:''});
+  if(inp) inp.value='';
+  autoSave(); renderWorkAreas(); showToast('Bereich hinzugefügt','ok');
+}
+function removeWorkArea(id){
+  ensureWorkAreaState();
+  S.workAreas = (S.workAreas||[]).filter(a => String((typeof a==='string'?a:(a.id||a.name))||'') !== String(id));
+  autoSave(); renderWorkAreas();
+}
+function setWorkAreaNote(id, value){
+  ensureWorkAreaState();
+  const a = (S.workAreas||[]).find(x => String((typeof x==='string'?x:(x.id||x.name))||'') === String(id));
+  if(a && typeof a === 'object'){ a.note = value; autoSave(); }
+}
+function renderAutoWeatherToTB(){
+  const box = document.getElementById('tbAutoWeather');
+  if(!box) return;
+  const aw = S.autoWeather || null;
+  box.textContent = aw ? aw.summary : 'Noch nicht geladen';
 }
 
 // ═══════════════════════════════════════════════════
@@ -4177,32 +4281,116 @@ document.querySelectorAll('.modal-ov').forEach(m => {
   });
 });
 
+
+function ensureTodoKanbanSync(){
+  ensureTodoState();
+  if(!S.kanban) S.kanban = {today:[], tomorrow:[], done:[]};
+
+  const allKb = [
+    ...((S.kanban?.today||[]).map(t=>({...t, __col:'today'}))),
+    ...((S.kanban?.tomorrow||[]).map(t=>({...t, __col:'tomorrow'}))),
+    ...((S.kanban?.done||[]).map(t=>({...t, __col:'done'}))),
+  ];
+
+  // one-time migration from old kanban if todo list is empty
+  if((!S.todos || !S.todos.length) && allKb.length){
+    S.todos = allKb.map(k => ({
+      id: k.id || ('td_'+Date.now()+'_'+Math.random().toString(36).slice(2,5)),
+      title: k.title || '',
+      desc: '',
+      firmId: k.firmId || '',
+      category: k.trade || 'Allgemein',
+      priority: k.prio === 'high' ? 'Hoch' : (k.prio === 'low' ? 'Niedrig' : 'Mittel'),
+      status: k.__col === 'done' ? 'Erledigt' : (k.__col === 'tomorrow' ? 'Wartet' : 'Offen'),
+      due: '',
+      comment: k.note || '',
+      createdAt: k.createdAt || new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      history: [{ id:'th_'+Date.now()+'_'+Math.random().toString(36).slice(2,6), date:(typeof todayStr==='function'?todayStr():new Date().toISOString().slice(0,10)), time:'', text:'Aus Kanban übernommen' }]
+    }));
+  }
+
+  syncTodosToKanban(false);
+}
+
+function todoStatusToKanbanCol(status){
+  if(['Erledigt','Entfällt'].includes(status)) return 'done';
+  if(['Wartet','Wartet auf Firma','Wartet auf Freigabe','Verschoben'].includes(status)) return 'tomorrow';
+  return 'today';
+}
+function todoPriorityToKanbanPrio(priority){
+  return priority === 'Hoch' ? 'high' : (priority === 'Niedrig' ? 'low' : 'mid');
+}
+function kanbanColToTodoStatus(col, currentStatus='Offen'){
+  if(col === 'done') return 'Erledigt';
+  if(col === 'tomorrow'){
+    if(['Wartet auf Firma','Wartet auf Freigabe'].includes(currentStatus)) return currentStatus;
+    return 'Wartet';
+  }
+  if(col === 'today'){
+    return currentStatus === 'In Arbeit' ? 'In Arbeit' : 'Offen';
+  }
+  return currentStatus || 'Offen';
+}
+function syncTodosToKanban(doSave=true){
+  ensureTodoState();
+  if(!S.kanban) S.kanban = {today:[], tomorrow:[], done:[]};
+  const next = {today:[], tomorrow:[], done:[]};
+  (S.todos||[]).forEach(t => {
+    const firm = (S.contractors||[]).find(c=>c.id===t.firmId);
+    const card = {
+      id: t.id,
+      title: t.title || '',
+      firmId: t.firmId || '',
+      firmName: firm ? firm.name : '',
+      prio: todoPriorityToKanbanPrio(t.priority || 'Mittel'),
+      time: '',
+      trade: t.category || '',
+      note: t.comment || '',
+      createdAt: t.createdAt || new Date().toISOString(),
+      col: todoStatusToKanbanCol(t.status || 'Offen'),
+      status: t.status || 'Offen'
+    };
+    next[card.col].push(card);
+  });
+  S.kanban = next;
+  if(doSave && typeof autoSave === 'function') autoSave();
+}
+
 function saveKanban() {
+  ensureTodoKanbanSync();
   const title = gv('km-title').trim();
   if (!title) { showToast('Aufgabe eingeben!','warn'); return; }
   const col = gv('km-col');
   const firmId = gv('km-firm');
-  const firm = (S.contractors||[]).find(c=>c.id===firmId);
   const task = {
-    id:'kt_'+Date.now(), title, firmId,
-    firmName: firm ? firm.name : '',
-    prio: gv('km-prio'),
-    time: gv('km-time'),
-    trade: gv('km-trade'),
-    note: gv('km-note'),
+    id:'td_'+Date.now(),
+    title,
+    desc:'',
+    firmId: firmId || '',
+    category: gv('km-trade') || 'Allgemein',
+    priority: gv('km-prio') === 'high' ? 'Hoch' : (gv('km-prio') === 'low' ? 'Niedrig' : 'Mittel'),
+    status: col === 'done' ? 'Erledigt' : (col === 'tomorrow' ? 'Wartet' : 'Offen'),
+    due:'',
+    comment: gv('km-note'),
     createdAt: new Date().toISOString(),
-    col,
+    updatedAt: new Date().toISOString(),
+    history:[]
   };
-  if (!S.kanban) S.kanban={today:[],tomorrow:[],done:[]};
-  S.kanban[col].push(task);
+  addTodoHistoryEntry(task, 'Punkt erstellt');
+  if(task.comment) addTodoHistoryEntry(task, `Kommentar: ${task.comment}`);
+  S.todos.unshift(task);
+  syncTodosToKanban(false);
   closeModal('km');
   autoSave();
+  renderTodoPage();
   renderKanban();
+  refreshDash();
   showToast('Aufgabe gespeichert','ok');
 }
 
 function renderKanban() {
-  if (!S.kanban) S.kanban={today:[],tomorrow:[],done:[]};
+  ensureTodoKanbanSync();
   ['today','tomorrow','done'].forEach(col => {
     const cont = document.getElementById('kbc-'+col);
     const cnt = document.getElementById('kb-cnt-'+col);
@@ -4219,6 +4407,7 @@ function renderKanban() {
       card.addEventListener('dragend', () => card.classList.remove('dragging'));
       const pCls = {high:'chip-h',mid:'chip-m',low:'chip-l'}[task.prio]||'chip-m';
       const pLbl = {high:'Hoch',mid:'Mittel',low:'Niedrig'}[task.prio]||'Mittel';
+      const due = (S.todos||[]).find(t=>t.id===task.id)?.due || '';
       card.innerHTML = `
         <div class="kbc-top">
           <div class="kbc-title">${esc(task.title)}</div>
@@ -4227,10 +4416,9 @@ function renderKanban() {
         <div class="kbc-meta">
           <span class="chip ${pCls}">${pLbl}</span>
           ${task.trade?`<span class="chip chip-t">${esc(task.trade)}</span>`:''}
-          ${task.time?`<span class="chip chip-t">⏰ ${task.time}</span>`:''}
+          ${due?`<span class="chip chip-t">⏱ ${esc(due)}</span>`:''}
         </div>
         ${task.note?`<div class="kbc-note">📝 ${esc(task.note)}</div>`:''}
-        ${task.sourceMangelId?`<div class="kbc-note">⚠ Aus Mangel erstellt</div>`:''}
         <div class="kbc-acts">
           ${col!=='today'?`<button class="kbc-mv" title="←" onclick="mvTask('${task.id}','${col}','${col==='done'?'tomorrow':'today'}')">←</button>`:''}
           ${col!=='done'?`<button class="kbc-mv" title="→" onclick="mvTask('${task.id}','${col}','${col==='today'?'tomorrow':'done'}')">→</button>`:''}
@@ -4244,22 +4432,36 @@ function renderKanban() {
 }
 
 function mvTask(id, from, to) {
-  const tasks = S.kanban[from];
-  const idx = tasks.findIndex(t=>t.id===id);
-  if (idx<0) return;
-  const t = tasks.splice(idx,1)[0];
-  t.col=to; S.kanban[to].push(t);
-  autoSave(); renderKanban();
+  ensureTodoKanbanSync();
+  const t = (S.todos||[]).find(x=>x.id===id);
+  if (!t) return;
+  const newStatus = kanbanColToTodoStatus(to, t.status || 'Offen');
+  if ((t.status || '') !== newStatus) {
+    t.status = newStatus;
+    t.updatedAt = new Date().toISOString();
+    addTodoHistoryEntry(t, `Status geändert: ${newStatus}`);
+  }
+  syncTodosToKanban(false);
+  autoSave();
+  renderTodoPage();
+  renderKanban();
+  refreshDash();
 }
-function delTask(id, col) { S.kanban[col]=(S.kanban[col]||[]).filter(t=>t.id!==id); autoSave(); renderKanban(); }
+function delTask(id, col) {
+  ensureTodoKanbanSync();
+  S.todos = (S.todos||[]).filter(t=>t.id!==id);
+  syncTodosToKanban(false);
+  autoSave();
+  renderTodoPage();
+  renderKanban();
+  refreshDash();
+}
 function onDOver(e,col){e.preventDefault();document.getElementById('kbc-'+col)?.classList.add('drag-over');}
 function onDLeave(e){document.querySelectorAll('.kb-cards').forEach(c=>c.classList.remove('drag-over'));}
 function onDDrop(e,to){
   e.preventDefault();document.querySelectorAll('.kb-cards').forEach(c=>c.classList.remove('drag-over'));
   if(!draggingId)return;
-  for(const col of['today','tomorrow','done']){
-    if((S.kanban[col]||[]).find(t=>t.id===draggingId)){mvTask(draggingId,col,to);break;}
-  }
+  mvTask(draggingId,'',to);
   draggingId=null;
 }
 
@@ -5233,14 +5435,20 @@ function refreshDash() {
     </div>`).join('');
   }
 
-  // Weather
+  // Weather (automatic only)
   const dw=document.getElementById('dash-weather');
-  if(dw){dw.innerHTML=`<div style="text-align:center;padding:10px 0;">
-    <div style="font-size:46px;margin-bottom:8px;">${S.weather?S.weather.split(' ')[0]:'❓'}</div>
-    <div style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:3px;">${esc(S.weather||'Nicht erfasst')}</div>
-    <div style="font-size:12px;color:var(--text3);">${S.tempMin||'—'}°C — ${S.tempMax||'—'}°C</div>
-    <div style="font-size:11px;color:var(--text3);margin-top:3px;">${S.wind||''} ${S.boden?'· '+S.boden:''}</div>
-  </div>`;}
+  if(dw){
+    const aw = S.autoWeather || null;
+    dw.innerHTML = aw ? `<div style="padding:6px 0;">
+      <div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:6px;">${esc(aw.place || S.standort || '')}</div>
+      <div style="font-size:12px;color:var(--text2);line-height:1.7;">
+        ${esc(aw.weather || 'Wetter')} · ${esc(String(aw.temp || '—'))} °C<br>
+        Wind: ${esc(String(aw.wind || '—'))} km/h<br>
+        Regen: ${esc(String(aw.rainDay || '—'))} mm<br>
+        Temperatur: ${esc(String(aw.tempMin || '—'))} °C bis ${esc(String(aw.tempMax || '—'))} °C
+      </div>
+    </div>` : `<div style="font-size:12px;color:var(--text3);line-height:1.7;">Noch keine automatische Wetterdaten geladen.</div>`;
+  }
   ensureTodoState();
   const today = (typeof todayStr==='function') ? todayStr() : new Date().toISOString().slice(0,10);
   const openRows = (S.todos||[]).filter(t => !['Erledigt','Entfällt'].includes(t.status));
@@ -5702,259 +5910,201 @@ function ensureSeroPdfFonts(doc){
 async function exportPDF() {
   try {
     collectFormToState();
-    await hydratePhotosFromIDB();
     const { jsPDF } = window.jspdf;
-    const doc = new jsPDF({ orientation:'p', unit:'mm', format:'a4' });
-    ensureSeroPdfFonts(doc);
+    const doc = new jsPDF({ unit: 'mm', format: 'a4' });
 
-    const W = 210, H = 297, M = 15;
-    let y = 20;
-    const ink = [25,25,25], gray = [110,110,110], line = [205,205,205], soft=[255,255,255];
+    const margin = 14;
+    const pageW = doc.internal.pageSize.getWidth();
+    const pageH = doc.internal.pageSize.getHeight();
+    let y = 16;
 
-    const setFont = (style='normal', size=10, color=ink) => {
-      doc.setFont('NotoSans', style === 'bold' ? 'bold' : 'normal');
-      doc.setFontSize(size);
-      doc.setTextColor(...color);
-    };
+    function pdfSafe(v){
+      return String(v ?? '')
+        .replace(/Ä/g,'Ae').replace(/Ö/g,'Oe').replace(/Ü/g,'Ue')
+        .replace(/ä/g,'ae').replace(/ö/g,'oe').replace(/ü/g,'ue')
+        .replace(/ß/g,'ss')
+        .replace(/Ç/g,'C').replace(/ç/g,'c')
+        .replace(/Ğ/g,'G').replace(/ğ/g,'g')
+        .replace(/İ/g,'I').replace(/İ/g,'I').replace(/ı/g,'i')
+        .replace(/Ş/g,'S').replace(/ş/g,'s')
+        .replace(/[^\S\r\n]+/g, ' ')
+        .trim();
+    }
 
-    const clean = (v) => String(v || '')
-      .replace(/[\u200B-\u200D\uFEFF]/g, '')
-      .replace(/—/g, '-')
-      .replace(/…/g, '...');
-
-    const pageHeader = () => {
-      setFont('bold', 16);
-      doc.text('SERO BAUTAGEBUCH', M, 14);
-      setFont('normal', 9, gray);
-      doc.text('Tagesbericht', M, 19);
-      doc.setDrawColor(...line);
-      doc.line(M, 22, W - M, 22);
-      y = 28;
-    };
-
-    const footerAllPages = () => {
-      const pages = doc.internal.getNumberOfPages();
-      for (let i = 1; i <= pages; i++) {
-        doc.setPage(i);
-        doc.setDrawColor(...line);
-        doc.line(M, H - 12, W - M, H - 12);
-        setFont('normal', 8, gray);
-        doc.text(`${clean(S.projectName || '')} | ${clean(S.reportDate || '')}`, M, H - 7);
-        doc.text(`Seite ${i} / ${pages}`, W - M, H - 7, { align:'right' });
-      }
-    };
-
-    const ensureSpace = (needed=12) => {
-      if (y + needed > H - 20) {
-        doc.addPage();
-        pageHeader();
-      }
-    };
-
-    const section = (title) => {
-      ensureSpace(12);
-      setFont('bold', 11);
-      doc.text(title, M, y);
-      y += 3;
-      doc.setDrawColor(...line);
-      doc.line(M, y, W - M, y);
+    function ensureSpace(h=10){
+      if (y + h > pageH - 18) { doc.addPage(); y = 16; }
+    }
+    function addHeader(){
+      doc.setFont('helvetica','bold');
+      doc.setFontSize(16);
+      doc.text('BAUTAGEBUCH', pageW/2, y, { align:'center' });
+      y += 7;
+      doc.setFont('helvetica','normal');
+      doc.setFontSize(9);
+      const sub = [S.projectNr || '', S.projectName || '', S.reportDate || ''].filter(Boolean).map(pdfSafe).join('  |  ');
+      if (sub) doc.text(sub, pageW/2, y, { align:'center' });
+      y += 8;
+      doc.setDrawColor(180);
+      doc.line(margin, y, pageW - margin, y);
       y += 6;
-    };
-
-    const kvTable = (rows) => {
-      const labelW = 42;
-      rows.forEach(([label, value]) => {
-        const txt = clean(value || '-');
-        const lines = doc.splitTextToSize(txt, W - 2*M - labelW - 6);
-        const rowH = Math.max(8, lines.length * 5 + 2);
-        ensureSpace(rowH + 1);
-        doc.setDrawColor(...line);
-        doc.rect(M, y - 4.5, labelW, rowH);
-        doc.setDrawColor(...line);
-        doc.rect(M, y - 4.5, W - 2*M, rowH);
-        doc.line(M + labelW, y - 4.5, M + labelW, y - 4.5 + rowH);
-        setFont('bold', 9);
-        doc.text(clean(label), M + 2, y);
-        setFont('normal', 9);
-        doc.text(lines, M + labelW + 3, y);
-        y += rowH;
-      });
-      y += 3;
-    };
-
-    const bulletList = (items, emptyText='Keine Einträge vorhanden.') => {
-      const arr = (items || []).filter(Boolean);
-      if (!arr.length) arr.push(emptyText);
-      arr.forEach(item => {
-        const lines = doc.splitTextToSize(clean(item), W - 2*M - 8);
-        ensureSpace(lines.length * 5 + 2);
-        setFont('normal', 9);
-        doc.text('•', M + 1, y);
-        doc.text(lines, M + 5, y);
-        y += lines.length * 5 + 1;
+    }
+    function addSectionTitle(title){
+      ensureSpace(9);
+      doc.setFont('helvetica','bold');
+      doc.setFontSize(11);
+      doc.text(pdfSafe(title), margin, y);
+      y += 2;
+      doc.setDrawColor(210);
+      doc.line(margin, y, pageW - margin, y);
+      y += 5;
+    }
+    function addKV(rows){
+      doc.setFontSize(10);
+      rows.forEach(([k,v]) => {
+        ensureSpace(6);
+        doc.setFont('helvetica','bold');
+        doc.text(pdfSafe(k) + ':', margin, y);
+        doc.setFont('helvetica','normal');
+        const lines = doc.splitTextToSize(pdfSafe(v || '-'), pageW - margin - 42);
+        doc.text(lines, margin + 34, y);
+        y += Math.max(5, lines.length * 4.5);
       });
       y += 2;
-    };
-
-    const simpleTable = (headers, rows, widths) => {
-      const totalW = W - 2*M;
-      const cols = widths || headers.map(() => totalW / headers.length);
-      ensureSpace(10);
-      let x = M;
-      headers.forEach((h, i) => {
-        doc.setDrawColor(...line);
-        doc.rect(x, y - 5, cols[i], 8);
-        setFont('bold', 8);
-        doc.text(clean(h), x + 2, y);
-        x += cols[i];
+    }
+    function addParagraph(text){
+      const lines = doc.splitTextToSize(pdfSafe(text || '-'), pageW - margin*2);
+      doc.setFont('helvetica','normal');
+      doc.setFontSize(10);
+      doc.text(lines, margin, y);
+      y += lines.length * 4.5 + 2;
+    }
+    function drawTable(headers, rows, widths){
+      if (!rows || !rows.length) return;
+      ensureSpace(12);
+      const headH = 7;
+      let x = margin;
+      doc.setDrawColor(200);
+      doc.setFont('helvetica','bold');
+      doc.setFontSize(9);
+      headers.forEach((h,i) => {
+        doc.rect(x, y, widths[i], headH);
+        doc.text(pdfSafe(h), x + 1.5, y + 4.6);
+        x += widths[i];
       });
-      y += 8;
-      if (!rows.length) rows = [[ 'Keine Daten vorhanden.' ]];
-      rows.forEach(row => {
-        const lineSets = row.map((cell, i) => doc.splitTextToSize(clean(cell || ''), (cols[i] || totalW) - 4));
-        const rowH = Math.max(...lineSets.map(ls => Math.max(1, ls.length))) * 4.5 + 3;
+      y += headH;
+      doc.setFont('helvetica','normal');
+      rows.forEach(r => {
+        const cellLines = r.map((c,i) => doc.splitTextToSize(pdfSafe(c || ''), widths[i] - 3));
+        let rowH = 6;
+        cellLines.forEach(cl => { rowH = Math.max(rowH, cl.length * 4.2 + 2); });
         ensureSpace(rowH + 1);
-        let x2 = M;
-        row.forEach((cell, i) => {
-          doc.setDrawColor(...line);
-          doc.rect(x2, y - 4.5, cols[i], rowH);
-          setFont('normal', 8.5);
-          doc.text(lineSets[i], x2 + 2, y);
-          x2 += cols[i];
+        let xx = margin;
+        cellLines.forEach((cl,i) => {
+          doc.rect(xx, y, widths[i], rowH);
+          doc.text(cl, xx + 1.5, y + 4);
+          xx += widths[i];
         });
         y += rowH;
       });
-      y += 3;
-    };
-
-    pageHeader();
-
-    section('Projektübersicht');
-    kvTable([
-      ['Projekt', S.projectName || '-'],
-      ['Projektnummer', S.projectNr || '-'],
-      ['Ort', S.standort || '-'],
-      ['Datum', S.reportDate || todayStr()],
-      ['Bauleiter', S.bauleiter || '-'],
-      ['Witterung', S.weather || '-'],
-      ['Temperatur', `${clean(S.tempMin || '-')} °C bis ${clean(S.tempMax || '-')} °C`],
-      ['Wind / Boden', `${clean(S.wind || '-')} / ${clean(S.boden || '-')}`],
-      ['Fortschritt', `${clean(S.progress || 0)} %`]
-    ]);
-
-    section('Tagesablauf');
-    const timelineRows = (S.timeline || []).length
-      ? (S.timeline || []).map(t => `${clean(t.time || '--:--')}  ${clean(t.text || '')}`)
-      : (S.photos || []).filter(p => p.time || p.caption || p.note).map(p => `${clean(p.time || '--:--')}  ${clean(p.caption || p.note || p.name || '')}`);
-    bulletList(timelineRows, 'Keine Tagesereignisse erfasst.');
-
-    section('Ausgeführte Arbeiten');
-    const workItems = (S.workEntries || []).map(e => {
-      const firm = (S.contractors || []).find(c => c.id === e.firmId)?.name || '';
-      const parts = [e.taetigkeit, e.beschreibung, e.ort ? 'Bereich: ' + e.ort : '', firm ? 'Firma: ' + firm : '', e.menge ? 'Menge: ' + e.menge : ''].filter(Boolean);
-      return parts.join(' | ');
-    });
-    const mainRemark = clean(S.remarks || '');
-    if (mainRemark) workItems.unshift(mainRemark);
-    bulletList(workItems, 'Keine Arbeiten dokumentiert.');
-
-    section('Personal und Geräte');
-    const personalRows = (S.personnelTypes || [])
-      .filter(p => (S.personnelCounts || {})[p.key] > 0)
-      .map(p => [p.de, String((S.personnelCounts || {})[p.key] || 0)]);
-    simpleTable(['Personal', 'Anzahl'], personalRows, [120, 60]);
-    const geraetRows = (S.geraete || [])
-      .filter(g => (g.count || 0) > 0)
-      .map(g => [g.de || '', String(g.count || 0), g.note || '']);
-    simpleTable(['Gerät', 'Anzahl', 'Bemerkung'], geraetRows, [70, 25, 85]);
-
-    section('Containerstatus');
-    const containerRows = (S.containers || []).map(c => [
-      c.ctId || '',
-      c.type || '',
-      ({leer:'Leer', halb:'Halb', voll:'Voll', bestellt:'Abholung angefordert'}[c.status] || c.status || ''),
-      c.note || ''
-    ]);
-    simpleTable(['Container', 'Typ', 'Status', 'Bemerkung'], containerRows, [28, 45, 40, 67]);
-
-    section('Besondere Vorkommnisse');
-    const special = [];
-    if (S.maengel && S.maengel.length) {
-      special.push(...S.maengel.filter(m => m.status !== 'erledigt').map(m => `${m.title || 'Mangel'}${m.area ? ' | Bereich: ' + m.area : ''}${m.desc ? ' | ' + m.desc : ''}`));
+      y += 4;
     }
-    if (!special.length && S.remarks) special.push(S.remarks);
-    bulletList(special, 'Keine besonderen Vorkommnisse erfasst.');
-
-    section('Fotodokumentation');
-    const photos = (S.photos || []).filter(p => !!p.data);
-    if (!photos.length) {
-      bulletList([], 'Keine Fotos vorhanden.');
-    } else {
-      for (let i = 0; i < photos.length; i++) {
-        const p = photos[i];
-        const caption = clean(p.caption || p.note || p.name || `Foto ${i+1}`);
-        const meta = [p.time ? `Uhrzeit: ${p.time}` : '', p.area ? `Bereich: ${p.area}` : '', p.location ? `Ort: ${p.location}` : ''].filter(Boolean).join(' | ');
-        ensureSpace(20);
-        setFont('bold', 9);
-        doc.text(`Foto ${i+1}`, M, y);
-        y += 5;
-        if (meta) {
-          setFont('normal', 8, gray);
-          const metaLines = doc.splitTextToSize(meta, W - 2*M);
-          doc.text(metaLines, M, y);
-          y += metaLines.length * 4.5;
-        }
-        setFont('normal', 9);
-        const capLines = doc.splitTextToSize(caption, W - 2*M);
-        doc.text(capLines, M, y);
-        y += capLines.length * 5 + 2;
-        try {
-          const format = (p.data || '').startsWith('data:image/png') ? 'PNG' : 'JPEG';
-          const props = doc.getImageProperties(p.data);
-          let imgW = W - 2*M;
-          let imgH = imgW * (props.height / props.width);
-          const maxH = 95;
-          if (imgH > maxH) {
-            imgH = maxH;
-            imgW = imgH * (props.width / props.height);
-          }
-          ensureSpace(imgH + 8);
-          doc.addImage(p.data, format, M, y, imgW, imgH, undefined, 'FAST');
-          doc.setDrawColor(...line);
-          doc.rect(M, y, imgW, imgH);
-          y += imgH + 8;
-        } catch (imgErr) {
-          setFont('normal', 8, gray);
-          doc.text('Foto konnte im PDF nicht eingebettet werden.', M, y);
-          y += 8;
-        }
+    function addPhotoBlock(p, idx){
+      ensureSpace(82);
+      doc.setFont('helvetica','bold');
+      doc.setFontSize(10);
+      doc.text(`Foto ${idx}`, margin, y);
+      y += 5;
+      const firmName = (S.contractors || []).find(f => f.id === p.firmId)?.name || '';
+      const meta = [p.caption || p.name || '', p.area ? `Bereich: ${p.area}` : '', p.time ? `Zeit: ${p.time}` : '', firmName ? `Firma: ${firmName}` : '', p.note ? `Notiz: ${p.note}` : ''].filter(Boolean).join(' | ');
+      if (meta) {
+        const lines = doc.splitTextToSize(pdfSafe(meta), pageW - margin*2);
+        doc.setFont('helvetica','normal');
+        doc.setFontSize(9);
+        doc.text(lines, margin, y);
+        y += lines.length * 4.2 + 2;
       }
+      if (p.data) {
+        try {
+          const fmt = String(p.data).startsWith('data:image/png') ? 'PNG' : 'JPEG';
+          doc.addImage(p.data, fmt, margin, y, 76, 57);
+          y += 61;
+        } catch(err) { addParagraph('Bild konnte nicht eingebettet werden.'); }
+      } else addParagraph('Bilddaten nicht verfügbar.');
     }
 
-    section('Anlagen / Pläne');
-    const docItems = (S.docs || []).map(d => d.name || '').filter(Boolean);
-    bulletList(docItems, 'Keine Anlagen vorhanden.');
+    addHeader();
+    addSectionTitle('Projekt');
+    addKV([
+      ['Projekt', S.projectName || ''],
+      ['Projektnummer', S.projectNr || ''],
+      ['Ort', S.standort || ''],
+      ['Datum', S.reportDate || ''],
+      ['Bauleiter', S.bauleiter || '']
+    ]);
 
-    section('Unterschriften');
-    const sigs = [clean(S.sig1 || 'Bauleiter'), clean(S.sig2 || 'Auftragnehmer'), clean(S.sig3 || 'Auftraggeber')];
-    const boxW = (W - 2*M - 8) / 3;
-    ensureSpace(34);
-    sigs.forEach((sig, i) => {
-      const x = M + i * (boxW + 4);
-      doc.setDrawColor(...line);
-      doc.rect(x, y, boxW, 26);
-      setFont('bold', 8.5);
-      doc.text(sig, x + boxW/2, y + 6, { align:'center' });
-      doc.line(x + 5, y + 18, x + boxW - 5, y + 18);
-      setFont('normal', 7, gray);
-      doc.text('Unterschrift', x + boxW/2, y + 22, { align:'center' });
+    addSectionTitle('Wetter');
+    addKV([
+      ['Wetter automatisch', (S.autoWeather && S.autoWeather.weather) ? S.autoWeather.weather : '-'],
+      ['Temperatur', (S.autoWeather ? `${S.autoWeather.tempMin} °C bis ${S.autoWeather.tempMax} °C` : '-')],
+      ['Wind / Regen', (S.autoWeather ? `${S.autoWeather.wind} km/h / ${S.autoWeather.rainDay} mm` : '-')]
+    ]);
+
+    addSectionTitle('Bauarbeiten');
+    const workRows = (S.workEntries || []).map((w, i) => {
+      const firmName = (S.contractors || []).find(f => f.id === w.firmId)?.name || '';
+      return [w.time || '', w.title || w.text || `Eintrag ${i+1}`, firmName, w.note || w.desc || ''];
     });
-    y += 32;
+    if (workRows.length) drawTable(['Zeit','Eintrag','Firma','Notiz'], workRows, [20, 58, 42, 66]);
+    else addKV([['Bauarbeiten','Keine Einträge']]);
 
-    footerAllPages();
-    doc.save(`SERO_Bautagebuch_${clean(S.projectNr||'Projekt')}_${clean(S.reportDate||todayStr())}.pdf`);
-    showToast('PDF exportiert ✓','ok');
-  } catch(e){ console.error(e); showToast('PDF Fehler: '+e.message,'err'); }
+    addSectionTitle('Personal');
+    const personnelRows = (S.personnelTypes || []).map(p => {
+      const c = parseInt((S.personnelCounts || {})[p.key] || 0, 10) || 0;
+      const firmId = (S.personnelFirms || {})[p.key] || '';
+      const firmName = (S.contractors || []).find(f => f.id === firmId)?.name || '';
+      const names = ((S.personnelNames || {})[p.key] || []).filter(Boolean).join(', ');
+      return (c > 0 || firmName || names) ? [p.de || '', String(c || ''), firmName, names] : null;
+    }).filter(Boolean);
+    if (personnelRows.length) drawTable(['Funktion','Anzahl','Firma','Namen'], personnelRows, [40, 18, 48, 68]);
+    else addKV([['Personal','Keine aktiven Einträge']]);
+
+    addSectionTitle('Geraete');
+    const geraetRows = (S.geraete || []).map(g => {
+      const c = parseInt(g.count || 0, 10) || 0;
+      const firmName = (S.contractors || []).find(f => f.id === g.firmId)?.name || '';
+      const typ = [g.brand || '', g.model || ''].join(' ').trim();
+      const note = g.note || '';
+      return (c > 0 || typ || firmName || note) ? [g.de || '', String(c || ''), typ, firmName, note] : null;
+    }).filter(Boolean);
+    if (geraetRows.length) drawTable(['Geraet','Anzahl','Typ','Firma','Bemerkung'], geraetRows, [28, 15, 34, 38, 57]);
+    else addKV([['Geraete','Keine aktiven Eintraege']]);
+
+    addSectionTitle('Bemerkungen');
+    if (S.remarks) addParagraph(S.remarks);
+    else addKV([['Bemerkungen','Keine Bemerkungen']]);
+
+    addSectionTitle('Fotodokumentation');
+    const photos = Array.isArray(S.photos) ? S.photos : [];
+    if (!photos.length) addKV([['Fotos','Keine Fotos']]);
+    else photos.forEach((p, idx) => addPhotoBlock(p, idx + 1));
+
+    addSectionTitle('Unterschrift');
+    const sigName = pdfSafe((S.signatures && S.signatures[0] && S.signatures[0].name) || S.bauleiter || S.sig1 || '');
+    if (sigName) {
+      ensureSpace(26);
+      doc.line(margin, y + 14, margin + 70, y + 14);
+      doc.setFont('helvetica','normal');
+      doc.setFontSize(10);
+      doc.text(sigName, margin, y + 19);
+      doc.text('Bauleiter', margin, y + 24);
+      y += 30;
+    }
+
+    doc.save(`BAUTAGEBUCH_${pdfSafe(S.projectNr||'Projekt')}_${pdfSafe(S.reportDate||'')}.pdf`);
+  } catch (e) {
+    console.error(e);
+    showToast('PDF Fehler: ' + e.message,'err');
+  }
 }
 
 
@@ -6594,21 +6744,25 @@ window.renderFirms = function renderFirmsPatched() {
     const rows = S.timeline || [];
     list.innerHTML = rows.map(it => {
       const firmName = contractorName(it.firmId);
-      return `<div class="timeline-item">
-        <input type="time" class="fi" value="${h(it.time||'')}" onchange="(function(v){const x=(S.timeline||[]).find(a=>a.id==='${h(it.id)}'); if(x){x.time=v; autoSave();}})(this.value)">
-        <textarea class="fta" style="min-height:46px;" onchange="(function(v){const x=(S.timeline||[]).find(a=>a.id==='${h(it.id)}'); if(x){x.text=v; autoSave();}})(this.value)">${h(it.text||'')}</textarea>
-        <div>
-          <select class="fs" onchange="(function(v){const x=(S.timeline||[]).find(a=>a.id==='${h(it.id)}'); if(x){x.firmId=v; const f=(S.contractors||[]).find(c=>c.id===v); x.nuCode=f?f.nuCode:''; autoSave(); renderTimeline();}})(this.value)">${'<option value="">— Firma wählen</option>' + (S.contractors||[]).map(c=>`<option value="${h(c.id)}" ${it.firmId===c.id?'selected':''}>${h((c.nuCode||'')+' '+c.name)}</option>`).join('')}</select>
-          <div class="tag-row">
-            ${it.nuCode ? `<span class="tag">📁 ${h(it.nuCode)}</span>`:''}
-            ${it.area ? `<span class="tag">📍 ${h(it.area)}</span>`:''}
-            ${firmName ? `<span class="tag">🏢 ${h(firmName)}</span>`:''}
+      const linkedPhotos = (S.photos||[]).filter(p => p.timelineId === it.id);
+      return `<div class="timeline-card">
+        <div class="timeline-card-top">
+          <input type="time" class="fi" value="${h(it.time||'')}" onchange="(function(v){const x=(S.timeline||[]).find(a=>a.id==='${h(it.id)}'); if(x){x.time=v; autoSave();}})(this.value)">
+          <textarea class="fta timeline-note" onchange="(function(v){const x=(S.timeline||[]).find(a=>a.id==='${h(it.id)}'); if(x){x.text=v; autoSave(); renderTimeline();}})(this.value)">${h(it.text||'')}</textarea>
+          <div>
+            <select class="fs" onchange="(function(v){const x=(S.timeline||[]).find(a=>a.id==='${h(it.id)}'); if(x){x.firmId=v; const f=(S.contractors||[]).find(c=>c.id===v); x.nuCode=f?f.nuCode:''; autoSave(); renderTimeline();}})(this.value)">${'<option value="">— Firma wählen</option>' + (S.contractors||[]).map(c=>`<option value="${h(c.id)}" ${it.firmId===c.id?'selected':''}>${h((c.nuCode||'')+' '+c.name)}</option>`).join('')}</select>
+            <div class="timeline-meta">
+              ${it.nuCode ? `<span class="tag">📁 ${h(it.nuCode)}</span>`:''}
+              ${it.area ? `<span class="tag">📍 ${h(it.area)}</span>`:''}
+              ${firmName ? `<span class="tag">🏢 ${h(firmName)}</span>`:''}
+            </div>
+            <div class="timeline-toolbar">
+              <button class="timeline-photo-btn" onclick="openTimelinePhotoPicker('${h(it.id)}')">📸 Foto</button>
+            </div>
           </div>
-          <div class="timeline-actions">
-            <button class="timeline-photo-btn" onclick="openTimelinePhotoPicker('${h(it.id)}')">📸 Foto</button>
-          </div>
+          <div style="display:flex;justify-content:flex-end;"><button class="btn-icon" onclick="(function(){S.timeline=(S.timeline||[]).filter(x=>x.id!=='${h(it.id)}'); autoSave(); renderTimeline();})()">✕</button></div>
         </div>
-        <div style="display:flex;justify-content:flex-end;"><button class="btn-icon" onclick="(function(){S.timeline=(S.timeline||[]).filter(x=>x.id!=='${h(it.id)}'); autoSave(); renderTimeline();})()">✕</button></div>
+        ${linkedPhotos.length ? `<div class="timeline-photo-strip">${linkedPhotos.map(p=>`<div class="timeline-photo-thumb" onclick="openPhotoViewer('${(p.data||'').replace(/'/g,'&#39;')}', '${h(p.caption||p.name||'Foto').replace(/'/g,'&#39;')}')"><img src="${p.data||''}" alt="${h(p.caption||p.name||'Foto')}"></div>`).join('')}</div>` : ''}
       </div>`;
     }).join('');
     if (empty) empty.style.display = rows.length ? 'none' : 'block';
@@ -6955,6 +7109,123 @@ window.renderFirms = function renderFirmsPatched() {
   }
   window.addEventListener('load', patchInit);
 })();
+
+
+function exportExcel() {
+  try {
+    collectFormToState();
+    const wb = XLSX.utils.book_new();
+
+    const projekt = [
+      ['Bereich','Wert'],
+      ['Projekt', S.projectName || ''],
+      ['Projektnummer', S.projectNr || ''],
+      ['Ort', S.standort || ''],
+      ['Datum', S.reportDate || ''],
+      ['Bauleiter', S.bauleiter || ''],
+      ['Wetter automatisch', S.autoWeather?.weather || ''],
+      ['Temperatur', S.autoWeather ? `${S.autoWeather.tempMin} °C bis ${S.autoWeather.tempMax} °C` : ''],
+      ['Wind', S.autoWeather?.wind || ''],
+      ['Regen', S.autoWeather?.rainDay || ''],
+      ['Bemerkungen', S.remarks || '']
+    ];
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(projekt), 'Projekt');
+
+    const bauarbeiten = [['Zeit','Eintrag','Firma','Bereich','Notiz']];
+    (S.workEntries || []).forEach((w, i) => {
+      const firmName = (S.contractors || []).find(f => f.id === w.firmId)?.name || '';
+      bauarbeiten.push([w.time || '', w.title || w.text || `Eintrag ${i+1}`, firmName, w.area || '', w.note || w.desc || '']);
+    });
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(bauarbeiten), 'Bauarbeiten');
+
+    const timeline = [['Zeit','Eintrag','Firma','Bereich','Fotos']];
+    (S.timeline || []).forEach(t => {
+      const firmName = (S.contractors || []).find(f => f.id === t.firmId)?.name || '';
+      const pCount = (S.photos || []).filter(p => p.timelineId === t.id).length;
+      timeline.push([t.time || '', t.text || '', firmName, t.area || '', pCount]);
+    });
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(timeline), 'Tageschronologie');
+
+    const personal = [['Funktion','Anzahl','Firma','Namen']];
+    (S.personnelTypes || []).forEach(p => {
+      const c = parseInt((S.personnelCounts || {})[p.key] || 0, 10) || 0;
+      const firmId = (S.personnelFirms || {})[p.key] || '';
+      const firmName = (S.contractors || []).find(f => f.id === firmId)?.name || '';
+      const names = ((S.personnelNames || {})[p.key] || []).filter(Boolean).join(', ');
+      personal.push([p.de || '', c, firmName, names]);
+    });
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(personal), 'Personal');
+
+    const geraete = [['Geraet','Anzahl','Stunden','Typ','Firma','Bemerkung']];
+    (S.geraete || []).forEach(g => {
+      const firmName = (S.contractors || []).find(f => f.id === g.firmId)?.name || '';
+      const typ = [g.brand || '', g.model || ''].join(' ').trim();
+      geraete.push([g.de || '', g.count || 0, g.hours || 0, typ, firmName, g.note || '']);
+    });
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(geraete), 'Geraete');
+
+    const firmen = [['Firma','Gewerk','NU-Code','Ansprechpartner','Telefon','Status','Notizen']];
+    (S.contractors || []).forEach(f => {
+      const notes = (f.notes || []).map(n => `${n.date || ''}: ${n.text || ''}`).join(' | ');
+      firmen.push([f.name || '', f.trade || '', f.nuCode || '', f.contact || '', f.phone || '', f.status || '', notes]);
+    });
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(firmen), 'Firmen');
+
+    const kontakte = [['Name','Firma','Funktion','Kategorie','Telefon','E-Mail','Bemerkung']];
+    (S.contacts || []).forEach(c => {
+      const firmName = (S.contractors || []).find(f => f.id === c.firmId)?.name || '';
+      kontakte.push([c.name || '', firmName, c.role || '', c.group || '', c.phone || '', c.mail || '', c.note || '']);
+    });
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(kontakte), 'Kontakte');
+
+    const container = [['ID','Typ','Standort','Groesse','Status','Notiz']];
+    (S.containers || []).forEach(c => {
+      container.push([c.id || '', c.type || '', c.loc || '', c.size || '', c.status || '', c.note || '']);
+    });
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(container), 'Container');
+
+    const maengel = [['Titel','Firma','Status','Datum','Deadline','Verantwortlich','Bereich','Beschreibung']];
+    (S.maengel || []).forEach(mg => {
+      const firmName = (S.contractors || []).find(f => f.id === mg.firmId)?.name || '';
+      maengel.push([mg.title || '', firmName, mg.status || '', mg.date || '', mg.deadline || '', mg.owner || '', mg.area || '', mg.desc || '']);
+    });
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(maengel), 'Maengel');
+
+    const meetings = [['Datum','Zeit','Titel','Art','Ort','Teilnehmer','Tagesordnung','Beschluesse','Naechster Termin']];
+    (S.meetings || []).forEach(mt => {
+      meetings.push([mt.date || '', mt.time || '', mt.title || '', mt.type || '', mt.loc || '', (mt.att || []).join(', '), mt.agenda || '', mt.dec || '', mt.next || '']);
+    });
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(meetings), 'Besprechungen');
+
+    const fotos = [['Datei','Titel','Bereich','Zeit','Firma','Notiz','Timeline-ID']];
+    (S.photos || []).forEach(p => {
+      const firmName = (S.contractors || []).find(f => f.id === p.firmId)?.name || '';
+      fotos.push([p.name || '', p.caption || '', p.area || '', p.time || '', firmName, p.note || '', p.timelineId || '']);
+    });
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(fotos), 'Fotos');
+
+    const dateien = [['Datei','Typ','Groesse']];
+    (S.docs || []).forEach(d => {
+      dateien.push([d.name || '', d.type || '', d.size || '']);
+    });
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(dateien), 'Dateien');
+
+    const todo = [['Titel','Beschreibung','Firma','Kategorie','Prioritaet','Status','Faellig','Kommentar','Verlauf']];
+    (S.todos || []).forEach(t => {
+      const firmName = (S.contractors || []).find(f => f.id === t.firmId)?.name || '';
+      const hist = (t.history || []).map(h => `${h.date || ''} ${h.time || ''} ${h.text || ''}`.trim()).join(' | ');
+      todo.push([t.title || '', t.desc || '', firmName, t.category || '', t.priority || '', t.status || '', t.due || '', t.comment || '', hist]);
+    });
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(todo), 'ToDo');
+
+    XLSX.writeFile(wb, `BAUTAGEBUCH_${S.projectNr || 'Projekt'}_${S.reportDate || ''}.xlsx`);
+    showToast('Excel exportiert','ok');
+  } catch (e) {
+    console.error(e);
+    showToast('Excel Fehler: ' + e.message,'err');
+  }
+}
+
 </script>
 
 </body>
