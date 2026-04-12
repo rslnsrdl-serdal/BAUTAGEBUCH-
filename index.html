@@ -2937,7 +2937,7 @@ function autoSave() {
     updateBadges();
     refreshDash();
   renderWorkAreas();
-  if((S.standort || S.projectLocation || S.projectOrt) && !S.autoWeather) loadDashboardWeather();
+  if(S.standort) loadDashboardWeather();
   else if (typeof renderAutoWeatherToTB === 'function') renderAutoWeatherToTB();
   }, 900);
 }
@@ -2948,7 +2948,9 @@ function syncProjectInfoFromTB() {
   sv('hPName', gv('tbPName'));
   sv('hST', gv('tbST'));
   sv('hBL', gv('tbBL'));
+  S.standort = gv('tbST');
   autoSave();
+  loadDashboardWeather();
 }
 function syncProjectInfoToTB() {
   sv('tbPN', gv('hPN'));
@@ -3721,13 +3723,21 @@ function todoMiniCard(t){
 }
 async function loadDashboardWeather(){
   const box = document.getElementById('dash-weather-auto');
-  const place = (S.standort || S.projectLocation || S.projectOrt || '').trim();
+  const place = (S.standort || '').trim();
   if(box) box.textContent = 'Wetter wird geladen…';
-  if(!place){ if(box) box.textContent='Projekt-Ort fehlt'; renderAutoWeatherToTB(); return; }
+  if(!place){
+    if(box) box.textContent='Projekt-Ort fehlt';
+    if (typeof renderAutoWeatherToTB === 'function') renderAutoWeatherToTB();
+    return;
+  }
   try{
     const gRes = await fetch('https://geocoding-api.open-meteo.com/v1/search?name=' + encodeURIComponent(place) + '&count=1&language=de&format=json');
     const gJson = await gRes.json();
-    if(!gJson || !gJson.results || !gJson.results.length){ if(box) box.textContent='Ort nicht gefunden'; renderAutoWeatherToTB(); return; }
+    if(!gJson || !gJson.results || !gJson.results.length){
+      if(box) box.textContent='Ort nicht gefunden';
+      if (typeof renderAutoWeatherToTB === 'function') renderAutoWeatherToTB();
+      return;
+    }
     const loc = gJson.results[0];
     const wRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${loc.latitude}&longitude=${loc.longitude}&current=temperature_2m,weather_code,wind_speed_10m,precipitation,rain&daily=temperature_2m_max,temperature_2m_min,precipitation_sum&timezone=auto`);
     const wJson = await wRes.json();
@@ -3750,11 +3760,11 @@ async function loadDashboardWeather(){
       summary
     };
     if(box) box.textContent = summary;
-    renderAutoWeatherToTB();
+    if (typeof renderAutoWeatherToTB === 'function') renderAutoWeatherToTB();
     autoSave();
   }catch(err){
     if(box) box.textContent = 'Wetter konnte nicht geladen werden';
-    renderAutoWeatherToTB();
+    if (typeof renderAutoWeatherToTB === 'function') renderAutoWeatherToTB();
   }
 }
 
