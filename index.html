@@ -1563,6 +1563,63 @@ body{
   .timeline-card-top{grid-template-columns:1fr}
 }
 
+
+/* SIDEBAR NAV PATCH */
+.nav-bar{display:none !important;}
+.side-overlay{
+  position:fixed;inset:0;background:rgba(15,23,42,.36);
+  z-index:699;display:none;
+  -webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);
+}
+.side-overlay.open{display:block;}
+.side-nav{
+  position:fixed;top:0;left:0;bottom:0;width:300px;max-width:84vw;
+  background:var(--bg2);border-right:1px solid var(--border);
+  box-shadow:var(--shadow2);z-index:700;
+  transform:translateX(-102%);transition:transform .22s ease;
+  display:flex;flex-direction:column;
+}
+.side-nav.open{transform:translateX(0);}
+.side-nav-hd{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+  padding:16px 16px 12px;border-bottom:1px solid var(--border);
+}
+.side-nav-title{
+  font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Helvetica Neue',sans-serif;
+  font-size:15px;font-weight:800;color:var(--text);letter-spacing:-.02em;
+}
+.side-nav-close,.menu-toggle{
+  width:36px;height:36px;border-radius:10px;
+  background:var(--bg3);border:1px solid var(--border);
+  color:var(--text2);cursor:pointer;font-size:16px;
+  display:flex;align-items:center;justify-content:center;
+  -webkit-appearance:none;appearance:none;flex-shrink:0;
+}
+.side-nav-close:hover,.menu-toggle:hover{background:var(--bg4);border-color:var(--border2);color:var(--text);}
+.side-nav-body{padding:12px;overflow:auto;display:flex;flex-direction:column;gap:14px;}
+.side-group{display:flex;flex-direction:column;gap:6px;}
+.side-group-label{
+  font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;
+  color:var(--text3);padding:0 8px 2px;
+}
+.side-link{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+  width:100%;padding:11px 12px;border:none;border-radius:12px;
+  background:transparent;color:var(--text2);cursor:pointer;
+  font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Epilogue',sans-serif;
+  font-size:13px;font-weight:600;text-align:left;
+  -webkit-appearance:none;appearance:none;
+}
+.side-link:hover{background:var(--bg3);color:var(--text);}
+.side-link.active{background:rgba(0,122,255,.10);color:var(--accent2);}
+.side-link-main{display:flex;align-items:center;gap:10px;min-width:0;}
+.side-link .ti{font-size:16px;line-height:1;width:18px;text-align:center;}
+.side-link .nav-badge{margin-left:6px;}
+@media(max-width:430px){
+  .hdr-actions{gap:4px;}
+  .menu-toggle{width:32px;height:32px;font-size:15px;}
+}
+
 /* ═══════════════════════════════════════════════════
    RESPONSIVE
 ═══════════════════════════════════════════════════ */
@@ -1681,8 +1738,7 @@ body{
       </div>
       <button class="theme-toggle" id="themeBtn" onclick="toggleTheme()" title="Tema değiştir">🌙</button>
       <button class="theme-toggle" onclick="goPageById('pg-settings')" title="Ayarlar">⚙️</button>
-      <button class="btn btn-pdf btn-sm" onclick="exportPDF()">📄 PDF</button>
-      <button class="btn btn-excel btn-sm" onclick="exportExcel()">📊 Excel</button>
+      <button class="menu-toggle" onclick="toggleSideNav()" title="Menü">☰</button>
     </div>
   </div>
   <div class="nav-bar">
@@ -1702,6 +1758,51 @@ body{
     </div>
   </div>
 </header>
+
+
+<div class="side-overlay" id="sideOverlay" onclick="closeSideNav()"></div>
+<aside class="side-nav" id="sideNav">
+  <div class="side-nav-hd">
+    <div class="side-nav-title">Navigation</div>
+    <button class="side-nav-close" onclick="closeSideNav()">✕</button>
+  </div>
+  <div class="side-nav-body">
+    <div class="side-group">
+      <div class="side-group-label">Hauptbereich</div>
+      <button class="side-link active" data-side-page="pg-dash" onclick="sideGo('pg-dash')"><span class="side-link-main"><span class="ti">🏠</span><span>Dashboard</span></span></button>
+      <button class="side-link" data-side-page="pg-tb" onclick="sideGo('pg-tb')"><span class="side-link-main"><span class="ti">📝</span><span>Tagesbericht</span></span></button>
+      <button class="side-link" data-side-page="pg-todos" onclick="sideGo('pg-todos')"><span class="side-link-main"><span class="ti">🗂️</span><span>To-do</span></span><span class="nav-badge" id="side-nb-todos">0</span></button>
+      <button class="side-link" data-side-page="pg-kanban" onclick="sideGo('pg-kanban')"><span class="side-link-main"><span class="ti">📋</span><span>Kanban</span></span><span class="nav-badge" id="side-nb-kanban">0</span></button>
+    </div>
+
+    <div class="side-group">
+      <div class="side-group-label">Organisation</div>
+      <button class="side-link" data-side-page="pg-firms" onclick="sideGo('pg-firms')"><span class="side-link-main"><span class="ti">🏢</span><span>Firmen</span></span><span class="nav-badge" id="side-nb-firms">0</span></button>
+      <button class="side-link" data-side-page="pg-contacts" onclick="sideGo('pg-contacts')"><span class="side-link-main"><span class="ti">📇</span><span>Kontakte</span></span><span class="nav-badge" id="side-nb-contacts">0</span></button>
+      <button class="side-link" data-side-page="pg-ct" onclick="sideGo('pg-ct')"><span class="side-link-main"><span class="ti">🗑</span><span>Container</span></span><span class="nav-badge" id="side-nb-ct">0</span></button>
+    </div>
+
+    <div class="side-group">
+      <div class="side-group-label">Dokumentation</div>
+      <button class="side-link" data-side-page="pg-mangel" onclick="sideGo('pg-mangel')"><span class="side-link-main"><span class="ti">⚠️</span><span>Mängel</span></span><span class="nav-badge" id="side-nb-mangel">0</span></button>
+      <button class="side-link" data-side-page="pg-meet" onclick="sideGo('pg-meet')"><span class="side-link-main"><span class="ti">📅</span><span>Besprechungen</span></span><span class="nav-badge" id="side-nb-meet">0</span></button>
+      <button class="side-link" data-side-page="pg-files" onclick="sideGo('pg-files')"><span class="side-link-main"><span class="ti">📂</span><span>Dateien</span></span><span class="nav-badge" id="side-nb-files">0</span></button>
+      <button class="side-link" data-side-page="pg-archive" onclick="sideGo('pg-archive')"><span class="side-link-main"><span class="ti">🗃</span><span>Archiv</span></span><span class="nav-badge" id="side-nb-archive">0</span></button>
+    </div>
+
+    <div class="side-group">
+      <div class="side-group-label">Export</div>
+      <button class="side-link" onclick="closeSideNav();exportPDF()"><span class="side-link-main"><span class="ti">📄</span><span>PDF exportieren</span></span></button>
+      <button class="side-link" onclick="closeSideNav();exportExcel()"><span class="side-link-main"><span class="ti">📊</span><span>Excel exportieren</span></span></button>
+    </div>
+
+    <div class="side-group">
+      <div class="side-group-label">System</div>
+      <button class="side-link" data-side-page="pg-settings" onclick="sideGo('pg-settings')"><span class="side-link-main"><span class="ti">⚙️</span><span>Einstellungen</span></span></button>
+    </div>
+  </div>
+</aside>
+
 
 <div class="main">
 
@@ -3143,6 +3244,8 @@ function loadArchiveIntoCurrent(id) {
   renderMaengel();
   updateBadges();
   refreshDash();
+  syncSideNavActive();
+  syncSideNavBadges();
   goPageById('pg-tb');
   showToast('Bericht geladen: ' + (ar.reportDate || ''), 'ok');
 }
@@ -3284,6 +3387,47 @@ function setTheme(t) {
   }, 0);
 }
 
+
+function toggleSideNav(){
+  document.getElementById('sideNav')?.classList.toggle('open');
+  document.getElementById('sideOverlay')?.classList.toggle('open');
+}
+function closeSideNav(){
+  document.getElementById('sideNav')?.classList.remove('open');
+  document.getElementById('sideOverlay')?.classList.remove('open');
+}
+function sideGo(pid){
+  closeSideNav();
+  goPageById(pid);
+}
+function syncSideNavActive(){
+  const activePage = document.querySelector('.page.active')?.id || 'pg-dash';
+  document.querySelectorAll('.side-link[data-side-page]').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.sidePage === activePage);
+  });
+}
+function syncSideNavBadges(){
+  const pairs = [
+    ['nb-kanban','side-nb-kanban'],
+    ['nb-firms','side-nb-firms'],
+    ['nb-contacts','side-nb-contacts'],
+    ['nb-ct','side-nb-ct'],
+    ['nb-meet','side-nb-meet'],
+    ['nb-files','side-nb-files'],
+    ['nb-mangel','side-nb-mangel'],
+    ['nb-archive','side-nb-archive'],
+    ['nb-todos','side-nb-todos'],
+  ];
+  pairs.forEach(([srcId,dstId])=>{
+    const s = document.getElementById(srcId);
+    const d = document.getElementById(dstId);
+    if(s && d) d.textContent = s.textContent || '0';
+  });
+}
+document.addEventListener('keydown', function(e){
+  if(e.key === 'Escape') closeSideNav();
+});
+
 // ═══════════════════════════════════════════════════
 // NAVIGATION
 // ═══════════════════════════════════════════════════
@@ -3295,10 +3439,14 @@ function goPage(btn) {
   btn.classList.add('active');
   if (pid === 'pg-dash') refreshDash();
   if (pid === 'pg-archive') renderArchive();
+  syncSideNavActive();
+  syncSideNavBadges();
 }
 function goPageById(pid) {
   const btn = document.querySelector(`[data-page="${pid}"]`);
   if (btn) goPage(btn);
+  syncSideNavActive();
+  syncSideNavBadges();
 }
 
 // ═══════════════════════════════════════════════════
@@ -5757,6 +5905,7 @@ function updateBadges() {
   document.getElementById('nb-files').textContent=(S.photos||[]).length+(S.docs||[]).length;
   const nbm = document.getElementById('nb-mangel'); if (nbm) nbm.textContent=(S.maengel||[]).length;
   document.getElementById('nb-archive').textContent=archive.length;
+  syncSideNavBadges();
 }
 
 // ═══════════════════════════════════════════════════
