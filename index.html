@@ -7589,5 +7589,53 @@ function exportContactsCSV(){
 
 </script>
 
+
+<script>
+/* ONLY update Settings → automatic Gewerk list (UI + state) */
+document.addEventListener("DOMContentLoaded", function(){
+
+const NEW_GEWERK_LIST = `100|Stahlbau
+400|Fassade
+901|Erd- und Entwässerungsarbeiten
+902|Beton- und Stahlbetonarbeiten
+903|Hallensohle
+904|Bauwerksabdichtung
+905|Industriefußboden Estrich
+906|Mauerwerksarbeiten
+908|Betonfertigteile
+910|Tore, Türen, Überladebrücken
+911|Lichtbandwand
+912|Dacheindeckung
+913|Lichtkuppeln
+914|Blechverlegearbeiten
+915|Brandschutz
+916|Innenausbau
+917|Sonnenschutz
+918|Malerarbeiten
+919|Fliesenarbeiten
+920|Bodenbeläge
+921|Elektro
+922|Löschanlagen
+923|HKLS
+925|Ingenieurleistungen
+927|Schlosserarbeiten
+928|Baustelleneinrichtung
+930|Aufzugsanlage
+934|Außenanlagen`;
+
+if(window.appState){
+    if(!appState.settings) appState.settings = {};
+    appState.settings.defaultGewerkeText = NEW_GEWERK_LIST;
+}
+
+/* also update textarea in Settings if present */
+const ta = document.querySelector("#gewerkDefaults, textarea[name='gewerkDefaults']");
+if(ta){
+    ta.value = NEW_GEWERK_LIST;
+}
+
+});
+</script>
+
 </body>
 </html>
