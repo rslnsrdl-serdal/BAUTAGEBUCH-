@@ -1563,6 +1563,16 @@ body{
   .timeline-card-top{grid-template-columns:1fr}
 }
 
+
+@media(max-width:430px){
+  .hdr-actions .btn.btn-pdf.btn-sm,
+  .hdr-actions .btn.btn-excel.btn-sm{
+    padding:5px 7px !important;
+    font-size:8px !important;
+    gap:4px !important;
+  }
+}
+
 /* ═══════════════════════════════════════════════════
    RESPONSIVE
 ═══════════════════════════════════════════════════ */
@@ -6044,6 +6054,7 @@ async function exportPDF() {
     }
 
     addHeader();
+
     addSectionTitle('Projekt');
     addKV([
       ['Projekt', S.projectName || ''],
@@ -6063,9 +6074,18 @@ async function exportPDF() {
     addSectionTitle('Bauarbeiten');
     const workRows = (S.workEntries || []).map((w, i) => {
       const firmName = (S.contractors || []).find(f => f.id === w.firmId)?.name || '';
-      return [w.time || '', w.title || w.text || `Eintrag ${i+1}`, firmName, w.note || w.desc || ''];
+      const title = w.title || w.text || w.task || `Eintrag ${i+1}`;
+      const details = [
+        w.desc || '',
+        w.note || '',
+        w.details || '',
+        w.qty ? `Menge: ${w.qty}` : '',
+        w.unit ? `Einheit: ${w.unit}` : '',
+        w.area ? `Bereich: ${w.area}` : ''
+      ].filter(Boolean).join(' | ');
+      return [w.time || '', title, firmName, details];
     });
-    if (workRows.length) drawTable(['Zeit','Eintrag','Firma','Notiz'], workRows, [20, 58, 42, 66]);
+    if (workRows.length) drawTable(['Zeit','Eintrag','Firma','Details'], workRows, [18, 52, 34, 86]);
     else addKV([['Bauarbeiten','Keine Einträge']]);
 
     addSectionTitle('Personal');
@@ -7437,6 +7457,84 @@ function exportContactsCSV(){
     }
   }
 })();
+
+
+<script>
+(function(){
+  function waKey(a){
+    return String((typeof a === 'string' ? a : (a.id || a.name || '')) || '');
+  }
+  function waName(a){
+    return String((typeof a === 'string' ? a : (a.name || '')) || '');
+  }
+
+  window.renderWorkAreas = function(){
+    if(!S.workAreas) S.workAreas = [];
+    const tags = document.getElementById('workAreaTags');
+    const cards = document.getElementById('workAreaCards');
+    if(tags){
+      tags.innerHTML = (S.workAreas||[]).map(a => `
+        <span class="wa-tag">
+          ${esc(waName(a))}
+          <button type="button" onclick="removeWorkArea('${esc(waKey(a)).replace(/'/g,'&#39;')}')">✕</button>
+        </span>
+      `).join('');
+    }
+    if(cards){
+      if(!(S.workAreas||[]).length){
+        cards.innerHTML = '<div class="empty-state" style="padding:16px;"><p>Keine Bereiche erfasst</p></div>';
+      } else {
+        cards.innerHTML = (S.workAreas||[]).map((a,idx)=>{
+          const obj = typeof a === 'string' ? {id:'wa_'+idx,name:a,note:''} : a;
+          const count = (S.timeline||[]).filter(t => String(t.area||'').trim() === String(obj.name||'').trim()).length;
+          return `
+            <div class="area-card">
+              <div class="area-card-hd">
+                <div>
+                  <div class="area-card-name">${esc(obj.name||'Bereich')}</div>
+                  <div class="area-card-meta">${count} Einträge</div>
+                </div>
+                <button class="btn-icon" type="button" onclick="removeWorkArea('${esc(obj.id||obj.name||'').replace(/'/g,'&#39;')}')">✕</button>
+              </div>
+              <textarea class="fta" style="min-height:70px;margin-top:10px;" placeholder="Bereichsnotiz..." onchange="setWorkAreaNote('${esc(obj.id||obj.name||'').replace(/'/g,'&#39;')}', this.value)">${esc(obj.note||'')}</textarea>
+            </div>`;
+        }).join('');
+      }
+    }
+  };
+
+  window.addWorkArea = function(){
+    if(!S.workAreas) S.workAreas = [];
+    const inp = document.getElementById('waInput');
+    const val = String(inp?.value || '').trim();
+    if(!val){ showToast('Bereich eingeben','warn'); return; }
+    const exists = (S.workAreas||[]).some(a => waName(a).toLowerCase() === val.toLowerCase());
+    if(exists){ showToast('Bereich existiert bereits','warn'); return; }
+    S.workAreas.push({id:'wa_'+Date.now(), name:val, note:''});
+    if(inp) inp.value = '';
+    autoSave();
+    renderWorkAreas();
+    showToast('Bereich hinzugefügt','ok');
+  };
+
+  window.removeWorkArea = function(id){
+    if(!S.workAreas) S.workAreas = [];
+    S.workAreas = (S.workAreas||[]).filter(a => waKey(a) !== String(id));
+    autoSave();
+    renderWorkAreas();
+    showToast('Bereich entfernt','ok');
+  };
+
+  window.setWorkAreaNote = function(id, value){
+    if(!S.workAreas) S.workAreas = [];
+    const item = (S.workAreas||[]).find(a => waKey(a) === String(id));
+    if(item && typeof item === 'object'){
+      item.note = String(value || '');
+      autoSave();
+    }
+  };
+})();
+</script>
 
 </script>
 
