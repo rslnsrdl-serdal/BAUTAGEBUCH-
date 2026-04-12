@@ -2055,6 +2055,7 @@ body{
       <button class="btn btn-ghost" onclick="pickPhoneContacts()">Telefon-Rehber</button>
       <button class="btn btn-ghost" onclick="document.getElementById('contactCsvIn').click()">CSV importieren</button>
       <button class="btn btn-ghost" onclick="document.getElementById('contactVcfIn').click()">VCF importieren</button>
+      <button class="btn btn-ghost" onclick="exportContactsCSV()">CSV exportieren</button>
       <input type="file" id="contactCsvIn" accept=".csv,text/csv" style="display:none" onchange="importContactsCSV(this)">
       <input type="file" id="contactVcfIn" accept=".vcf,text/vcard" style="display:none" onchange="importContactsVCF(this)">
     </div>
@@ -7235,6 +7236,207 @@ function exportExcel() {
     showToast('Excel Fehler: ' + e.message,'err');
   }
 }
+
+
+function normalizePhoneForContact(v){
+  return String(v||'').replace(/\s+/g,' ').trim();
+}
+function contactExists(candidate){
+  return (S.contacts||[]).some(c =>
+    String(c.name||'').trim().toLowerCase() === String(candidate.name||'').trim().toLowerCase() &&
+    String(c.phone||'').replace(/\D+/g,'') === String(candidate.phone||'').replace(/\D+/g,'') &&
+    String(c.mail||'').trim().toLowerCase() === String(candidate.mail||'').trim().toLowerCase()
+  );
+}
+function addImportedContacts(items){
+  if(!S.contacts) S.contacts = [];
+  let added = 0;
+  (items||[]).forEach(it => {
+    const candidate = {
+      id:'co_'+Date.now()+'_'+Math.random().toString(36).slice(2,6),
+      name:String(it.name||'').trim(),
+      firmId: it.firmId || '',
+      role: String(it.role||'').trim(),
+      group: String(it.group||'Sonstige').trim() || 'Sonstige',
+      phone: normalizePhoneForContact(it.phone||''),
+      mail: String(it.mail||'').trim(),
+      note: String(it.note||'').trim()
+    };
+    if(!candidate.name) return;
+    if(contactExists(candidate)) return;
+    S.contacts.unshift(candidate);
+    added++;
+  });
+  autoSave();
+  renderContacts();
+  showToast(added ? `${added} Kontakte importiert` : 'Keine neuen Kontakte gefunden', added ? 'ok' : 'warn');
+}
+
+async function pickPhoneContacts(){
+  try{
+    if (!('contacts' in navigator) || !('ContactsManager' in window)) {
+      showToast('Telefon-Rehber auf diesem Gerät/Browser nicht verfügbar','warn');
+      return;
+    }
+    const props = ['name','tel','email'];
+    const opts = { multiple: true };
+    const picked = await navigator.contacts.select(props, opts);
+    const mapped = (picked||[]).map(p => ({
+      name: Array.isArray(p.name) ? (p.name[0]||'') : (p.name||''),
+      phone: Array.isArray(p.tel) ? (p.tel[0]||'') : (p.tel||''),
+      mail: Array.isArray(p.email) ? (p.email[0]||'') : (p.email||''),
+      group: 'Sonstige'
+    }));
+    addImportedContacts(mapped);
+  }catch(err){
+    console.error(err);
+    showToast('Rehber-Zugriff abgebrochen oder fehlgeschlagen','warn');
+  }
+}
+
+function importContactsCSV(input){
+  const file = input && input.files && input.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try{
+      const text = String(e.target.result||'').replace(/\r\n/g,'\n').replace(/\r/g,'\n');
+      const lines = text.split('\n').filter(l => l.trim());
+      if(!lines.length){ showToast('CSV leer','warn'); return; }
+
+      const splitLine = (line) => {
+        const out=[]; let cur=''; let q=false;
+        for(let i=0;i<line.length;i++){
+          const ch=line[i];
+          if(ch === '"'){
+            if(q && line[i+1] === '"'){ cur += '"'; i++; }
+            else q = !q;
+          } else if(ch === ',' && !q){
+            out.push(cur); cur='';
+          } else {
+            cur += ch;
+          }
+        }
+        out.push(cur);
+        return out.map(v=>v.trim());
+      };
+
+      const headers = splitLine(lines[0]).map(h => h.toLowerCase());
+      const idx = (alts) => headers.findIndex(h => alts.includes(h));
+      const iName = idx(['name','fullname','full name','kontakt','contact']);
+      const iPhone = idx(['phone','telefon','mobile','mobil','tel']);
+      const iMail = idx(['email','e-mail','mail']);
+      const iRole = idx(['role','funktion','position']);
+      const iGroup = idx(['group','gruppe','kategorie','category']);
+      const iNote = idx(['note','bemerkung','notiz','comment']);
+
+      const items = lines.slice(1).map(line => {
+        const cols = splitLine(line);
+        return {
+          name: iName >= 0 ? cols[iName] : '',
+          phone: iPhone >= 0 ? cols[iPhone] : '',
+          mail: iMail >= 0 ? cols[iMail] : '',
+          role: iRole >= 0 ? cols[iRole] : '',
+          group: iGroup >= 0 ? cols[iGroup] : 'Sonstige',
+          note: iNote >= 0 ? cols[iNote] : ''
+        };
+      });
+      addImportedContacts(items);
+    }catch(err){
+      console.error(err);
+      showToast('CSV konnte nicht importiert werden','err');
+    }finally{
+      input.value = '';
+    }
+  };
+  reader.readAsText(file, 'utf-8');
+}
+
+function importContactsVCF(input){
+  const file = input && input.files && input.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try{
+      const text = String(e.target.result||'');
+      const cards = text.split(/END:VCARD/i).map(c => c.trim()).filter(Boolean);
+      const items = cards.map(card => {
+        const lines = card.split(/\r?\n/);
+        let name='', phone='', mail='', note='';
+        for(let i=0;i<lines.length;i++){
+          let line = lines[i];
+          while(i+1 < lines.length && /^[ \t]/.test(lines[i+1])){
+            line += lines[i+1].replace(/^[ \t]/,'');
+            i++;
+          }
+          if(/^FN[:;]/i.test(line)) name = line.split(':').slice(1).join(':').trim();
+          else if(/^N[:;]/i.test(line) && !name){
+            const raw = line.split(':').slice(1).join(':').trim();
+            const parts = raw.split(';').filter(Boolean);
+            name = parts.reverse().join(' ').trim();
+          }
+          else if(/^TEL/i.test(line) && !phone) phone = line.split(':').slice(1).join(':').trim();
+          else if(/^EMAIL/i.test(line) && !mail) mail = line.split(':').slice(1).join(':').trim();
+          else if(/^NOTE/i.test(line) && !note) note = line.split(':').slice(1).join(':').trim();
+        }
+        return { name, phone, mail, note, group:'Sonstige' };
+      });
+      addImportedContacts(items);
+    }catch(err){
+      console.error(err);
+      showToast('VCF konnte nicht importiert werden','err');
+    }finally{
+      input.value = '';
+    }
+  };
+  reader.readAsText(file, 'utf-8');
+}
+
+function exportContactsCSV(){
+  try{
+    const rows = [['Name','Firma','Funktion','Kategorie','Telefon','E-Mail','Bemerkung']];
+    (S.contacts||[]).forEach(c => {
+      const firmName = (S.contractors||[]).find(f=>f.id===c.firmId)?.name || '';
+      rows.push([c.name||'', firmName, c.role||'', c.group||'', c.phone||'', c.mail||'', c.note||'']);
+    });
+    const escCSV = (v) => {
+      const s = String(v ?? '');
+      return /[",\n;]/.test(s) ? '"' + s.replace(/"/g,'""') + '"' : s;
+    };
+    const csv = rows.map(r => r.map(escCSV).join(',')).join('\n');
+    const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `Kontakte_${todayStr()}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 300);
+    showToast('Kontakte exportiert','ok');
+  }catch(err){
+    console.error(err);
+    showToast('Export fehlgeschlagen','err');
+  }
+}
+
+// ensure firm options when opening contact modal
+(function(){
+  const _openModal = window.openModal;
+  if(typeof _openModal === 'function'){
+    window.openModal = function(id, arg){
+      const r = _openModal.apply(this, arguments);
+      if(id === 'addContact'){
+        const sel = document.getElementById('contact-firm');
+        if(sel){
+          const cur = sel.value;
+          sel.innerHTML = '<option value="">— Keine Firma</option>' + (S.contractors||[]).map(f=>`<option value="${esc(f.id)}">${esc(f.name)}</option>`).join('');
+          sel.value = cur || '';
+        }
+        sv('contact-id',''); sv('contact-name',''); sv('contact-role',''); sv('contact-phone',''); sv('contact-mail',''); sv('contact-note',''); svs('contact-group','Sonstige');
+      }
+      return r;
+    }
+  }
+})();
 
 </script>
 
