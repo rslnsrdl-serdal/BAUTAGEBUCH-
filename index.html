@@ -6071,212 +6071,332 @@ function ensureSeroPdfFonts(doc){
 // ═══════════════════════════════════════════════════
 // PDF EXPORT
 // ═══════════════════════════════════════════════════
+
+
 async function exportPDF() {
   try {
     collectFormToState();
+    if (typeof hydratePhotosFromIDB === 'function') {
+      try { await hydratePhotosFromIDB(); } catch(e) {}
+    }
+
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+    if (typeof ensureSeroPdfFonts === 'function') {
+      try { ensureSeroPdfFonts(doc); doc.setFont('NotoSans','normal'); } catch(e) {}
+    }
 
-    const margin = 14;
-    const pageW = doc.internal.pageSize.getWidth();
-    const pageH = doc.internal.pageSize.getHeight();
+    const PW = doc.internal.pageSize.getWidth();
+    const PH = doc.internal.pageSize.getHeight();
+    const M = 14;
+    const CW = PW - M * 2;
     let y = 16;
 
-    function pdfSafe(v){
-      return String(v ?? '')
-        .replace(/Ä/g,'Ae').replace(/Ö/g,'Oe').replace(/Ü/g,'Ue')
-        .replace(/ä/g,'ae').replace(/ö/g,'oe').replace(/ü/g,'ue')
-        .replace(/ß/g,'ss')
-        .replace(/Ç/g,'C').replace(/ç/g,'c')
-        .replace(/Ğ/g,'G').replace(/ğ/g,'g')
-        .replace(/İ/g,'I').replace(/İ/g,'I').replace(/ı/g,'i')
-        .replace(/Ş/g,'S').replace(/ş/g,'s')
-        .replace(/[^\S\r\n]+/g, ' ')
-        .trim();
+    const C = {
+      ink:[28,28,30],
+      muted:[107,114,128],
+      line:[220,224,230],
+      soft:[248,249,251],
+      soft2:[242,244,247]
+    };
+
+    function fontNormal(){ try{ doc.setFont('NotoSans','normal'); }catch(e){ doc.setFont('helvetica','normal'); } }
+    function fontBold(){ try{ doc.setFont('NotoSans','bold'); }catch(e){ doc.setFont('helvetica','bold'); } }
+    function safe(v){ return String(v ?? '').replace(/\u00A0/g,' ').replace(/[\u200B-\u200D\uFEFF]/g,'').trim(); }
+    function t(v){ return safe(v || '—'); }
+    function n(v){ return parseInt(v || '0', 10) || 0; }
+    function firmName(id){ return (S.contractors || []).find(f => String(f.id) === String(id))?.name || ''; }
+    function firstReal(arr){
+      for (const v of arr) {
+        const s = safe(v);
+        if (s && s !== '—' && !/^Eintrag\s+\d+$/i.test(s)) return s;
+      }
+      return '';
     }
-    function ensureSpace(h=10){
-      if (y + h > pageH - 18) { doc.addPage(); y = 16; }
+    function workText(w, idx){
+      return firstReal([w.title, w.text, w.task, w.work, w.desc, w.note, w.details]) || `Arbeit ${idx+1}`;
     }
-    function addHeader(){
-      doc.setFont('helvetica','bold');
-      doc.setFontSize(16);
-      doc.text('BAUTAGEBUCH', pageW/2, y, { align:'center' });
+    function timelineText(tl, idx){
+      return firstReal([tl.text, tl.title, tl.desc, tl.event, tl.label, tl.note]) || `Zeitpunkt ${idx+1}`;
+    }
+    function ensure(h=8){
+      if (y + h > PH - 16) {
+        doc.addPage();
+        y = 16;
+        pageHeader();
+      }
+    }
+    function pageHeader(){
+      fontNormal();
+      doc.setTextColor(...C.muted);
+      doc.setFontSize(8);
+      doc.text('BAUTAGEBUCH', M, 8);
+      doc.text(`${t(S.projectNr)} · ${t(S.projectName)} · ${t(S.reportDate)}`, PW - M, 8, { align:'right' });
+      doc.setDrawColor(...C.line);
+      doc.line(M, 11, PW - M, 11);
+    }
+    function titleBlock(){
+      fontBold();
+      doc.setTextColor(...C.ink);
+      doc.setFontSize(18);
+      doc.text('BAUTAGEBUCH', M, y);
       y += 7;
-      doc.setFont('helvetica','normal');
-      doc.setFontSize(9);
-      const sub = [S.projectNr || '', S.projectName || '', S.reportDate || ''].filter(Boolean).map(pdfSafe).join('  |  ');
-      if (sub) doc.text(sub, pageW/2, y, { align:'center' });
-      y += 8;
-      doc.setDrawColor(180);
-      doc.line(margin, y, pageW - margin, y);
+      fontNormal();
+      doc.setFontSize(9.5);
+      doc.setTextColor(...C.muted);
+      const sub = [safe(S.projectName), safe(S.projectNr), safe(S.reportDate)].filter(Boolean).join(' · ');
+      if (sub) doc.text(sub, M, y);
       y += 6;
+      doc.setDrawColor(...C.line);
+      doc.line(M, y, PW - M, y);
+      y += 8;
     }
-    function addSectionTitle(title){
-      ensureSpace(9);
-      doc.setFont('helvetica','bold');
-      doc.setFontSize(11);
-      doc.text(pdfSafe(title), margin, y);
-      y += 2;
-      doc.setDrawColor(210);
-      doc.line(margin, y, pageW - margin, y);
+    function section(title){
+      ensure(12);
+      fontBold();
+      doc.setTextColor(...C.ink);
+      doc.setFontSize(10.8);
+      doc.text(safe(title), M, y);
+      y += 3;
+      doc.setDrawColor(...C.line);
+      doc.line(M, y, PW - M, y);
       y += 5;
     }
-    function addKV(rows){
-      doc.setFontSize(10);
+    function kv(rows, labelW=42){
       rows.forEach(([k,v]) => {
-        ensureSpace(6);
-        doc.setFont('helvetica','bold');
-        doc.text(pdfSafe(k) + ':', margin, y);
-        doc.setFont('helvetica','normal');
-        const lines = doc.splitTextToSize(pdfSafe(v || '-'), pageW - margin - 42);
-        doc.text(lines, margin + 34, y);
-        y += Math.max(5, lines.length * 4.5);
+        ensure(7);
+        fontBold();
+        doc.setFontSize(8.8);
+        doc.setTextColor(...C.ink);
+        doc.text(safe(k), M, y);
+        fontNormal();
+        const lines = doc.splitTextToSize(t(v), CW - labelW);
+        doc.text(lines, M + labelW, y);
+        y += Math.max(5.5, lines.length * 4.3);
       });
       y += 2;
     }
-    function addParagraph(text){
-      const lines = doc.splitTextToSize(pdfSafe(text || '-'), pageW - margin*2);
-      doc.setFont('helvetica','normal');
-      doc.setFontSize(10);
-      doc.text(lines, margin, y);
+    function para(text, size=9, color=C.ink){
+      const lines = doc.splitTextToSize(t(text), CW);
+      ensure(lines.length * 4.5 + 2);
+      fontNormal();
+      doc.setFontSize(size);
+      doc.setTextColor(...color);
+      doc.text(lines, M, y);
       y += lines.length * 4.5 + 2;
     }
-    function addBulletLines(items){
-      items.forEach(item => {
-        const lines = doc.splitTextToSize('• ' + pdfSafe(item || '-'), pageW - margin*2);
-        ensureSpace(lines.length * 4.5 + 2);
-        doc.setFont('helvetica','normal');
-        doc.setFontSize(10);
-        doc.text(lines, margin, y);
-        y += lines.length * 4.5 + 2;
-      });
-    }
-    function drawTable(headers, rows, widths){
-      if (!rows || !rows.length) return;
-      ensureSpace(12);
-      const headH = 7;
-      let x = margin;
-      doc.setDrawColor(200);
-      doc.setFont('helvetica','bold');
-      doc.setFontSize(9);
-      headers.forEach((h,i) => {
-        doc.rect(x, y, widths[i], headH);
-        doc.text(pdfSafe(h), x + 1.5, y + 4.6);
+    function table(headers, rows, widths){
+      if (!rows || !rows.length) {
+        para('Keine Einträge.');
+        return;
+      }
+      ensure(10);
+      let x = M;
+      doc.setFillColor(...C.soft2);
+      doc.setDrawColor(...C.line);
+      fontBold();
+      doc.setFontSize(8.1);
+      doc.setTextColor(...C.ink);
+      headers.forEach((h, i) => {
+        doc.rect(x, y, widths[i], 6.6, 'FD');
+        doc.text(safe(h), x + 1.4, y + 4.2);
         x += widths[i];
       });
-      y += headH;
-      doc.setFont('helvetica','normal');
+      y += 6.6;
+
       rows.forEach(r => {
-        const cellLines = r.map((c,i) => doc.splitTextToSize(pdfSafe(c || ''), widths[i] - 3));
-        let rowH = 6;
-        cellLines.forEach(cl => { rowH = Math.max(rowH, cl.length * 4.2 + 2); });
-        ensureSpace(rowH + 1);
-        let xx = margin;
-        cellLines.forEach((cl,i) => {
+        const linesPerCell = r.map((c, i) => doc.splitTextToSize(t(c), widths[i] - 3));
+        let rowH = 5.8;
+        linesPerCell.forEach(lines => rowH = Math.max(rowH, lines.length * 3.9 + 2));
+        ensure(rowH + 1);
+        let xx = M;
+        linesPerCell.forEach((lines, i) => {
+          doc.setDrawColor(...C.line);
           doc.rect(xx, y, widths[i], rowH);
-          doc.text(cl, xx + 1.5, y + 4);
+          fontNormal();
+          doc.setFontSize(8.1);
+          doc.setTextColor(...C.ink);
+          doc.text(lines, xx + 1.3, y + 3.8);
           xx += widths[i];
         });
         y += rowH;
       });
       y += 4;
     }
+    function addPhoto(photo, idx){
+      ensure(82);
+      const title = firstReal([photo.caption, photo.name, photo.note]) || `Foto ${idx}`;
+      fontBold();
+      doc.setFontSize(9.6);
+      doc.setTextColor(...C.ink);
+      doc.text(`Foto ${idx}: ${safe(title)}`, M, y);
+      y += 4.5;
 
-    addHeader();
+      const meta = [
+        photo.time ? `Zeit: ${photo.time}` : '',
+        photo.area ? `Bereich: ${photo.area}` : '',
+        photo.category ? `Kategorie: ${photo.category}` : '',
+        photo.firmId ? `Firma: ${firmName(photo.firmId)}` : ''
+      ].filter(Boolean).join(' | ');
+      if (meta) {
+        fontNormal();
+        doc.setFontSize(8);
+        doc.setTextColor(...C.muted);
+        const metaLines = doc.splitTextToSize(meta, CW)
+        doc.text(metaLines, M, y);
+        y += metaLines.length * 4 + 1.5;
+      }
 
-    addSectionTitle('Projekt');
-    addKV([
-      ['Projekt', S.projectName || ''],
-      ['Projektnummer', S.projectNr || ''],
-      ['Ort', S.standort || ''],
-      ['Datum', S.reportDate || ''],
-      ['Bauleiter', S.bauleiter || '']
+      const boxH = 58;
+      ensure(boxH + 3);
+      doc.setFillColor(...C.soft);
+      doc.setDrawColor(...C.line);
+      doc.rect(M, y, CW, boxH, 'FD');
+      if (photo.data) {
+        try {
+          const fmt = String(photo.data).startsWith('data:image/png') ? 'PNG' : 'JPEG';
+          doc.addImage(photo.data, fmt, M + 1.5, y + 1.5, CW - 3, boxH - 3, undefined, 'FAST');
+        } catch(e) {
+          fontNormal();
+          doc.setFontSize(8.8);
+          doc.setTextColor(...C.muted);
+          doc.text('Foto konnte nicht eingebettet werden.', M + 4, y + 10);
+        }
+      } else {
+        fontNormal();
+        doc.setFontSize(8.8);
+        doc.setTextColor(...C.muted);
+        doc.text('Keine Bilddaten verfügbar.', M + 4, y + 10);
+      }
+      y += boxH + 6;
+    }
+
+    titleBlock();
+
+    section('Projektdaten');
+    kv([
+      ['Projekt', S.projectName || '—'],
+      ['Projektnummer', S.projectNr || '—'],
+      ['Standort', S.standort || '—'],
+      ['Bauleiter', S.bauleiter || '—'],
+      ['Berichtstag', S.reportDate || '—'],
+      ['Bericht-Nr.', S.reportNr || '—']
     ]);
 
-    addSectionTitle('Wetter');
-    addKV([
-      ['Wetter automatisch', (S.autoWeather && S.autoWeather.weather) ? S.autoWeather.weather : (S.weather || '-')],
-      ['Temperatur', (S.autoWeather ? `${S.autoWeather.tempMin} °C bis ${S.autoWeather.tempMax} °C` : `${S.tempMin || '-'} °C bis ${S.tempMax || '-'} °C`)],
-      ['Wind / Regen', (S.autoWeather ? `${S.autoWeather.wind} km/h / ${S.autoWeather.rainDay} mm` : `${S.wind || '-'} / -`)]
+    section('Witterung');
+    kv([
+      ['Wetter', S.autoWeather?.weather || S.weather || '—'],
+      ['Temperatur', (S.autoWeather && (S.autoWeather.tempMin != null || S.autoWeather.tempMax != null))
+        ? `${S.autoWeather.tempMin ?? '–'} °C bis ${S.autoWeather.tempMax ?? '–'} °C`
+        : `${S.tempMin || '–'} °C bis ${S.tempMax || '–'} °C`],
+      ['Wind', S.autoWeather?.wind != null ? `${S.autoWeather.wind} km/h` : (S.wind || '—')],
+      ['Niederschlag', S.autoWeather?.rainDay != null ? `${S.autoWeather.rainDay} mm` : '—']
     ]);
 
-    addSectionTitle('Bauarbeiten');
-    const workRows = (S.workEntries || []).map((w) => {
-      const firmName = (S.contractors || []).find(f => f.id === w.firmId)?.name || '';
-      const mainText = w.title || w.text || w.task || w.work || w.desc || '-';
-      const detailText = [
-        w.desc || '',
-        w.note || '',
+    section('Bauarbeiten');
+    const workRows = (S.workEntries || []).map((w, i) => {
+      const details = [
+        w.note && w.note !== workText(w, i) ? w.note : '',
         w.details || '',
         w.qty ? `Menge: ${w.qty}` : '',
         w.unit ? `Einheit: ${w.unit}` : '',
-        w.area ? `Bereich: ${w.area}` : '',
-        w.trade ? `Gewerk: ${w.trade}` : ''
+        w.hours ? `Std.: ${w.hours}` : ''
       ].filter(Boolean).join(' | ');
-      return [w.time || '', mainText, firmName, detailText || '-'];
+      return [
+        w.time || '—',
+        workText(w, i),
+        w.trade || w.gewerk || '—',
+        firmName(w.firmId) || '—',
+        w.area || '—',
+        details || '—'
+      ];
     });
-    if (workRows.length) drawTable(['Zeit','Tätigkeit','Firma','Details'], workRows, [18, 52, 34, 86]);
-    else addKV([['Bauarbeiten','Keine Einträge']]);
+    table(['Zeit','Tätigkeit','Gewerk','Firma','Bereich','Details'], workRows, [14, 44, 20, 30, 24, 52]);
 
-    addSectionTitle('Arbeitsbereiche');
+    section('Arbeitsbereiche');
     const areaRows = (S.workAreas || []).map((a, idx) => {
-      const obj = typeof a === 'string' ? {name:a, note:'', notes:[]} : (a || {});
+      const obj = typeof a === 'string' ? { name:a, note:'', notes:[] } : (a || {});
       const notes = Array.isArray(obj.notes) && obj.notes.length
-        ? obj.notes.map(n => `[${n.time||''}] ${n.text||''}`).join(' | ')
-        : (obj.note || '-');
-      const count = (S.timeline || []).filter(t => String(t.area || '').trim() === String(obj.name || '').trim()).length;
-      return [obj.name || `Bereich ${idx+1}`, notes, count ? `${count} Einträge` : '-'];
+        ? obj.notes.map(n => `[${n.time || ''}] ${n.text || ''}`).join(' | ')
+        : (obj.note || '—');
+      const count = (S.timeline || []).filter(tl => String(tl.area || '').trim() === String(obj.name || '').trim()).length;
+      return [obj.name || `Bereich ${idx+1}`, notes, count ? `${count} Einträge` : '—'];
     });
-    if (areaRows.length) drawTable(['Bereich','Notizen','Chronologie'], areaRows, [42, 116, 24]);
-    else addKV([['Arbeitsbereiche','Keine Bereiche']]);
+    table(['Bereich','Notizen','Chronologie'], areaRows, [42, 112, 28]);
 
-    addSectionTitle('Tageschronologie');
-    const timelineRows = (S.timeline || []).map((t, idx) => {
-      const firmName = (S.contractors || []).find(f => f.id === t.firmId)?.name || '';
-      const realText = t.text || t.title || t.note || t.desc || t.event || t.label || '-';
-      const detail = [
-        t.area ? `Bereich: ${t.area}` : '',
-        firmName ? `Firma: ${firmName}` : '',
-        t.note && t.note !== realText ? t.note : '',
-        t.status ? `Status: ${t.status}` : ''
+    section('Tageschronologie');
+    const timelineRows = (S.timeline || []).map((tl, idx) => {
+      const main = timelineText(tl, idx);
+      const details = [
+        tl.area ? `Bereich: ${tl.area}` : '',
+        tl.firmId ? `Firma: ${firmName(tl.firmId)}` : '',
+        tl.status ? `Status: ${tl.status}` : '',
+        tl.note && tl.note !== main ? tl.note : ''
       ].filter(Boolean).join(' | ');
-      return [t.time || '', realText, detail || '-'];
+      return [tl.time || '—', main, details || '—'];
     });
-    if (timelineRows.length) drawTable(['Zeit','Ereignis','Details'], timelineRows, [20, 82, 80]);
-    else addKV([['Tageschronologie','Keine Einträge']]);
+    table(['Zeit','Ereignis','Details'], timelineRows, [18, 82, 82]);
 
-    addSectionTitle('Personal');
+    section('Personal');
     const personnelRows = (S.personnelTypes || []).map(p => {
-      const c = parseInt((S.personnelCounts || {})[p.key] || 0, 10) || 0;
-      const firmId = (S.personnelFirms || {})[p.key] || '';
-      const firmName = (S.contractors || []).find(f => f.id === firmId)?.name || '';
-      const names = ((S.personnelNames || {})[p.key] || []).filter(Boolean).join(', ');
-      return (c > 0 || firmName || names) ? [p.de || '', String(c || ''), firmName, names] : null;
+      const count = n((S.personnelCounts || {})[p.key]);
+      const firm = firmName((S.personnelFirms || {})[p.key]) || '—';
+      const names = ((S.personnelNames || {})[p.key] || []).filter(Boolean).join(', ') || '—';
+      if (!count && names === '—' && firm === '—') return null;
+      return [p.de || p.key || '—', String(count || '—'), firm, names];
     }).filter(Boolean);
-    if (personnelRows.length) drawTable(['Funktion','Anzahl','Firma','Namen'], personnelRows, [40, 18, 48, 68]);
-    else addKV([['Personal','Keine aktiven Einträge']]);
+    table(['Funktion','Anzahl','Firma','Namen'], personnelRows, [36, 18, 44, 84]);
 
-    addSectionTitle('Geräte');
+    section('Geräte');
     const geraetRows = (S.geraete || []).map(g => {
-      const c = parseInt(g.count || 0, 10) || 0;
-      const firmName = (S.contractors || []).find(f => f.id === g.firmId)?.name || '';
-      const typ = [g.brand || '', g.model || ''].join(' ').trim();
-      const note = g.note || '';
-      return (c > 0 || typ || firmName || note) ? [g.de || '', String(c || ''), typ, firmName, note] : null;
+      const count = n(g.count);
+      const type = [g.brand || '', g.model || ''].join(' ').trim() || '—';
+      const firm = firmName(g.firmId) || '—';
+      const note = g.note || (g.hours ? `Std.: ${g.hours}` : '—');
+      if (!count && type === '—' && firm === '—' && note === '—') return null;
+      return [g.de || g.key || '—', String(count || '—'), type, firm, note];
     }).filter(Boolean);
-    if (geraetRows.length) drawTable(['Gerät','Anzahl','Typ','Firma','Bemerkung'], geraetRows, [28, 15, 34, 38, 57]);
-    else addKV([['Geräte','Keine aktiven Einträge']]);
+    table(['Gerät','Anzahl','Typ','Firma','Bemerkung'], geraetRows, [28, 16, 38, 40, 58]);
 
-    addSectionTitle('Bemerkungen');
-    if (S.remarks) addParagraph(S.remarks);
-    else addKV([['Bemerkungen','Keine Bemerkungen']]);
+    if ((S.maengel || []).length) {
+      section('Mängel / Behinderungen');
+      const mangelRows = (S.maengel || []).map(m => [
+        m.title || '—',
+        m.status || '—',
+        m.date || '—',
+        firmName(m.firmId) || '—',
+        m.area || '—',
+        m.desc || '—'
+      ]);
+      table(['Titel','Status','Datum','Firma','Bereich','Beschreibung'], mangelRows, [30, 22, 20, 28, 24, 58]);
+    }
 
-    doc.save(`BAUTAGEBUCH_${pdfSafe(S.projectNr||'Projekt')}_${pdfSafe(S.reportDate||'')}.pdf`);
+    if (S.remarks) {
+      section('Bemerkungen');
+      para(S.remarks);
+    }
+
+    section('Fotodokumentation');
+    if (!(S.photos || []).length) {
+      para('Keine Fotos vorhanden.');
+    } else {
+      (S.photos || []).forEach((p, idx) => addPhoto(p, idx + 1));
+    }
+
+    fontNormal();
+    doc.setFontSize(8);
+    doc.setTextColor(...C.muted);
+    ensure(8);
+    doc.text(`Exportiert am ${new Date().toLocaleString('de-DE')}`, M, y);
+
+    doc.save(`BAUTAGEBUCH_${safe(S.projectNr || 'Projekt')}_${safe(S.reportDate || '')}.pdf`);
   } catch (e) {
     console.error(e);
     showToast('PDF Fehler: ' + e.message,'err');
   }
 }
+
+
 
 
 // ═══════════════════════════════════════════════════
