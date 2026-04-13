@@ -1563,6 +1563,63 @@ body{
   .timeline-card-top{grid-template-columns:1fr}
 }
 
+
+/* SIDEBAR NAV PATCH */
+.nav-bar{display:none !important;}
+.side-overlay{
+  position:fixed;inset:0;background:rgba(15,23,42,.36);
+  z-index:699;display:none;
+  -webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);
+}
+.side-overlay.open{display:block;}
+.side-nav{
+  position:fixed;top:0;left:0;bottom:0;width:300px;max-width:84vw;
+  background:var(--bg2);border-right:1px solid var(--border);
+  box-shadow:var(--shadow2);z-index:700;
+  transform:translateX(-102%);transition:transform .22s ease;
+  display:flex;flex-direction:column;
+}
+.side-nav.open{transform:translateX(0);}
+.side-nav-hd{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+  padding:16px 16px 12px;border-bottom:1px solid var(--border);
+}
+.side-nav-title{
+  font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Helvetica Neue',sans-serif;
+  font-size:15px;font-weight:800;color:var(--text);letter-spacing:-.02em;
+}
+.side-nav-close,.menu-toggle{
+  width:36px;height:36px;border-radius:10px;
+  background:var(--bg3);border:1px solid var(--border);
+  color:var(--text2);cursor:pointer;font-size:16px;
+  display:flex;align-items:center;justify-content:center;
+  -webkit-appearance:none;appearance:none;flex-shrink:0;
+}
+.side-nav-close:hover,.menu-toggle:hover{background:var(--bg4);border-color:var(--border2);color:var(--text);}
+.side-nav-body{padding:12px;overflow:auto;display:flex;flex-direction:column;gap:14px;}
+.side-group{display:flex;flex-direction:column;gap:6px;}
+.side-group-label{
+  font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;
+  color:var(--text3);padding:0 8px 2px;
+}
+.side-link{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+  width:100%;padding:11px 12px;border:none;border-radius:12px;
+  background:transparent;color:var(--text2);cursor:pointer;
+  font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Epilogue',sans-serif;
+  font-size:13px;font-weight:600;text-align:left;
+  -webkit-appearance:none;appearance:none;
+}
+.side-link:hover{background:var(--bg3);color:var(--text);}
+.side-link.active{background:rgba(0,122,255,.10);color:var(--accent2);}
+.side-link-main{display:flex;align-items:center;gap:10px;min-width:0;}
+.side-link .ti{font-size:16px;line-height:1;width:18px;text-align:center;}
+.side-link .nav-badge{margin-left:6px;}
+@media(max-width:430px){
+  .hdr-actions{gap:4px;}
+  .menu-toggle{width:32px;height:32px;font-size:15px;}
+}
+
 /* ═══════════════════════════════════════════════════
    RESPONSIVE
 ═══════════════════════════════════════════════════ */
@@ -1650,7 +1707,7 @@ body{
 <header class="hdr">
   <div class="hdr-top">
     <div class="hdr-brand">
-      <div class="logo-mark">SB</div>
+      <button class="menu-toggle" onclick="toggleSideNav()" title="Menü">☰</button>
       <div class="brand-text">
         <h1>SERO <span style="color:var(--accent)">BAUTAGEBUCH</span></h1>
         <p>Şantiye Yönetim Sistemi</p>
@@ -1681,8 +1738,7 @@ body{
       </div>
       <button class="theme-toggle" id="themeBtn" onclick="toggleTheme()" title="Tema değiştir">🌙</button>
       <button class="theme-toggle" onclick="goPageById('pg-settings')" title="Ayarlar">⚙️</button>
-      <button class="btn btn-pdf btn-sm" onclick="exportPDF()">📄 PDF</button>
-      <button class="btn btn-excel btn-sm" onclick="exportExcel()">📊 Excel</button>
+      
     </div>
   </div>
   <div class="nav-bar">
@@ -1702,6 +1758,51 @@ body{
     </div>
   </div>
 </header>
+
+
+<div class="side-overlay" id="sideOverlay" onclick="closeSideNav()"></div>
+<aside class="side-nav" id="sideNav">
+  <div class="side-nav-hd">
+    <div class="side-nav-title">Navigation</div>
+    <button class="side-nav-close" onclick="closeSideNav()">✕</button>
+  </div>
+  <div class="side-nav-body">
+    <div class="side-group">
+      <div class="side-group-label">Hauptbereich</div>
+      <button class="side-link active" data-side-page="pg-dash" onclick="sideGo('pg-dash')"><span class="side-link-main"><span class="ti">🏠</span><span>Dashboard</span></span></button>
+      <button class="side-link" data-side-page="pg-tb" onclick="sideGo('pg-tb')"><span class="side-link-main"><span class="ti">📝</span><span>Tagesbericht</span></span></button>
+      <button class="side-link" data-side-page="pg-todos" onclick="sideGo('pg-todos')"><span class="side-link-main"><span class="ti">🗂️</span><span>To-do</span></span><span class="nav-badge" id="side-nb-todos">0</span></button>
+      <button class="side-link" data-side-page="pg-kanban" onclick="sideGo('pg-kanban')"><span class="side-link-main"><span class="ti">📋</span><span>Kanban</span></span><span class="nav-badge" id="side-nb-kanban">0</span></button>
+    </div>
+
+    <div class="side-group">
+      <div class="side-group-label">Organisation</div>
+      <button class="side-link" data-side-page="pg-firms" onclick="sideGo('pg-firms')"><span class="side-link-main"><span class="ti">🏢</span><span>Firmen</span></span><span class="nav-badge" id="side-nb-firms">0</span></button>
+      <button class="side-link" data-side-page="pg-contacts" onclick="sideGo('pg-contacts')"><span class="side-link-main"><span class="ti">📇</span><span>Kontakte</span></span><span class="nav-badge" id="side-nb-contacts">0</span></button>
+      <button class="side-link" data-side-page="pg-ct" onclick="sideGo('pg-ct')"><span class="side-link-main"><span class="ti">🗑</span><span>Container</span></span><span class="nav-badge" id="side-nb-ct">0</span></button>
+    </div>
+
+    <div class="side-group">
+      <div class="side-group-label">Dokumentation</div>
+      <button class="side-link" data-side-page="pg-mangel" onclick="sideGo('pg-mangel')"><span class="side-link-main"><span class="ti">⚠️</span><span>Mängel</span></span><span class="nav-badge" id="side-nb-mangel">0</span></button>
+      <button class="side-link" data-side-page="pg-meet" onclick="sideGo('pg-meet')"><span class="side-link-main"><span class="ti">📅</span><span>Besprechungen</span></span><span class="nav-badge" id="side-nb-meet">0</span></button>
+      <button class="side-link" data-side-page="pg-files" onclick="sideGo('pg-files')"><span class="side-link-main"><span class="ti">📂</span><span>Dateien</span></span><span class="nav-badge" id="side-nb-files">0</span></button>
+      <button class="side-link" data-side-page="pg-archive" onclick="sideGo('pg-archive')"><span class="side-link-main"><span class="ti">🗃</span><span>Archiv</span></span><span class="nav-badge" id="side-nb-archive">0</span></button>
+    </div>
+
+    <div class="side-group">
+      <div class="side-group-label">Export</div>
+      <button class="side-link" onclick="closeSideNav();exportPDF()"><span class="side-link-main"><span class="ti">📄</span><span>PDF exportieren</span></span></button>
+      <button class="side-link" onclick="closeSideNav();exportExcel()"><span class="side-link-main"><span class="ti">📊</span><span>Excel exportieren</span></span></button>
+    </div>
+
+    <div class="side-group">
+      <div class="side-group-label">System</div>
+      <button class="side-link" data-side-page="pg-settings" onclick="sideGo('pg-settings')"><span class="side-link-main"><span class="ti">⚙️</span><span>Einstellungen</span></span></button>
+    </div>
+  </div>
+</aside>
+
 
 <div class="main">
 
@@ -3143,6 +3244,8 @@ function loadArchiveIntoCurrent(id) {
   renderMaengel();
   updateBadges();
   refreshDash();
+  syncSideNavActive();
+  syncSideNavBadges();
   goPageById('pg-tb');
   showToast('Bericht geladen: ' + (ar.reportDate || ''), 'ok');
 }
@@ -3284,6 +3387,47 @@ function setTheme(t) {
   }, 0);
 }
 
+
+function toggleSideNav(){
+  document.getElementById('sideNav')?.classList.toggle('open');
+  document.getElementById('sideOverlay')?.classList.toggle('open');
+}
+function closeSideNav(){
+  document.getElementById('sideNav')?.classList.remove('open');
+  document.getElementById('sideOverlay')?.classList.remove('open');
+}
+function sideGo(pid){
+  closeSideNav();
+  goPageById(pid);
+}
+function syncSideNavActive(){
+  const activePage = document.querySelector('.page.active')?.id || 'pg-dash';
+  document.querySelectorAll('.side-link[data-side-page]').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.sidePage === activePage);
+  });
+}
+function syncSideNavBadges(){
+  const pairs = [
+    ['nb-kanban','side-nb-kanban'],
+    ['nb-firms','side-nb-firms'],
+    ['nb-contacts','side-nb-contacts'],
+    ['nb-ct','side-nb-ct'],
+    ['nb-meet','side-nb-meet'],
+    ['nb-files','side-nb-files'],
+    ['nb-mangel','side-nb-mangel'],
+    ['nb-archive','side-nb-archive'],
+    ['nb-todos','side-nb-todos'],
+  ];
+  pairs.forEach(([srcId,dstId])=>{
+    const s = document.getElementById(srcId);
+    const d = document.getElementById(dstId);
+    if(s && d) d.textContent = s.textContent || '0';
+  });
+}
+document.addEventListener('keydown', function(e){
+  if(e.key === 'Escape') closeSideNav();
+});
+
 // ═══════════════════════════════════════════════════
 // NAVIGATION
 // ═══════════════════════════════════════════════════
@@ -3295,10 +3439,14 @@ function goPage(btn) {
   btn.classList.add('active');
   if (pid === 'pg-dash') refreshDash();
   if (pid === 'pg-archive') renderArchive();
+  syncSideNavActive();
+  syncSideNavBadges();
 }
 function goPageById(pid) {
   const btn = document.querySelector(`[data-page="${pid}"]`);
   if (btn) goPage(btn);
+  syncSideNavActive();
+  syncSideNavBadges();
 }
 
 // ═══════════════════════════════════════════════════
@@ -5757,6 +5905,7 @@ function updateBadges() {
   document.getElementById('nb-files').textContent=(S.photos||[]).length+(S.docs||[]).length;
   const nbm = document.getElementById('nb-mangel'); if (nbm) nbm.textContent=(S.maengel||[]).length;
   document.getElementById('nb-archive').textContent=archive.length;
+  syncSideNavBadges();
 }
 
 // ═══════════════════════════════════════════════════
@@ -5941,132 +6090,95 @@ async function exportPDF() {
         .replace(/[^\S\r\n]+/g, ' ')
         .trim();
     }
-
-    function ensureSpace(h=10){
-      if (y + h > pageH - 18) { doc.addPage(); y = 16; }
-    }
+    function ensureSpace(h=10){ if (y + h > pageH - 18) { doc.addPage(); y = 16; } }
     function addHeader(){
-      doc.setFont('helvetica','bold');
-      doc.setFontSize(16);
-      doc.text('BAUTAGEBUCH', pageW/2, y, { align:'center' });
-      y += 7;
-      doc.setFont('helvetica','normal');
-      doc.setFontSize(9);
+      doc.setFont('helvetica','bold'); doc.setFontSize(16);
+      doc.text('BAUTAGEBUCH', pageW/2, y, { align:'center' }); y += 7;
+      doc.setFont('helvetica','normal'); doc.setFontSize(9);
       const sub = [S.projectNr || '', S.projectName || '', S.reportDate || ''].filter(Boolean).map(pdfSafe).join('  |  ');
       if (sub) doc.text(sub, pageW/2, y, { align:'center' });
-      y += 8;
-      doc.setDrawColor(180);
-      doc.line(margin, y, pageW - margin, y);
-      y += 6;
+      y += 8; doc.setDrawColor(180); doc.line(margin, y, pageW - margin, y); y += 6;
     }
     function addSectionTitle(title){
-      ensureSpace(9);
-      doc.setFont('helvetica','bold');
-      doc.setFontSize(11);
-      doc.text(pdfSafe(title), margin, y);
-      y += 2;
-      doc.setDrawColor(210);
-      doc.line(margin, y, pageW - margin, y);
-      y += 5;
+      ensureSpace(9); doc.setFont('helvetica','bold'); doc.setFontSize(11);
+      doc.text(pdfSafe(title), margin, y); y += 2; doc.setDrawColor(210);
+      doc.line(margin, y, pageW - margin, y); y += 5;
     }
     function addKV(rows){
       doc.setFontSize(10);
       rows.forEach(([k,v]) => {
-        ensureSpace(6);
-        doc.setFont('helvetica','bold');
-        doc.text(pdfSafe(k) + ':', margin, y);
+        ensureSpace(6); doc.setFont('helvetica','bold'); doc.text(pdfSafe(k) + ':', margin, y);
         doc.setFont('helvetica','normal');
         const lines = doc.splitTextToSize(pdfSafe(v || '-'), pageW - margin - 42);
-        doc.text(lines, margin + 34, y);
-        y += Math.max(5, lines.length * 4.5);
+        doc.text(lines, margin + 34, y); y += Math.max(5, lines.length * 4.5);
       });
       y += 2;
     }
     function addParagraph(text){
       const lines = doc.splitTextToSize(pdfSafe(text || '-'), pageW - margin*2);
-      doc.setFont('helvetica','normal');
-      doc.setFontSize(10);
-      doc.text(lines, margin, y);
-      y += lines.length * 4.5 + 2;
+      doc.setFont('helvetica','normal'); doc.setFontSize(10);
+      doc.text(lines, margin, y); y += lines.length * 4.5 + 2;
     }
     function drawTable(headers, rows, widths){
       if (!rows || !rows.length) return;
       ensureSpace(12);
-      const headH = 7;
-      let x = margin;
-      doc.setDrawColor(200);
-      doc.setFont('helvetica','bold');
-      doc.setFontSize(9);
-      headers.forEach((h,i) => {
-        doc.rect(x, y, widths[i], headH);
-        doc.text(pdfSafe(h), x + 1.5, y + 4.6);
-        x += widths[i];
-      });
-      y += headH;
-      doc.setFont('helvetica','normal');
+      const headH = 7; let x = margin;
+      doc.setDrawColor(200); doc.setFont('helvetica','bold'); doc.setFontSize(9);
+      headers.forEach((h,i) => { doc.rect(x, y, widths[i], headH); doc.text(pdfSafe(h), x + 1.5, y + 4.6); x += widths[i]; });
+      y += headH; doc.setFont('helvetica','normal');
       rows.forEach(r => {
         const cellLines = r.map((c,i) => doc.splitTextToSize(pdfSafe(c || ''), widths[i] - 3));
-        let rowH = 6;
-        cellLines.forEach(cl => { rowH = Math.max(rowH, cl.length * 4.2 + 2); });
+        let rowH = 6; cellLines.forEach(cl => { rowH = Math.max(rowH, cl.length * 4.2 + 2); });
         ensureSpace(rowH + 1);
         let xx = margin;
-        cellLines.forEach((cl,i) => {
-          doc.rect(xx, y, widths[i], rowH);
-          doc.text(cl, xx + 1.5, y + 4);
-          xx += widths[i];
-        });
+        cellLines.forEach((cl,i) => { doc.rect(xx, y, widths[i], rowH); doc.text(cl, xx + 1.5, y + 4); xx += widths[i]; });
         y += rowH;
       });
       y += 4;
     }
     function addPhotoBlock(p, idx){
-      ensureSpace(82);
-      doc.setFont('helvetica','bold');
-      doc.setFontSize(10);
-      doc.text(`Foto ${idx}`, margin, y);
-      y += 5;
+      ensureSpace(82); doc.setFont('helvetica','bold'); doc.setFontSize(10); doc.text(`Foto ${idx}`, margin, y); y += 5;
       const firmName = (S.contractors || []).find(f => f.id === p.firmId)?.name || '';
       const meta = [p.caption || p.name || '', p.area ? `Bereich: ${p.area}` : '', p.time ? `Zeit: ${p.time}` : '', firmName ? `Firma: ${firmName}` : '', p.note ? `Notiz: ${p.note}` : ''].filter(Boolean).join(' | ');
       if (meta) {
         const lines = doc.splitTextToSize(pdfSafe(meta), pageW - margin*2);
-        doc.setFont('helvetica','normal');
-        doc.setFontSize(9);
-        doc.text(lines, margin, y);
-        y += lines.length * 4.2 + 2;
+        doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.text(lines, margin, y); y += lines.length * 4.2 + 2;
       }
       if (p.data) {
-        try {
-          const fmt = String(p.data).startsWith('data:image/png') ? 'PNG' : 'JPEG';
-          doc.addImage(p.data, fmt, margin, y, 76, 57);
-          y += 61;
-        } catch(err) { addParagraph('Bild konnte nicht eingebettet werden.'); }
+        try { const fmt = String(p.data).startsWith('data:image/png') ? 'PNG' : 'JPEG'; doc.addImage(p.data, fmt, margin, y, 76, 57); y += 61; }
+        catch(err) { addParagraph('Bild konnte nicht eingebettet werden.'); }
       } else addParagraph('Bilddaten nicht verfügbar.');
     }
 
     addHeader();
     addSectionTitle('Projekt');
-    addKV([
-      ['Projekt', S.projectName || ''],
-      ['Projektnummer', S.projectNr || ''],
-      ['Ort', S.standort || ''],
-      ['Datum', S.reportDate || ''],
-      ['Bauleiter', S.bauleiter || '']
-    ]);
+    addKV([['Projekt', S.projectName || ''],['Projektnummer', S.projectNr || ''],['Ort', S.standort || ''],['Datum', S.reportDate || ''],['Bauleiter', S.bauleiter || '']]);
 
     addSectionTitle('Wetter');
-    addKV([
-      ['Wetter automatisch', (S.autoWeather && S.autoWeather.weather) ? S.autoWeather.weather : '-'],
-      ['Temperatur', (S.autoWeather ? `${S.autoWeather.tempMin} °C bis ${S.autoWeather.tempMax} °C` : '-')],
-      ['Wind / Regen', (S.autoWeather ? `${S.autoWeather.wind} km/h / ${S.autoWeather.rainDay} mm` : '-')]
-    ]);
+    addKV([['Wetter automatisch', (S.autoWeather && S.autoWeather.weather) ? S.autoWeather.weather : '-'],['Temperatur', (S.autoWeather ? `${S.autoWeather.tempMin} °C bis ${S.autoWeather.tempMax} °C` : '-')],['Wind / Regen', (S.autoWeather ? `${S.autoWeather.wind} km/h / ${S.autoWeather.rainDay} mm` : '-')]]);
 
     addSectionTitle('Bauarbeiten');
     const workRows = (S.workEntries || []).map((w, i) => {
       const firmName = (S.contractors || []).find(f => f.id === w.firmId)?.name || '';
-      return [w.time || '', w.title || w.text || `Eintrag ${i+1}`, firmName, w.note || w.desc || ''];
+      const title = w.title || w.text || w.task || `Eintrag ${i+1}`;
+      const details = [w.desc || '', w.note || '', w.details || '', w.qty ? `Menge: ${w.qty}` : '', w.unit ? `Einheit: ${w.unit}` : '', w.area ? `Bereich: ${w.area}` : ''].filter(Boolean).join(' | ');
+      return [w.time || '', title, firmName, details || '-'];
     });
-    if (workRows.length) drawTable(['Zeit','Eintrag','Firma','Notiz'], workRows, [20, 58, 42, 66]);
+    if (workRows.length) drawTable(['Zeit','Eintrag','Firma','Details'], workRows, [18, 52, 34, 86]);
     else addKV([['Bauarbeiten','Keine Einträge']]);
+
+    addSectionTitle('Arbeitsbereiche');
+    const areaRows = [];
+    (S.workAreas || []).forEach((a, idx) => {
+      const obj = typeof a === 'string' ? {name:a, note:'', notes:[]} : (a || {});
+      const notes = Array.isArray(obj.notes) && obj.notes.length
+        ? obj.notes.map(n => `[${n.time||''}] ${n.text||''}`).join(' | ')
+        : (obj.note || '-');
+      const count = (S.timeline || []).filter(t => String(t.area || '').trim() === String(obj.name || '').trim()).length;
+      areaRows.push([obj.name || `Bereich ${idx+1}`, notes, count ? `${count} Einträge` : '-']);
+    });
+    if (areaRows.length) drawTable(['Bereich','Notizen','Chronologie'], areaRows, [42, 116, 24]);
+    else addKV([['Arbeitsbereiche','Keine Bereiche']]);
 
     addSectionTitle('Personal');
     const personnelRows = (S.personnelTypes || []).map(p => {
@@ -6091,25 +6203,15 @@ async function exportPDF() {
     else addKV([['Geraete','Keine aktiven Eintraege']]);
 
     addSectionTitle('Bemerkungen');
-    if (S.remarks) addParagraph(S.remarks);
-    else addKV([['Bemerkungen','Keine Bemerkungen']]);
+    if (S.remarks) addParagraph(S.remarks); else addKV([['Bemerkungen','Keine Bemerkungen']]);
 
     addSectionTitle('Fotodokumentation');
     const photos = Array.isArray(S.photos) ? S.photos : [];
-    if (!photos.length) addKV([['Fotos','Keine Fotos']]);
-    else photos.forEach((p, idx) => addPhotoBlock(p, idx + 1));
+    if (!photos.length) addKV([['Fotos','Keine Fotos']]); else photos.forEach((p, idx) => addPhotoBlock(p, idx + 1));
 
     addSectionTitle('Unterschrift');
     const sigName = pdfSafe((S.signatures && S.signatures[0] && S.signatures[0].name) || S.bauleiter || S.sig1 || '');
-    if (sigName) {
-      ensureSpace(26);
-      doc.line(margin, y + 14, margin + 70, y + 14);
-      doc.setFont('helvetica','normal');
-      doc.setFontSize(10);
-      doc.text(sigName, margin, y + 19);
-      doc.text('Bauleiter', margin, y + 24);
-      y += 30;
-    }
+    if (sigName) { ensureSpace(26); doc.line(margin, y + 14, margin + 70, y + 14); doc.setFont('helvetica','normal'); doc.setFontSize(10); doc.text(sigName, margin, y + 19); doc.text('Bauleiter', margin, y + 24); y += 30; }
 
     doc.save(`BAUTAGEBUCH_${pdfSafe(S.projectNr||'Projekt')}_${pdfSafe(S.reportDate||'')}.pdf`);
   } catch (e) {
@@ -7438,6 +7540,287 @@ function exportContactsCSV(){
   }
 })();
 
+</script>
+</script>
+
+
+<script>
+/* ONLY Arbeitsbereiche notes with timestamp + PDF listing support */
+(function(){
+  function waKey(a){ return String((typeof a === 'string' ? a : (a && (a.id || a.name) || '')) || ''); }
+  function waObjById(id){
+    if(!S.workAreas) S.workAreas = [];
+    return (S.workAreas||[]).find(a => waKey(a) === String(id));
+  }
+  function ensureAreaShape(a, idx){
+    if(typeof a === 'string') return {id:'wa_'+idx, name:a, note:'', notes:[]};
+    if(!a.id) a.id = 'wa_'+Date.now()+'_'+idx;
+    if(!Array.isArray(a.notes)) a.notes = [];
+    if(typeof a.note !== 'string') a.note = '';
+    return a;
+  }
+  function nowHm(){
+    const d = new Date();
+    return String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0');
+  }
+
+  window.renderWorkAreas = function(){
+    if(!S.workAreas) S.workAreas = [];
+    S.workAreas = (S.workAreas||[]).map((a,idx)=>ensureAreaShape(a, idx));
+
+    const tags = document.getElementById('workAreaTags');
+    const cards = document.getElementById('workAreaCards');
+
+    if(tags){
+      tags.innerHTML = (S.workAreas||[]).map(a => `
+        <span class="wa-tag">
+          ${esc(a.name || '')}
+          <button type="button" onclick="removeWorkArea('${esc(waKey(a)).replace(/'/g,'&#39;')}')">✕</button>
+        </span>
+      `).join('');
+    }
+
+    if(cards){
+      if(!(S.workAreas||[]).length){
+        cards.innerHTML = '<div class="empty-state" style="padding:16px;"><p>Keine Bereiche erfasst</p></div>';
+      } else {
+        cards.innerHTML = (S.workAreas||[]).map((a,idx)=>{
+          const obj = ensureAreaShape(a, idx);
+          const count = (S.timeline||[]).filter(t => String(t.area||'').trim() === String(obj.name||'').trim()).length;
+          const notesHtml = (obj.notes||[]).length
+            ? `<div style="margin-top:10px;display:flex;flex-direction:column;gap:6px;">${
+                obj.notes.map((n)=>`
+                  <div style="padding:8px 10px;border:1px solid var(--border);border-radius:10px;background:var(--bg2);">
+                    <div style="display:flex;justify-content:space-between;gap:8px;align-items:flex-start;">
+                      <div style="font-size:12px;line-height:1.6;color:var(--text2);">${esc(n.text||'')}</div>
+                      <div style="font-size:10px;color:var(--text3);white-space:nowrap;">${esc(n.time||'')}</div>
+                    </div>
+                  </div>
+                `).join('')
+              }</div>`
+            : `<div style="margin-top:10px;font-size:11px;color:var(--text3);">Noch keine Bereichsnotiz</div>`;
+
+          return `
+            <div class="area-card">
+              <div class="area-card-hd">
+                <div>
+                  <div class="area-card-name">${esc(obj.name||'Bereich')}</div>
+                  <div class="area-card-meta">${count} Einträge</div>
+                </div>
+                <button class="btn-icon" type="button" onclick="removeWorkArea('${esc(obj.id||obj.name||'').replace(/'/g,'&#39;')}')">✕</button>
+              </div>
+
+              <textarea
+                class="fta"
+                id="wa-note-input-${esc(obj.id||obj.name||'').replace(/"/g,'&quot;')}"
+                style="min-height:70px;margin-top:10px;"
+                placeholder="Bereichsnotiz..."
+              ></textarea>
+
+              <div style="display:flex;justify-content:flex-end;margin-top:8px;">
+                <button class="btn btn-primary btn-sm" type="button" onclick="saveWorkAreaNote('${esc(obj.id||obj.name||'').replace(/'/g,'&#39;')}')">Notiz speichern</button>
+              </div>
+
+              ${notesHtml}
+            </div>`;
+        }).join('');
+      }
+    }
+  };
+
+  window.addWorkArea = function(){
+    if(!S.workAreas) S.workAreas = [];
+    const inp = document.getElementById('waInput');
+    const val = String(inp?.value || '').trim();
+    if(!val){ showToast('Bereich eingeben','warn'); return; }
+    const exists = (S.workAreas||[]).some(a => String((typeof a==='string'?a:a.name)||'').toLowerCase() === val.toLowerCase());
+    if(exists){ showToast('Bereich existiert bereits','warn'); return; }
+    S.workAreas.push({id:'wa_'+Date.now(), name:val, note:'', notes:[]});
+    if(inp) inp.value = '';
+    autoSave();
+    renderWorkAreas();
+    showToast('Bereich hinzugefügt','ok');
+  };
+
+  window.removeWorkArea = function(id){
+    if(!S.workAreas) S.workAreas = [];
+    S.workAreas = (S.workAreas||[]).filter(a => waKey(a) !== String(id));
+    autoSave();
+    renderWorkAreas();
+    showToast('Bereich entfernt','ok');
+  };
+
+  window.saveWorkAreaNote = function(id){
+    const item = waObjById(id);
+    if(!item) return;
+    const input = document.getElementById('wa-note-input-' + id);
+    const text = String(input?.value || '').trim();
+    if(!text){ showToast('Notiz eingeben','warn'); return; }
+    if(!Array.isArray(item.notes)) item.notes = [];
+    const stamp = nowHm();
+    item.notes.unshift({ time: stamp, text });
+    item.note = item.notes.map(n => `[${n.time}] ${n.text}`).join(' | ');
+    if(input) input.value = '';
+    autoSave();
+    renderWorkAreas();
+    showToast('Bereichsnotiz gespeichert','ok');
+  };
+})();
+</script>
+
+
+<script>
+/* ONLY targeted fixes: photo delete + empty gewerk defaults + editable workarea notes */
+(function(){
+
+  // --- photo delete robust override ---
+  window.deletePhoto = function(id){
+    if(!S.photos) S.photos = [];
+    const before = S.photos.length;
+    S.photos = S.photos.filter(p => String(p.id || '') !== String(id));
+    autoSave();
+    if (typeof renderPhotoManager === 'function') renderPhotoManager();
+    if (typeof renderFiles === 'function') renderFiles();
+    if (typeof refreshDash === 'function') refreshDash();
+    showToast(before !== S.photos.length ? 'Foto gelöscht' : 'Foto nicht gefunden', before !== S.photos.length ? 'ok' : 'warn');
+  };
+
+  // delegate support in case inline handler is missing/broken
+  document.addEventListener('click', function(e){
+    const btn = e.target.closest('.ph-del');
+    if(!btn) return;
+    const host = btn.closest('[data-photo-id], .ph-thumb');
+    const pid = btn.dataset.id || host?.dataset?.photoId || host?.getAttribute('data-photo-id');
+    if(pid){
+      e.preventDefault();
+      e.stopPropagation();
+      deletePhoto(pid);
+    }
+  }, true);
+
+  // --- workareas editable notes with explicit save ---
+  function waKey(a){ return String((typeof a === 'string' ? a : (a && (a.id || a.name) || '')) || ''); }
+  function ensureAreaShape(a, idx){
+    if(typeof a === 'string') return {id:'wa_'+idx, name:a, note:'', notes:[]};
+    if(!a.id) a.id = 'wa_'+Date.now()+'_'+idx;
+    if(!Array.isArray(a.notes)) a.notes = [];
+    if(typeof a.note !== 'string') a.note = '';
+    return a;
+  }
+  function nowHm(){
+    const d = new Date();
+    return String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0');
+  }
+  window.renderWorkAreas = function(){
+    if(!S.workAreas) S.workAreas = [];
+    S.workAreas = (S.workAreas||[]).map((a,idx)=>ensureAreaShape(a, idx));
+    const tags = document.getElementById('workAreaTags');
+    const cards = document.getElementById('workAreaCards');
+
+    if(tags){
+      tags.innerHTML = (S.workAreas||[]).map(a => `
+        <span class="wa-tag">
+          ${esc(a.name || '')}
+          <button type="button" onclick="removeWorkArea('${esc(waKey(a)).replace(/'/g,'&#39;')}')">✕</button>
+        </span>
+      `).join('');
+    }
+
+    if(cards){
+      if(!(S.workAreas||[]).length){
+        cards.innerHTML = '<div class="empty-state" style="padding:16px;"><p>Keine Bereiche erfasst</p></div>';
+      } else {
+        cards.innerHTML = (S.workAreas||[]).map((a,idx)=>{
+          const obj = ensureAreaShape(a, idx);
+          const count = (S.timeline||[]).filter(t => String(t.area||'').trim() === String(obj.name||'').trim()).length;
+          const notesHtml = (obj.notes||[]).length
+            ? `<div style="margin-top:10px;display:flex;flex-direction:column;gap:6px;">${
+                obj.notes.map((n)=>`
+                  <div style="padding:8px 10px;border:1px solid var(--border);border-radius:10px;background:var(--bg2);">
+                    <div style="display:flex;justify-content:space-between;gap:8px;align-items:flex-start;">
+                      <div style="font-size:12px;line-height:1.6;color:var(--text2);">${esc(n.text||'')}</div>
+                      <div style="font-size:10px;color:var(--text3);white-space:nowrap;">${esc(n.time||'')}</div>
+                    </div>
+                  </div>
+                `).join('')
+              }</div>`
+            : `<div style="margin-top:10px;font-size:11px;color:var(--text3);">Noch keine Bereichsnotiz</div>`;
+
+          return `
+            <div class="area-card">
+              <div class="area-card-hd">
+                <div>
+                  <div class="area-card-name">${esc(obj.name||'Bereich')}</div>
+                  <div class="area-card-meta">${count} Einträge</div>
+                </div>
+                <button class="btn-icon" type="button" onclick="removeWorkArea('${esc(obj.id||obj.name||'').replace(/'/g,'&#39;')}')">✕</button>
+              </div>
+
+              <textarea
+                class="fta"
+                id="wa-note-input-${esc(obj.id||obj.name||'').replace(/"/g,'&quot;')}"
+                style="min-height:70px;margin-top:10px;"
+                placeholder="Bereichsnotiz..."
+              ></textarea>
+
+              <div style="display:flex;justify-content:flex-end;margin-top:8px;">
+                <button class="btn btn-primary btn-sm" type="button" onclick="saveWorkAreaNote('${esc(obj.id||obj.name||'').replace(/'/g,'&#39;')}')">Notiz speichern</button>
+              </div>
+
+              ${notesHtml}
+            </div>`;
+        }).join('');
+      }
+    }
+  };
+
+  window.addWorkArea = function(){
+    if(!S.workAreas) S.workAreas = [];
+    const inp = document.getElementById('waInput');
+    const val = String(inp?.value || '').trim();
+    if(!val){ showToast('Bereich eingeben','warn'); return; }
+    const exists = (S.workAreas||[]).some(a => String((typeof a==='string'?a:a.name)||'').toLowerCase() === val.toLowerCase());
+    if(exists){ showToast('Bereich existiert bereits','warn'); return; }
+    S.workAreas.push({id:'wa_'+Date.now(), name:val, note:'', notes:[]});
+    if(inp) inp.value = '';
+    autoSave();
+    renderWorkAreas();
+    showToast('Bereich hinzugefügt','ok');
+  };
+
+  window.removeWorkArea = function(id){
+    if(!S.workAreas) S.workAreas = [];
+    S.workAreas = (S.workAreas||[]).filter(a => waKey(a) !== String(id));
+    autoSave();
+    renderWorkAreas();
+    showToast('Bereich entfernt','ok');
+  };
+
+  window.saveWorkAreaNote = function(id){
+    if(!S.workAreas) S.workAreas = [];
+    const item = (S.workAreas||[]).find(a => waKey(a) === String(id));
+    if(!item) return;
+    const input = document.getElementById('wa-note-input-' + id);
+    const text = String(input?.value || '').trim();
+    if(!text){ showToast('Notiz eingeben','warn'); return; }
+    if(!Array.isArray(item.notes)) item.notes = [];
+    const stamp = nowHm();
+    item.notes.unshift({ time: stamp, text });
+    item.note = item.notes.map(n => `[${n.time}] ${n.text}`).join(' | ');
+    if(input) input.value = '';
+    autoSave();
+    renderWorkAreas();
+    showToast('Bereichsnotiz gespeichert','ok');
+  };
+
+  // --- keep settings default gewerk textarea empty after load, but editable ---
+  document.addEventListener('DOMContentLoaded', function(){
+    const ta = document.querySelector('#gewerkDefaults, #defaultGewerkList, #defaultGewerkeText, textarea[name="gewerkDefaults"], textarea[name="defaultGewerkList"], textarea[name="defaultGewerkeText"]');
+    if(ta && !ta.dataset.userEdited){
+      ta.value = '';
+    }
+  });
+})();
 </script>
 
 </body>
