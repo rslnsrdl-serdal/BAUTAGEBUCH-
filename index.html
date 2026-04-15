@@ -8101,7 +8101,11 @@ async function delPhoto(id){
         <div style="display:grid;grid-template-columns:120px 1fr 1fr;gap:8px;margin-bottom:10px;">
           <input type="time" class="fi" id="ubTime">
           <input type="text" class="fi" id="ubText" placeholder="Eintrag">
-          <select class="fs" id="ubFirm"><option value="">— Firma wählen</option></select>
+          <div>
+            <input type="hidden" id="ubFirm">
+            <input type="text" class="fi" id="ubFirmText" list="ubFirmList" placeholder="Firma suchen / wählen">
+            <datalist id="ubFirmList"></datalist>
+          </div>
         </div>
         <textarea class="fta" id="ubDetails" placeholder="Details / Beschreibung" style="margin-bottom:10px;min-height:90px;"></textarea>
         <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px;">
@@ -8121,16 +8125,30 @@ async function delPhoto(id){
       ubQueuedFiles = Array.from(this.files || []);
       updatePhotoInfo();
     });
+    document.getElementById('ubFirmText').addEventListener('input', syncUBFirmByText);
+    document.getElementById('ubFirmText').addEventListener('change', syncUBFirmByText);
   }
 
   function populateFirmSelect(){
-    const sel = document.getElementById('ubFirm');
-    if(!sel || typeof S === 'undefined') return;
-    const cur = sel.value;
-    sel.innerHTML = '<option value="">— Firma wählen</option>' + (S.contractors||[]).map(f =>
-      `<option value="${h(f.id)}">${h(f.name)}</option>`
-    ).join('');
-    if(cur) sel.value = cur;
+    const hidden = document.getElementById('ubFirm');
+    const input = document.getElementById('ubFirmText');
+    const list = document.getElementById('ubFirmList');
+    if(!hidden || !input || !list || typeof S === 'undefined') return;
+    const curId = hidden.value || '';
+    list.innerHTML = (S.contractors||[]).map(f => `<option value="${h(f.name)}"></option>`).join('');
+    if(curId){
+      const firm = (S.contractors||[]).find(f => String(f.id) === String(curId));
+      input.value = firm ? (firm.name || '') : '';
+    }
+  }
+
+  function syncUBFirmByText(){
+    const hidden = document.getElementById('ubFirm');
+    const input = document.getElementById('ubFirmText');
+    if(!hidden || !input || typeof S === 'undefined') return;
+    const val = String(input.value || '').trim().toLowerCase();
+    const firm = (S.contractors||[]).find(f => String(f.name || '').trim().toLowerCase() === val);
+    hidden.value = firm ? (firm.id || '') : '';
   }
 
   function linkedPhotos(entryId){
@@ -8147,7 +8165,8 @@ async function delPhoto(id){
     ubEditId = '';
     const map = {ubTime:'', ubText:'', ubDetails:'', ubEditId:''};
     Object.keys(map).forEach(id=>{ const el = document.getElementById(id); if(el) el.value = map[id]; });
-    const sel = document.getElementById('ubFirm'); if(sel) sel.value = '';
+    const hidden = document.getElementById('ubFirm'); if(hidden) hidden.value = '';
+    const firmText = document.getElementById('ubFirmText'); if(firmText) firmText.value = '';
     const inp = document.getElementById('ubPhotoInput'); if(inp) inp.value = '';
     ubQueuedFiles = [];
     updatePhotoInfo();
@@ -8189,6 +8208,7 @@ async function delPhoto(id){
     const time = gv('ubTime');
     const text = gv('ubText').trim();
     const note = gv('ubDetails').trim();
+    syncUBFirmByText();
     const firmId = document.getElementById('ubFirm')?.value || '';
     if(!text){
       showToast('Eintrag fehlt','warn');
@@ -8248,7 +8268,12 @@ async function delPhoto(id){
     sv('ubTime', entry.time || '');
     sv('ubText', entry.text || '');
     sv('ubDetails', entry.note || '');
-    const sel = document.getElementById('ubFirm'); if(sel) sel.value = entry.firmId || '';
+    const hidden = document.getElementById('ubFirm'); if(hidden) hidden.value = entry.firmId || '';
+    const firmText = document.getElementById('ubFirmText');
+    if(firmText){
+      const firm = (S.contractors || []).find(f => String(f.id) === String(entry.firmId || ''));
+      firmText.value = firm ? (firm.name || '') : '';
+    }
     ubQueuedFiles = [];
     const inp = document.getElementById('ubPhotoInput'); if(inp) inp.value = '';
     updatePhotoInfo();
