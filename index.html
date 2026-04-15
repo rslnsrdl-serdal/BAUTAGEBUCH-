@@ -7991,5 +7991,234 @@ async function delPhoto(id){
 }
 </script>
 
+
+<!-- === SERO PATCH: Baustellenbericht Unified Section (fixed) === -->
+<script>
+(function(){
+  let unifiedTempPhotos = [];
+
+  function findTBContent(){
+    return document.querySelector('#pg-tb .tb-content');
+  }
+
+  function hideOriginalCards(){
+    const cards = Array.from(document.querySelectorAll('#pg-tb .tb-content .card'));
+    cards.forEach(card=>{
+      const h3 = card.querySelector('.card-hd h3');
+      const title = (h3?.childNodes?.[0]?.textContent || h3?.textContent || '').trim();
+      if(['Bauarbeiten','Arbeitsbereiche','Tageschronologie','Allgemeine Bemerkungen'].includes(title)){
+        card.style.display = 'none';
+        card.dataset.unifiedHidden = '1';
+      }
+    });
+  }
+
+  function buildUnifiedCard(){
+    if(document.getElementById('unifiedBaustellenberichtCard')) return;
+    const tbContent = findTBContent();
+    if(!tbContent) return;
+
+    const wrap = document.createElement('div');
+    wrap.className = 'card';
+    wrap.id = 'unifiedBaustellenberichtCard';
+    wrap.innerHTML = `
+      <div class="card-hd">
+        <div class="card-hd-l">
+          <div class="ci ci-o">📒</div>
+          <h3>Baustellenbericht <small>Şantiye Günlük Notları</small></h3>
+        </div>
+        <button class="btn btn-primary btn-sm" type="button" id="ubAddBtn">+ Eintrag</button>
+      </div>
+      <div class="card-body">
+        <div style="display:grid;grid-template-columns:120px 1fr 1fr auto;gap:8px;margin-bottom:10px;">
+          <input type="time" class="fi" id="ubTime">
+          <input type="text" class="fi" id="ubText" placeholder="Eintrag">
+          <select class="fs" id="ubFirm"><option value="">— Firma wählen</option></select>
+          <button class="btn btn-ghost" type="button" id="ubSaveBtn">Speichern</button>
+        </div>
+        <textarea class="fta" id="ubDetails" placeholder="Details / Beschreibung" style="margin-bottom:10px;"></textarea>
+        <div style="margin-bottom:10px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+          <input type="file" id="ubPhotoInput" accept="image/*">
+          <span id="ubPhotoInfo" style="font-size:11px;color:var(--text3);">Noch keine Fotos gewählt</span>
+        </div>
+        <div id="unifiedList"></div>
+      </div>
+    `;
+    // Insert where the first hidden card was, otherwise at top
+    const firstOldCard = Array.from(tbContent.querySelectorAll('.card')).find(c => c.dataset.unifiedHidden === '1');
+    if(firstOldCard && firstOldCard.parentNode === tbContent){
+      tbContent.insertBefore(wrap, firstOldCard);
+    } else {
+      tbContent.prepend(wrap);
+    }
+
+    document.getElementById('ubAddBtn')?.addEventListener('click', addUnifiedEntry);
+    document.getElementById('ubSaveBtn')?.addEventListener('click', saveUnifiedEntry);
+    document.getElementById('ubPhotoInput')?.addEventListener('change', function(){ attachUnifiedPhoto(this); });
+  }
+
+  function populateUnifiedFirmSelect(){
+    const sel = document.getElementById('ubFirm');
+    if(!sel || typeof S === 'undefined') return;
+    const current = sel.value;
+    sel.innerHTML = '<option value="">— Firma wählen</option>' +
+      (S.contractors || []).map(f => `<option value="${String(f.id||'').replace(/"/g,'&quot;')}">${String(f.name||'')}</option>`).join('');
+    if(current) sel.value = current;
+  }
+
+  function addUnifiedEntry(){
+    const ids = ['ubTime','ubText','ubDetails'];
+    ids.forEach(id => { const el = document.getElementById(id); if(el) el.value = ''; });
+    const photo = document.getElementById('ubPhotoInput');
+    if(photo) photo.value = '';
+    unifiedTempPhotos = [];
+    updateUnifiedPhotoInfo();
+  }
+
+  function updateUnifiedPhotoInfo(){
+    const el = document.getElementById('ubPhotoInfo');
+    if(!el) return;
+    el.textContent = unifiedTempPhotos.length
+      ? `${unifiedTempPhotos.length} Foto(s) gewählt`
+      : 'Noch keine Fotos gewählt';
+  }
+
+  function attachUnifiedPhoto(input){
+    const files = Array.from(input.files || []);
+    if(!files.length) return;
+    let pending = files.length;
+    files.forEach(file=>{
+      const reader = new FileReader();
+      reader.onload = function(e){
+        unifiedTempPhotos.push({
+          id: 'ubp_' + Date.now() + '_' + Math.random().toString(36).slice(2,7),
+          src: e.target.result,
+          name: file.name
+        });
+        pending--;
+        if(pending === 0){
+          updateUnifiedPhotoInfo();
+          if(typeof showToast === 'function') showToast('Foto hinzugefügt','ok');
+        }
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  function saveUnifiedEntry(){
+    const time = document.getElementById('ubTime')?.value || '';
+    const text = document.getElementById('ubText')?.value.trim() || '';
+    const details = document.getElementById('ubDetails')?.value.trim() || '';
+    const firmId = document.getElementById('ubFirm')?.value || '';
+
+    if(!text){
+      if(typeof showToast === 'function') showToast('Eintrag fehlt','warn');
+      return;
+    }
+
+    if(!window.S) window.S = {};
+    if(!S.timeline) S.timeline = [];
+
+    S.timeline.unshift({
+      id: 'tl_' + Date.now(),
+      time,
+      text,
+      note: details,
+      firmId,
+      photos: [...unifiedTempPhotos]
+    });
+
+    unifiedTempPhotos = [];
+    const photo = document.getElementById('ubPhotoInput');
+    if(photo) photo.value = '';
+    updateUnifiedPhotoInfo();
+
+    if(typeof autoSave === 'function') autoSave();
+    renderUnifiedList();
+  }
+
+  function escHtml(s){
+    return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  function renderUnifiedList(){
+    const list = document.getElementById('unifiedList');
+    if(!list || !window.S) return;
+
+    const rows = (S.timeline || []).map(e=>{
+      const firm = (S.contractors || []).find(f => f.id === e.firmId)?.name || '';
+      const photos = (e.photos || []).map(p=>`
+        <img src="${p.src}" alt="${escHtml(p.name||'')}" style="height:60px;margin-right:6px;margin-top:6px;border-radius:4px;border:1px solid var(--border);">
+      `).join('');
+
+      return `
+        <div style="padding:10px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;margin-bottom:8px;">
+          <div style="font-weight:700;font-size:13px;color:var(--text);">${escHtml(e.time||'')} ${escHtml(e.text||'')}</div>
+          ${firm ? `<div style="font-size:11px;margin-top:4px;color:var(--text2);">${escHtml(firm)}</div>` : ''}
+          ${e.note ? `<div style="font-size:11px;color:var(--text2);margin-top:4px;white-space:pre-wrap;">${escHtml(e.note)}</div>` : ''}
+          ${photos ? `<div style="margin-top:6px;">${photos}</div>` : ''}
+        </div>
+      `;
+    }).join('');
+
+    list.innerHTML = rows || '<div class="empty-state" style="padding:20px;"><div class="ei">📒</div><h4>Keine Einträge</h4><p>Noch kein Baustellenbericht erfasst</p></div>';
+  }
+
+  function patchExportPDF(){
+    if(typeof window.exportPDF !== 'function' || window.__unifiedPdfPatched) return;
+    const oldExportPDF = window.exportPDF;
+    window.exportPDF = async function(){
+      // merge photos into global photo list temporarily so existing exporter still includes them
+      const originalPhotos = Array.isArray(S.photos) ? S.photos.slice() : [];
+      const generated = [];
+      (S.timeline || []).forEach(entry=>{
+        (entry.photos || []).forEach((p, idx)=>{
+          generated.push({
+            id: p.id || ('pdf_' + Date.now() + '_' + idx),
+            data: p.src,
+            name: p.name || ('Foto_' + (idx+1)),
+            caption: entry.text || '',
+            area: entry.area || '',
+            firmId: entry.firmId || '',
+            note: entry.note || '',
+            time: entry.time || '',
+            timelineId: entry.id || ''
+          });
+        });
+      });
+      try{
+        if(generated.length){
+          S.photos = [...originalPhotos, ...generated];
+        }
+        return await oldExportPDF.apply(this, arguments);
+      } finally {
+        S.photos = originalPhotos;
+      }
+    };
+    window.__unifiedPdfPatched = true;
+  }
+
+  function initUnifiedPatch(){
+    hideOriginalCards();
+    buildUnifiedCard();
+    populateUnifiedFirmSelect();
+    renderUnifiedList();
+    patchExportPDF();
+  }
+
+  document.addEventListener('DOMContentLoaded', initUnifiedPatch);
+  window.addEventListener('load', initUnifiedPatch);
+
+  const originalRenderFirms = window.renderFirms;
+  if(typeof originalRenderFirms === 'function'){
+    window.renderFirms = function(){
+      const result = originalRenderFirms.apply(this, arguments);
+      populateUnifiedFirmSelect();
+      return result;
+    };
+  }
+})();
+</script>
+
 </body>
 </html>
