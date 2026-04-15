@@ -3196,7 +3196,7 @@ function importBackup(inp) {
       base.progressPlan = {month:'',soll:'',ist:'',phase:'',note:''};
     }
     base.archive = undefined;
-    return makeStateSafeForStorage(base);
+    return base;
   };
 
   const reader = new FileReader();
@@ -3235,6 +3235,9 @@ function importBackup(inp) {
           }
         }
       }
+
+      try { await hydratePhotosFromIDB(); } catch (err) { console.warn('Photo hydrate warning:', err); }
+      try { await hydrateDocsFromIDB(); } catch (err) { console.warn('Doc hydrate warning:', err); }
 
       persistState();
       applyStateToForm();
