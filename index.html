@@ -7992,274 +7992,290 @@ async function delPhoto(id){
 </script>
 
 
-<!-- === SERO PATCH: Baustellenbericht Unified Section (fixed v5) === -->
-<div id="ubGalleryModal" style="display:none;position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.88);align-items:center;justify-content:center;padding:20px;">
-  <button type="button" id="ubGalleryClose" style="position:absolute;top:16px;right:16px;width:44px;height:44px;border:none;border-radius:999px;background:rgba(255,255,255,.14);color:#fff;font-size:22px;cursor:pointer;">✕</button>
-  <button type="button" id="ubGalleryPrev" style="position:absolute;left:16px;top:50%;transform:translateY(-50%);width:48px;height:48px;border:none;border-radius:999px;background:rgba(255,255,255,.14);color:#fff;font-size:28px;cursor:pointer;">‹</button>
-  <img id="ubGalleryImg" src="" alt="" style="max-width:92vw;max-height:88vh;border-radius:12px;display:block;box-shadow:0 10px 40px rgba(0,0,0,.45);">
-  <button type="button" id="ubGalleryNext" style="position:absolute;right:16px;top:50%;transform:translateY(-50%);width:48px;height:48px;border:none;border-radius:999px;background:rgba(255,255,255,.14);color:#fff;font-size:28px;cursor:pointer;">›</button>
-</div>
 <script>
+/* === Stable Baustellenbericht patch === */
 (function(){
-  let unifiedTempPhotos = [];
-  let editingEntryId = null;
-  let galleryPhotos = [];
-  let galleryIndex = 0;
+  let ubEditId = '';
+  let ubQueuedFiles = [];
 
-  function escHtml(s){
+  function h(s){
     return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
-  function safeAttr(s){
-    return escHtml(s).replace(/'/g,'&#39;');
+
+  function getTBContent(){
+    return document.querySelector('#pg-tb .tb-content');
   }
-  function findTBContent(){ return document.querySelector('#pg-tb .tb-content'); }
-  function getTimeline(){ if(typeof S === 'undefined') return []; if(!Array.isArray(S.timeline)) S.timeline = []; return S.timeline; }
+
+  function isTargetCard(card){
+    const h3 = card && card.querySelector('.card-hd h3');
+    const txt = ((h3 && h3.childNodes && h3.childNodes[0] && h3.childNodes[0].textContent) || (h3 && h3.textContent) || '').trim();
+    return ['Bauarbeiten','Arbeitsbereiche','Tageschronologie','Allgemeine Bemerkungen'].includes(txt);
+  }
 
   function hideOriginalCards(){
-    const cards = Array.from(document.querySelectorAll('#pg-tb .tb-content .card'));
-    cards.forEach(card=>{
-      const h3 = card.querySelector('.card-hd h3');
-      const title = (h3?.childNodes?.[0]?.textContent || h3?.textContent || '').trim();
-      if(['Bauarbeiten','Arbeitsbereiche','Tageschronologie','Allgemeine Bemerkungen'].includes(title)){
+    const tb = getTBContent();
+    if(!tb) return;
+    Array.from(tb.querySelectorAll('.card')).forEach(card=>{
+      if(isTargetCard(card)){
         card.style.display = 'none';
-        card.dataset.unifiedHidden = '1';
+        card.dataset.ubHidden = '1';
       }
     });
   }
 
-  function buildUnifiedCard(){
-    if(document.getElementById('unifiedBaustellenberichtCard')) return;
-    const tbContent = findTBContent();
-    if(!tbContent) return;
-    const wrap = document.createElement('div');
-    wrap.className = 'card';
-    wrap.id = 'unifiedBaustellenberichtCard';
-    wrap.innerHTML = `
+  function buildCard(){
+    const tb = getTBContent();
+    if(!tb || document.getElementById('ubCard')) return;
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.id = 'ubCard';
+    card.innerHTML = `
       <div class="card-hd">
-        <div class="card-hd-l">
-          <div class="ci ci-o">📒</div>
-          <h3>Baustellenbericht <small>Şantiye Günlük Notları</small></h3>
+        <div class="card-hd-l"><div class="ci ci-o">📒</div><h3>Baustellenbericht <small>Şantiye Günlük Notları</small></h3></div>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+          <button class="btn btn-ghost btn-sm" type="button" id="ubResetBtn">Neu</button>
+          <button class="btn btn-primary btn-sm" type="button" id="ubSaveBtn">Speichern</button>
         </div>
-        <button class="btn btn-primary btn-sm" type="button" id="ubAddBtn">+ Eintrag</button>
       </div>
       <div class="card-body">
-        <div style="display:grid;grid-template-columns:120px 1fr 1fr auto;gap:8px;margin-bottom:10px;">
+        <input type="hidden" id="ubEditId">
+        <div style="display:grid;grid-template-columns:120px 1fr 1fr;gap:8px;margin-bottom:10px;">
           <input type="time" class="fi" id="ubTime">
           <input type="text" class="fi" id="ubText" placeholder="Eintrag">
           <select class="fs" id="ubFirm"><option value="">— Firma wählen</option></select>
-          <button class="btn btn-ghost" type="button" id="ubSaveBtn">Speichern</button>
         </div>
-        <textarea class="fta" id="ubDetails" placeholder="Details / Beschreibung" style="margin-bottom:10px;"></textarea>
-        <div style="margin-bottom:10px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+        <textarea class="fta" id="ubDetails" placeholder="Details / Beschreibung" style="margin-bottom:10px;min-height:90px;"></textarea>
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px;">
           <input type="file" id="ubPhotoInput" accept="image/*" multiple>
-          <span id="ubPhotoInfo" style="font-size:11px;color:var(--text3);">Noch keine Fotos gewählt</span>
+          <span id="ubPhotoInfo" style="font-size:11px;color:var(--text3);">Keine neuen Fotos gewählt</span>
         </div>
-        <div id="ubPhotoPreview" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px;"></div>
-        <div id="unifiedList"></div>
-      </div>`;
-    const firstOldCard = Array.from(tbContent.querySelectorAll('.card')).find(c => c.dataset.unifiedHidden === '1');
-    if(firstOldCard && firstOldCard.parentNode === tbContent) tbContent.insertBefore(wrap, firstOldCard);
-    else tbContent.prepend(wrap);
+        <div id="ubList"></div>
+      </div>
+    `;
+    const firstHidden = Array.from(tb.querySelectorAll('.card')).find(x => x.dataset.ubHidden === '1');
+    if(firstHidden) tb.insertBefore(card, firstHidden);
+    else tb.prepend(card);
 
-    document.getElementById('ubAddBtn')?.addEventListener('click', resetUnifiedForm);
-    document.getElementById('ubSaveBtn')?.addEventListener('click', saveUnifiedEntry);
-    document.getElementById('ubPhotoInput')?.addEventListener('change', function(){ attachUnifiedPhoto(this); });
+    document.getElementById('ubSaveBtn').addEventListener('click', saveUB);
+    document.getElementById('ubResetBtn').addEventListener('click', resetUBForm);
+    document.getElementById('ubPhotoInput').addEventListener('change', function(){
+      ubQueuedFiles = Array.from(this.files || []);
+      updatePhotoInfo();
+    });
   }
 
-  function populateUnifiedFirmSelect(){
+  function populateFirmSelect(){
     const sel = document.getElementById('ubFirm');
     if(!sel || typeof S === 'undefined') return;
-    const current = sel.value;
-    sel.innerHTML = '<option value="">— Firma wählen</option>' +
-      (S.contractors || []).map(f => `<option value="${safeAttr(String(f.id||''))}">${escHtml(String(f.name||''))}</option>`).join('');
-    if(current) sel.value = current;
+    const cur = sel.value;
+    sel.innerHTML = '<option value="">— Firma wählen</option>' + (S.contractors||[]).map(f =>
+      `<option value="${h(f.id)}">${h(f.name)}</option>`
+    ).join('');
+    if(cur) sel.value = cur;
   }
 
-  function updateUnifiedPhotoInfo(){
+  function linkedPhotos(entryId){
+    return (S.photos || []).filter(p => String(p.timelineId||'') === String(entryId||''));
+  }
+
+  function updatePhotoInfo(){
     const el = document.getElementById('ubPhotoInfo');
-    if(el) el.textContent = unifiedTempPhotos.length ? `${unifiedTempPhotos.length} Foto(s) gewählt` : 'Noch keine Fotos gewählt';
-    const prev = document.getElementById('ubPhotoPreview');
-    if(prev){
-      prev.innerHTML = unifiedTempPhotos.map((p,idx)=>`
-        <div style="position:relative;">
-          <img src="${p.src}" alt="${safeAttr(p.name||'')}" style="width:72px;height:72px;object-fit:cover;border-radius:10px;border:1px solid var(--border);cursor:pointer;" onclick="window.__ubOpenTempPhoto(${idx})">
-          <button type="button" onclick="window.__ubRemoveTempPhoto(${idx});event.stopPropagation();" style="position:absolute;top:-6px;right:-6px;width:22px;height:22px;border:none;border-radius:999px;background:#ef4444;color:#fff;font-size:12px;cursor:pointer;">✕</button>
-        </div>`).join('');
-    }
+    if(!el) return;
+    el.textContent = ubQueuedFiles.length ? `${ubQueuedFiles.length} neue Foto(s) gewählt` : 'Keine neuen Fotos gewählt';
   }
 
-  function resetUnifiedForm(){
-    editingEntryId = null;
-    ['ubTime','ubText','ubDetails'].forEach(id=>{ const el = document.getElementById(id); if(el) el.value=''; });
-    const firm = document.getElementById('ubFirm'); if(firm) firm.value='';
-    const photo = document.getElementById('ubPhotoInput'); if(photo) photo.value='';
-    unifiedTempPhotos = [];
-    updateUnifiedPhotoInfo();
-    const btn = document.getElementById('ubSaveBtn'); if(btn) btn.textContent = 'Speichern';
+  function resetUBForm(){
+    ubEditId = '';
+    const map = {ubTime:'', ubText:'', ubDetails:'', ubEditId:''};
+    Object.keys(map).forEach(id=>{ const el = document.getElementById(id); if(el) el.value = map[id]; });
+    const sel = document.getElementById('ubFirm'); if(sel) sel.value = '';
+    const inp = document.getElementById('ubPhotoInput'); if(inp) inp.value = '';
+    ubQueuedFiles = [];
+    updatePhotoInfo();
+    const txt = document.getElementById('ubText'); if(txt) txt.focus();
   }
 
-  function attachUnifiedPhoto(input){
-    const files = Array.from(input.files || []);
-    if(!files.length) return;
-    let pending = files.length;
-    files.forEach(file=>{
-      const reader = new FileReader();
-      reader.onload = function(e){
-        unifiedTempPhotos.push({ id:'ubp_'+Date.now()+'_'+Math.random().toString(36).slice(2,7), src:e.target.result, name:file.name });
-        pending--;
-        if(pending===0){ updateUnifiedPhotoInfo(); if(typeof showToast==='function') showToast('Foto hinzugefügt','ok'); }
-      };
-      reader.readAsDataURL(file);
+  function readFileAsDataURL(file){
+    return new Promise((resolve,reject)=>{
+      const r = new FileReader();
+      r.onload = e => resolve(String(e.target.result || ''));
+      r.onerror = () => reject(r.error || new Error('read failed'));
+      r.readAsDataURL(file);
     });
-    input.value='';
   }
 
-  function saveUnifiedEntry(){
-    const time = document.getElementById('ubTime')?.value || '';
-    const text = document.getElementById('ubText')?.value.trim() || '';
-    const details = document.getElementById('ubDetails')?.value.trim() || '';
+  async function addLinkedPhotoFile(file, entry){
+    const data = await readFileAsDataURL(file);
+    if(!S.photos) S.photos = [];
+    const photo = {
+      id:'ph_'+Date.now()+'_'+Math.random().toString(36).slice(2),
+      name:file.name,
+      data:data,
+      date:todayStr(),
+      time:new Date().toTimeString().slice(0,5),
+      caption: entry.text || '',
+      firmId: entry.firmId || '',
+      taskId:'',
+      area: entry.area || '',
+      location:'',
+      note: entry.note || '',
+      timelineId: entry.id
+    };
+    S.photos.push(photo);
+    await idbSavePhoto({ id: photo.id, data: photo.data, name: photo.name, savedAt: new Date().toISOString() });
+  }
+
+  async function saveUB(){
+    if(typeof S === 'undefined') return;
+    const time = gv('ubTime');
+    const text = gv('ubText').trim();
+    const note = gv('ubDetails').trim();
     const firmId = document.getElementById('ubFirm')?.value || '';
-    if(!text){ if(typeof showToast==='function') showToast('Eintrag fehlt','warn'); return; }
-    const timeline = getTimeline();
-    if(editingEntryId){
-      const entry = timeline.find(x=>String(x.id)===String(editingEntryId));
-      if(entry){
-        entry.time = time; entry.text = text; entry.note = details; entry.firmId = firmId; entry.photos = unifiedTempPhotos.slice();
-      }
-    } else {
-      timeline.unshift({ id:'tl_'+Date.now(), time, text, note:details, firmId, photos: unifiedTempPhotos.slice() });
+    if(!text){
+      showToast('Eintrag fehlt','warn');
+      return;
     }
-    if(typeof autoSave==='function') autoSave();
-    resetUnifiedForm();
-    renderUnifiedList();
+    if(!S.timeline) S.timeline = [];
+    let entry = null;
+    if(ubEditId){
+      entry = (S.timeline||[]).find(t => String(t.id) === String(ubEditId));
+      if(!entry){
+        ubEditId = '';
+      }
+    }
+    if(entry){
+      entry.time = time;
+      entry.text = text;
+      entry.note = note;
+      entry.firmId = firmId;
+      linkedPhotos(entry.id).forEach(p=>{
+        p.caption = text || '';
+        p.note = note || '';
+        p.firmId = firmId || '';
+      });
+    } else {
+      entry = {
+        id:'tl_'+Date.now()+'_'+Math.random().toString(36).slice(2,6),
+        time: time,
+        text: text,
+        note: note,
+        firmId: firmId
+      };
+      S.timeline.unshift(entry);
+    }
+
+    try{
+      for(const file of ubQueuedFiles){
+        await addLinkedPhotoFile(file, entry);
+      }
+    }catch(err){
+      console.error(err);
+      showToast('Foto konnte nicht gespeichert werden','err');
+    }
+
+    autoSave();
+    if(typeof renderPhotos === 'function') renderPhotos();
+    if(typeof renderTimeline === 'function') renderTimeline();
+    renderUBList();
+    resetUBForm();
+    showToast(ubEditId ? 'Eintrag aktualisiert' : 'Eintrag gespeichert','ok');
   }
 
-  function editUnifiedEntry(id){
-    const entry = getTimeline().find(x=>String(x.id)===String(id));
+  function editUB(id){
+    const entry = (S.timeline || []).find(t => String(t.id) === String(id));
     if(!entry) return;
-    editingEntryId = id;
-    const set = (id,v)=>{ const el=document.getElementById(id); if(el) el.value=v||''; };
-    set('ubTime', entry.time||'');
-    set('ubText', entry.text||'');
-    set('ubDetails', entry.note||'');
-    set('ubFirm', entry.firmId||'');
-    unifiedTempPhotos = Array.isArray(entry.photos) ? entry.photos.map(p=>({...p})) : [];
-    updateUnifiedPhotoInfo();
-    const btn = document.getElementById('ubSaveBtn'); if(btn) btn.textContent = 'Aktualisieren';
-    document.getElementById('unifiedBaustellenberichtCard')?.scrollIntoView({behavior:'smooth', block:'start'});
+    ubEditId = entry.id;
+    sv('ubEditId', entry.id);
+    sv('ubTime', entry.time || '');
+    sv('ubText', entry.text || '');
+    sv('ubDetails', entry.note || '');
+    const sel = document.getElementById('ubFirm'); if(sel) sel.value = entry.firmId || '';
+    ubQueuedFiles = [];
+    const inp = document.getElementById('ubPhotoInput'); if(inp) inp.value = '';
+    updatePhotoInfo();
+    document.getElementById('ubCard')?.scrollIntoView({behavior:'smooth', block:'start'});
   }
 
-  function deleteUnifiedEntry(id){
-    if(!confirm('Eintrag wirklich löschen?')) return;
-    S.timeline = getTimeline().filter(x=>String(x.id)!==String(id));
-    if(String(editingEntryId)===String(id)) resetUnifiedForm();
-    if(typeof autoSave==='function') autoSave();
-    renderUnifiedList();
+  async function deleteUB(id){
+    const entry = (S.timeline || []).find(t => String(t.id) === String(id));
+    if(!entry) return;
+    const photos = linkedPhotos(id);
+    S.timeline = (S.timeline || []).filter(t => String(t.id) !== String(id));
+    S.photos = (S.photos || []).filter(p => String(p.timelineId||'') !== String(id));
+    for(const p of photos){
+      try { await idbDeletePhoto(p.id); } catch(e) {}
+    }
+    autoSave();
+    if(typeof renderPhotos === 'function') renderPhotos();
+    if(typeof renderTimeline === 'function') renderTimeline();
+    renderUBList();
+    showToast('Eintrag gelöscht','ok');
   }
 
-  function openGallery(photos, idx){
-    if(!photos || !photos.length) return;
-    galleryPhotos = photos;
-    galleryIndex = idx || 0;
-    const modal = document.getElementById('ubGalleryModal');
-    if(!modal) return;
-    renderGallery();
-    modal.style.display = 'flex';
-  }
-  function renderGallery(){
-    const img = document.getElementById('ubGalleryImg');
-    if(!img || !galleryPhotos.length) return;
-    img.src = galleryPhotos[galleryIndex].src;
-  }
-  function closeGallery(){ const modal = document.getElementById('ubGalleryModal'); if(modal) modal.style.display='none'; }
-  function prevGallery(){ if(!galleryPhotos.length) return; galleryIndex=(galleryIndex-1+galleryPhotos.length)%galleryPhotos.length; renderGallery(); }
-  function nextGallery(){ if(!galleryPhotos.length) return; galleryIndex=(galleryIndex+1)%galleryPhotos.length; renderGallery(); }
-
-  function renderUnifiedList(){
-    const list = document.getElementById('unifiedList');
-    if(!list || typeof S==='undefined') return;
-    const rows = getTimeline().map(e=>{
-      const firm = (S.contractors || []).find(f => String(f.id) === String(e.firmId))?.name || '';
-      const photosArr = Array.isArray(e.photos) ? e.photos : [];
-      const photos = photosArr.map((p,idx)=>`
-        <div style="position:relative;display:inline-block;">
-          <img src="${p.src}" alt="${safeAttr(p.name||'')}" style="height:64px;width:64px;object-fit:cover;margin-right:6px;margin-top:6px;border-radius:8px;border:1px solid var(--border);cursor:pointer;" onclick="window.__ubOpenEntryGallery('${safeAttr(String(e.id))}',${idx})">
-        </div>`).join('');
+  function renderUBList(){
+    const box = document.getElementById('ubList');
+    if(!box || typeof S === 'undefined') return;
+    populateFirmSelect();
+    const rows = (S.timeline || []).map(entry => {
+      const firmName = (S.contractors || []).find(f => String(f.id) === String(entry.firmId||''))?.name || '';
+      const photos = linkedPhotos(entry.id);
+      const photoHtml = photos.length ? `<div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;">${
+        photos.map(p => `<img src="${p.data || ''}" alt="${h(p.name||'Foto')}" onclick="openPhotoViewer('${String(p.data||'').replace(/'/g, '&#39;')}', '${h((p.caption||p.name||'Foto')).replace(/'/g, '&#39;')}')" style="width:78px;height:78px;object-fit:cover;border-radius:10px;border:1px solid var(--border);cursor:pointer;">`).join('')
+      }</div>` : '';
       return `
-        <div style="padding:10px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;margin-bottom:8px;">
-          <div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start;">
-            <div style="flex:1;min-width:0;">
-              <div style="font-weight:700;font-size:13px;color:var(--text);">${escHtml(e.time||'')} ${escHtml(e.text||'')}</div>
-              ${firm ? `<div style="font-size:11px;margin-top:4px;color:var(--text2);">${escHtml(firm)}</div>` : ''}
-              ${e.note ? `<div style="font-size:11px;color:var(--text2);margin-top:4px;white-space:pre-wrap;">${escHtml(e.note)}</div>` : ''}
-              ${photos ? `<div style="margin-top:6px;display:flex;flex-wrap:wrap;">${photos}</div>` : ''}
+        <div style="padding:12px;background:var(--bg3);border:1px solid var(--border);border-radius:12px;margin-bottom:10px;">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap;">
+            <div style="min-width:0;flex:1;">
+              <div style="font-size:13px;font-weight:700;color:var(--text);">${h(entry.time || '')}${entry.time ? ' — ' : ''}${h(entry.text || '')}</div>
+              ${firmName ? `<div style="font-size:11px;color:var(--accent2);margin-top:4px;">${h(firmName)}</div>` : ''}
+              ${entry.note ? `<div style="font-size:11px;color:var(--text2);margin-top:6px;white-space:pre-wrap;line-height:1.6;">${h(entry.note)}</div>` : ''}
+              ${photoHtml}
             </div>
             <div style="display:flex;gap:6px;flex-wrap:wrap;">
-              <button type="button" class="btn btn-ghost btn-xs" onclick="window.__ubEditEntry('${safeAttr(String(e.id))}')">Bearbeiten</button>
-              <button type="button" class="btn btn-ghost btn-xs" onclick="window.__ubDeleteEntry('${safeAttr(String(e.id))}')">Löschen</button>
+              <button class="btn btn-ghost btn-xs" type="button" onclick="window.editUnifiedEntry('${h(entry.id)}')">Bearbeiten</button>
+              <button class="btn btn-ghost btn-xs" type="button" onclick="window.deleteUnifiedEntry('${h(entry.id)}')">Löschen</button>
             </div>
           </div>
-        </div>`;
+        </div>
+      `;
     }).join('');
-    list.innerHTML = rows || '<div class="empty-state" style="padding:20px;"><div class="ei">📒</div><h4>Keine Einträge</h4><p>Noch kein Baustellenbericht erfasst</p></div>';
+    box.innerHTML = rows || '<div class="empty-state" style="padding:20px;"><div class="ei">📒</div><h4>Keine Einträge</h4><p>Noch kein Baustellenbericht erfasst</p></div>';
   }
 
-  function patchExportPDF(){
-    if(typeof window.exportPDF !== 'function' || window.__unifiedPdfPatched) return;
-    const oldExportPDF = window.exportPDF;
-    window.exportPDF = async function(){
-      const originalPhotos = Array.isArray(S.photos) ? S.photos.slice() : [];
-      const generated = [];
-      getTimeline().forEach(entry=>{
-        (entry.photos || []).forEach((p, idx)=>{
-          generated.push({ id: p.id || ('pdf_' + Date.now() + '_' + idx), data: p.src, name: p.name || ('Foto_' + (idx+1)), caption: entry.text || '', area: entry.area || '', firmId: entry.firmId || '', note: entry.note || '', time: entry.time || '', timelineId: entry.id || '' });
-        });
-      });
-      try{ if(generated.length) S.photos = [...originalPhotos, ...generated]; return await oldExportPDF.apply(this, arguments); }
-      finally { S.photos = originalPhotos; }
-    };
-    window.__unifiedPdfPatched = true;
+  function wrapRenderers(){
+    if(typeof window.renderFirms === 'function' && !window.__ubWrapFirms){
+      const old = window.renderFirms;
+      window.renderFirms = function(){
+        const out = old.apply(this, arguments);
+        setTimeout(populateFirmSelect, 0);
+        return out;
+      };
+      window.__ubWrapFirms = true;
+    }
+    if(typeof window.renderTimeline === 'function' && !window.__ubWrapTimeline){
+      const old = window.renderTimeline;
+      window.renderTimeline = function(){
+        const out = old.apply(this, arguments);
+        setTimeout(renderUBList, 0);
+        return out;
+      };
+      window.__ubWrapTimeline = true;
+    }
   }
 
-  function initGalleryEvents(){
-    document.getElementById('ubGalleryClose')?.addEventListener('click', closeGallery);
-    document.getElementById('ubGalleryPrev')?.addEventListener('click', function(e){ e.stopPropagation(); prevGallery(); });
-    document.getElementById('ubGalleryNext')?.addEventListener('click', function(e){ e.stopPropagation(); nextGallery(); });
-    document.getElementById('ubGalleryModal')?.addEventListener('click', function(e){ if(e.target === this) closeGallery(); });
-    document.addEventListener('keydown', function(e){
-      const modal = document.getElementById('ubGalleryModal');
-      if(!modal || modal.style.display !== 'flex') return;
-      if(e.key === 'Escape') closeGallery();
-      if(e.key === 'ArrowLeft') prevGallery();
-      if(e.key === 'ArrowRight') nextGallery();
-    });
-  }
-
-  function initUnifiedPatch(){
+  function initUB(){
     hideOriginalCards();
-    buildUnifiedCard();
-    populateUnifiedFirmSelect();
-    renderUnifiedList();
-    patchExportPDF();
-    initGalleryEvents();
+    buildCard();
+    populateFirmSelect();
+    renderUBList();
+    wrapRenderers();
   }
 
-  window.__ubEditEntry = editUnifiedEntry;
-  window.__ubDeleteEntry = deleteUnifiedEntry;
-  window.__ubOpenEntryGallery = function(entryId, idx){
-    const entry = getTimeline().find(x=>String(x.id)===String(entryId));
-    if(entry && Array.isArray(entry.photos)) openGallery(entry.photos, idx);
-  };
-  window.__ubRemoveTempPhoto = function(idx){ unifiedTempPhotos.splice(idx,1); updateUnifiedPhotoInfo(); };
-  window.__ubOpenTempPhoto = function(idx){ if(unifiedTempPhotos[idx]) openGallery(unifiedTempPhotos, idx); };
+  window.editUnifiedEntry = editUB;
+  window.deleteUnifiedEntry = deleteUB;
 
-  document.addEventListener('DOMContentLoaded', initUnifiedPatch);
-  window.addEventListener('load', initUnifiedPatch);
-
-  const originalRenderFirms = window.renderFirms;
-  if(typeof originalRenderFirms === 'function'){
-    window.renderFirms = function(){ const result = originalRenderFirms.apply(this, arguments); populateUnifiedFirmSelect(); return result; };
-  }
+  document.addEventListener('DOMContentLoaded', initUB);
+  window.addEventListener('load', initUB);
 })();
 </script>
 
