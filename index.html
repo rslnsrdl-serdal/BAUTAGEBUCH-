@@ -7992,18 +7992,28 @@ async function delPhoto(id){
 </script>
 
 
-<!-- === SERO PATCH: Baustellenbericht Unified Section (fixed v4) === -->
+<!-- === SERO PATCH: Baustellenbericht Unified Section (fixed v5) === -->
+<div id="ubGalleryModal" style="display:none;position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.88);align-items:center;justify-content:center;padding:20px;">
+  <button type="button" id="ubGalleryClose" style="position:absolute;top:16px;right:16px;width:44px;height:44px;border:none;border-radius:999px;background:rgba(255,255,255,.14);color:#fff;font-size:22px;cursor:pointer;">✕</button>
+  <button type="button" id="ubGalleryPrev" style="position:absolute;left:16px;top:50%;transform:translateY(-50%);width:48px;height:48px;border:none;border-radius:999px;background:rgba(255,255,255,.14);color:#fff;font-size:28px;cursor:pointer;">‹</button>
+  <img id="ubGalleryImg" src="" alt="" style="max-width:92vw;max-height:88vh;border-radius:12px;display:block;box-shadow:0 10px 40px rgba(0,0,0,.45);">
+  <button type="button" id="ubGalleryNext" style="position:absolute;right:16px;top:50%;transform:translateY(-50%);width:48px;height:48px;border:none;border-radius:999px;background:rgba(255,255,255,.14);color:#fff;font-size:28px;cursor:pointer;">›</button>
+</div>
 <script>
 (function(){
   let unifiedTempPhotos = [];
-  let unifiedEditId = '';
-  let unifiedGallery = { photos: [], index: 0, title: 'Foto' };
+  let editingEntryId = null;
+  let galleryPhotos = [];
+  let galleryIndex = 0;
 
-  function hasState(){ return typeof S !== 'undefined' && S; }
   function escHtml(s){
-    return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+    return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+  function safeAttr(s){
+    return escHtml(s).replace(/'/g,'&#39;');
   }
   function findTBContent(){ return document.querySelector('#pg-tb .tb-content'); }
+  function getTimeline(){ if(typeof S === 'undefined') return []; if(!Array.isArray(S.timeline)) S.timeline = []; return S.timeline; }
 
   function hideOriginalCards(){
     const cards = Array.from(document.querySelectorAll('#pg-tb .tb-content .card'));
@@ -8044,37 +8054,45 @@ async function delPhoto(id){
           <input type="file" id="ubPhotoInput" accept="image/*" multiple>
           <span id="ubPhotoInfo" style="font-size:11px;color:var(--text3);">Noch keine Fotos gewählt</span>
         </div>
+        <div id="ubPhotoPreview" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px;"></div>
         <div id="unifiedList"></div>
       </div>`;
     const firstOldCard = Array.from(tbContent.querySelectorAll('.card')).find(c => c.dataset.unifiedHidden === '1');
     if(firstOldCard && firstOldCard.parentNode === tbContent) tbContent.insertBefore(wrap, firstOldCard);
     else tbContent.prepend(wrap);
-    document.getElementById('ubAddBtn')?.addEventListener('click', addUnifiedEntry);
+
+    document.getElementById('ubAddBtn')?.addEventListener('click', resetUnifiedForm);
     document.getElementById('ubSaveBtn')?.addEventListener('click', saveUnifiedEntry);
     document.getElementById('ubPhotoInput')?.addEventListener('change', function(){ attachUnifiedPhoto(this); });
   }
 
   function populateUnifiedFirmSelect(){
     const sel = document.getElementById('ubFirm');
-    if(!sel || !hasState()) return;
+    if(!sel || typeof S === 'undefined') return;
     const current = sel.value;
     sel.innerHTML = '<option value="">— Firma wählen</option>' +
-      (S.contractors || []).map(f => `<option value="${escHtml(String(f.id||''))}">${escHtml(String(f.name||''))}</option>`).join('');
+      (S.contractors || []).map(f => `<option value="${safeAttr(String(f.id||''))}">${escHtml(String(f.name||''))}</option>`).join('');
     if(current) sel.value = current;
   }
 
   function updateUnifiedPhotoInfo(){
     const el = document.getElementById('ubPhotoInfo');
-    if(!el) return;
-    if(!unifiedTempPhotos.length) el.textContent = 'Noch keine Fotos gewählt';
-    else el.textContent = unifiedTempPhotos.length + ' Foto(s) gewählt';
+    if(el) el.textContent = unifiedTempPhotos.length ? `${unifiedTempPhotos.length} Foto(s) gewählt` : 'Noch keine Fotos gewählt';
+    const prev = document.getElementById('ubPhotoPreview');
+    if(prev){
+      prev.innerHTML = unifiedTempPhotos.map((p,idx)=>`
+        <div style="position:relative;">
+          <img src="${p.src}" alt="${safeAttr(p.name||'')}" style="width:72px;height:72px;object-fit:cover;border-radius:10px;border:1px solid var(--border);cursor:pointer;" onclick="window.__ubOpenTempPhoto(${idx})">
+          <button type="button" onclick="window.__ubRemoveTempPhoto(${idx});event.stopPropagation();" style="position:absolute;top:-6px;right:-6px;width:22px;height:22px;border:none;border-radius:999px;background:#ef4444;color:#fff;font-size:12px;cursor:pointer;">✕</button>
+        </div>`).join('');
+    }
   }
 
-  function addUnifiedEntry(){
-    unifiedEditId = '';
-    ['ubTime','ubText','ubDetails'].forEach(id => { const el = document.getElementById(id); if(el) el.value = ''; });
-    const sel = document.getElementById('ubFirm'); if(sel) sel.value = '';
-    const photo = document.getElementById('ubPhotoInput'); if(photo) photo.value = '';
+  function resetUnifiedForm(){
+    editingEntryId = null;
+    ['ubTime','ubText','ubDetails'].forEach(id=>{ const el = document.getElementById(id); if(el) el.value=''; });
+    const firm = document.getElementById('ubFirm'); if(firm) firm.value='';
+    const photo = document.getElementById('ubPhotoInput'); if(photo) photo.value='';
     unifiedTempPhotos = [];
     updateUnifiedPhotoInfo();
     const btn = document.getElementById('ubSaveBtn'); if(btn) btn.textContent = 'Speichern';
@@ -8087,154 +8105,85 @@ async function delPhoto(id){
     files.forEach(file=>{
       const reader = new FileReader();
       reader.onload = function(e){
-        unifiedTempPhotos.push({
-          id: 'ubp_' + Date.now() + '_' + Math.random().toString(36).slice(2,7),
-          src: e.target.result,
-          name: file.name
-        });
+        unifiedTempPhotos.push({ id:'ubp_'+Date.now()+'_'+Math.random().toString(36).slice(2,7), src:e.target.result, name:file.name });
         pending--;
-        if(pending === 0){
-          updateUnifiedPhotoInfo();
-          if(typeof showToast === 'function') showToast('Foto hinzugefügt','ok');
-        }
+        if(pending===0){ updateUnifiedPhotoInfo(); if(typeof showToast==='function') showToast('Foto hinzugefügt','ok'); }
       };
       reader.readAsDataURL(file);
     });
-    input.value = '';
+    input.value='';
   }
 
   function saveUnifiedEntry(){
-    if(!hasState()) return;
     const time = document.getElementById('ubTime')?.value || '';
     const text = document.getElementById('ubText')?.value.trim() || '';
     const details = document.getElementById('ubDetails')?.value.trim() || '';
     const firmId = document.getElementById('ubFirm')?.value || '';
-    if(!text){ if(typeof showToast === 'function') showToast('Eintrag fehlt','warn'); return; }
-    if(!S.timeline) S.timeline = [];
-
-    if(unifiedEditId){
-      const existing = S.timeline.find(x => String(x.id) === String(unifiedEditId));
-      if(existing){
-        existing.time = time;
-        existing.text = text;
-        existing.note = details;
-        existing.firmId = firmId;
-        existing.photos = Array.isArray(existing.photos) ? existing.photos.concat(unifiedTempPhotos) : [...unifiedTempPhotos];
+    if(!text){ if(typeof showToast==='function') showToast('Eintrag fehlt','warn'); return; }
+    const timeline = getTimeline();
+    if(editingEntryId){
+      const entry = timeline.find(x=>String(x.id)===String(editingEntryId));
+      if(entry){
+        entry.time = time; entry.text = text; entry.note = details; entry.firmId = firmId; entry.photos = unifiedTempPhotos.slice();
       }
     } else {
-      S.timeline.unshift({
-        id: 'tl_' + Date.now(),
-        time,
-        text,
-        note: details,
-        firmId,
-        photos: [...unifiedTempPhotos]
-      });
+      timeline.unshift({ id:'tl_'+Date.now(), time, text, note:details, firmId, photos: unifiedTempPhotos.slice() });
     }
-
-    unifiedTempPhotos = [];
-    updateUnifiedPhotoInfo();
-    if(typeof autoSave === 'function') autoSave();
-    addUnifiedEntry();
+    if(typeof autoSave==='function') autoSave();
+    resetUnifiedForm();
     renderUnifiedList();
-    if(typeof showToast === 'function') showToast(unifiedEditId ? 'Eintrag aktualisiert' : 'Eintrag gespeichert','ok');
   }
 
   function editUnifiedEntry(id){
-    if(!hasState()) return;
-    const entry = (S.timeline || []).find(x => String(x.id) === String(id));
+    const entry = getTimeline().find(x=>String(x.id)===String(id));
     if(!entry) return;
-    unifiedEditId = entry.id;
-    document.getElementById('ubTime').value = entry.time || '';
-    document.getElementById('ubText').value = entry.text || '';
-    document.getElementById('ubDetails').value = entry.note || '';
-    document.getElementById('ubFirm').value = entry.firmId || '';
-    unifiedTempPhotos = [];
+    editingEntryId = id;
+    const set = (id,v)=>{ const el=document.getElementById(id); if(el) el.value=v||''; };
+    set('ubTime', entry.time||'');
+    set('ubText', entry.text||'');
+    set('ubDetails', entry.note||'');
+    set('ubFirm', entry.firmId||'');
+    unifiedTempPhotos = Array.isArray(entry.photos) ? entry.photos.map(p=>({...p})) : [];
     updateUnifiedPhotoInfo();
     const btn = document.getElementById('ubSaveBtn'); if(btn) btn.textContent = 'Aktualisieren';
     document.getElementById('unifiedBaustellenberichtCard')?.scrollIntoView({behavior:'smooth', block:'start'});
   }
 
-  function removeUnifiedEntry(id){
-    if(!hasState()) return;
-    S.timeline = (S.timeline || []).filter(x => String(x.id) !== String(id));
-    if(typeof autoSave === 'function') autoSave();
+  function deleteUnifiedEntry(id){
+    if(!confirm('Eintrag wirklich löschen?')) return;
+    S.timeline = getTimeline().filter(x=>String(x.id)!==String(id));
+    if(String(editingEntryId)===String(id)) resetUnifiedForm();
+    if(typeof autoSave==='function') autoSave();
     renderUnifiedList();
-    if(typeof showToast === 'function') showToast('Eintrag gelöscht','ok');
   }
 
-  function removeUnifiedPhoto(entryId, photoId){
-    if(!hasState()) return;
-    const entry = (S.timeline || []).find(x => String(x.id) === String(entryId));
-    if(!entry || !Array.isArray(entry.photos)) return;
-    entry.photos = entry.photos.filter(p => String(p.id) !== String(photoId));
-    if(typeof autoSave === 'function') autoSave();
-    renderUnifiedList();
-    if(typeof showToast === 'function') showToast('Foto entfernt','ok');
+  function openGallery(photos, idx){
+    if(!photos || !photos.length) return;
+    galleryPhotos = photos;
+    galleryIndex = idx || 0;
+    const modal = document.getElementById('ubGalleryModal');
+    if(!modal) return;
+    renderGallery();
+    modal.style.display = 'flex';
   }
-
-  function ensureUnifiedGalleryControls(){
-    const modal = document.getElementById('photoViewerModal');
-    const body = modal?.querySelector('.modal-body');
-    if(!modal || !body) return;
-    if(document.getElementById('unifiedGalleryPrev')) return;
-    body.style.position = 'relative';
-    const makeBtn = (id, html, side, handler) => {
-      const b = document.createElement('button');
-      b.id = id; b.type = 'button'; b.innerHTML = html;
-      b.style.cssText = `position:absolute;${side}:12px;top:50%;transform:translateY(-50%);width:44px;height:44px;border:none;border-radius:999px;background:rgba(15,23,42,.78);color:#fff;font-size:28px;line-height:1;display:none;align-items:center;justify-content:center;cursor:pointer;z-index:5;`;
-      b.onclick = function(e){ e.stopPropagation(); handler(); };
-      body.appendChild(b);
-    };
-    makeBtn('unifiedGalleryPrev','‹','left',()=>showUnifiedGalleryIndex(unifiedGallery.index - 1));
-    makeBtn('unifiedGalleryNext','›','right',()=>showUnifiedGalleryIndex(unifiedGallery.index + 1));
-    const counter = document.createElement('div');
-    counter.id = 'unifiedGalleryCounter';
-    counter.style.cssText = 'position:absolute;left:50%;bottom:14px;transform:translateX(-50%);padding:6px 10px;border-radius:999px;background:rgba(15,23,42,.78);color:#fff;font-size:12px;font-weight:700;display:none;z-index:5;';
-    body.appendChild(counter);
+  function renderGallery(){
+    const img = document.getElementById('ubGalleryImg');
+    if(!img || !galleryPhotos.length) return;
+    img.src = galleryPhotos[galleryIndex].src;
   }
-
-  function updateUnifiedGalleryControls(){
-    const prev = document.getElementById('unifiedGalleryPrev');
-    const next = document.getElementById('unifiedGalleryNext');
-    const counter = document.getElementById('unifiedGalleryCounter');
-    const total = unifiedGallery.photos.length;
-    const multi = total > 1;
-    if(prev) prev.style.display = multi ? 'flex' : 'none';
-    if(next) next.style.display = multi ? 'flex' : 'none';
-    if(counter){ counter.style.display = total ? 'block' : 'none'; counter.textContent = total ? `${unifiedGallery.index + 1} / ${total}` : ''; }
-  }
-
-  function showUnifiedGalleryIndex(idx){
-    const total = unifiedGallery.photos.length;
-    if(!total) return;
-    if(idx < 0) idx = total - 1;
-    if(idx >= total) idx = 0;
-    unifiedGallery.index = idx;
-    const photo = unifiedGallery.photos[idx] || {};
-    if(typeof openPhotoViewer === 'function') openPhotoViewer(photo.src || '', `${unifiedGallery.title || 'Foto'} (${idx + 1}/${total})`);
-    updateUnifiedGalleryControls();
-  }
-
-  function openUnifiedPhotoGallery(photos, index, title){
-    unifiedGallery.photos = Array.isArray(photos) ? photos : [];
-    unifiedGallery.title = title || 'Foto';
-    ensureUnifiedGalleryControls();
-    showUnifiedGalleryIndex(Number(index) || 0);
-  }
+  function closeGallery(){ const modal = document.getElementById('ubGalleryModal'); if(modal) modal.style.display='none'; }
+  function prevGallery(){ if(!galleryPhotos.length) return; galleryIndex=(galleryIndex-1+galleryPhotos.length)%galleryPhotos.length; renderGallery(); }
+  function nextGallery(){ if(!galleryPhotos.length) return; galleryIndex=(galleryIndex+1)%galleryPhotos.length; renderGallery(); }
 
   function renderUnifiedList(){
     const list = document.getElementById('unifiedList');
-    if(!list || !hasState()) return;
-    const rows = (S.timeline || []).map(e => {
-      const firm = (S.contractors || []).find(f => f.id === e.firmId)?.name || '';
+    if(!list || typeof S==='undefined') return;
+    const rows = getTimeline().map(e=>{
+      const firm = (S.contractors || []).find(f => String(f.id) === String(e.firmId))?.name || '';
       const photosArr = Array.isArray(e.photos) ? e.photos : [];
-      const photosAttr = escHtml(JSON.stringify(photosArr.map(p => ({src:p.src || '', name:p.name || '', id:p.id || ''}))));
-      const titleAttr = escHtml(e.text || 'Foto');
-      const photos = photosArr.map((p, idx) => `
-        <div style="position:relative;display:inline-block;margin-right:6px;margin-top:6px;">
-          <img src="${p.src}" alt="${escHtml(p.name||'')}" onclick='openUnifiedPhotoGallery(JSON.parse(this.dataset.photos), ${idx}, this.dataset.title)' data-photos="${photosAttr}" data-title="${titleAttr}" style="height:60px;border-radius:4px;border:1px solid var(--border);cursor:pointer;display:block;">
-          <button type="button" onclick="event.stopPropagation();removeUnifiedPhoto('${escHtml(e.id)}','${escHtml(p.id||'')}')" style="position:absolute;top:-6px;right:-6px;width:18px;height:18px;border:none;border-radius:999px;background:#ef4444;color:#fff;font-size:11px;line-height:1;cursor:pointer;">×</button>
+      const photos = photosArr.map((p,idx)=>`
+        <div style="position:relative;display:inline-block;">
+          <img src="${p.src}" alt="${safeAttr(p.name||'')}" style="height:64px;width:64px;object-fit:cover;margin-right:6px;margin-top:6px;border-radius:8px;border:1px solid var(--border);cursor:pointer;" onclick="window.__ubOpenEntryGallery('${safeAttr(String(e.id))}',${idx})">
         </div>`).join('');
       return `
         <div style="padding:10px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;margin-bottom:8px;">
@@ -8243,17 +8192,16 @@ async function delPhoto(id){
               <div style="font-weight:700;font-size:13px;color:var(--text);">${escHtml(e.time||'')} ${escHtml(e.text||'')}</div>
               ${firm ? `<div style="font-size:11px;margin-top:4px;color:var(--text2);">${escHtml(firm)}</div>` : ''}
               ${e.note ? `<div style="font-size:11px;color:var(--text2);margin-top:4px;white-space:pre-wrap;">${escHtml(e.note)}</div>` : ''}
-              ${photos ? `<div style="margin-top:6px;">${photos}</div>` : ''}
+              ${photos ? `<div style="margin-top:6px;display:flex;flex-wrap:wrap;">${photos}</div>` : ''}
             </div>
-            <div style="display:flex;gap:6px;flex-shrink:0;">
-              <button type="button" class="btn btn-ghost btn-xs" onclick="editUnifiedEntry('${escHtml(e.id)}')">Bearbeiten</button>
-              <button type="button" class="btn btn-ghost btn-xs" onclick="removeUnifiedEntry('${escHtml(e.id)}')">Löschen</button>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;">
+              <button type="button" class="btn btn-ghost btn-xs" onclick="window.__ubEditEntry('${safeAttr(String(e.id))}')">Bearbeiten</button>
+              <button type="button" class="btn btn-ghost btn-xs" onclick="window.__ubDeleteEntry('${safeAttr(String(e.id))}')">Löschen</button>
             </div>
           </div>
         </div>`;
     }).join('');
     list.innerHTML = rows || '<div class="empty-state" style="padding:20px;"><div class="ei">📒</div><h4>Keine Einträge</h4><p>Noch kein Baustellenbericht erfasst</p></div>';
-    ensureUnifiedGalleryControls();
   }
 
   function patchExportPDF(){
@@ -8262,29 +8210,29 @@ async function delPhoto(id){
     window.exportPDF = async function(){
       const originalPhotos = Array.isArray(S.photos) ? S.photos.slice() : [];
       const generated = [];
-      (S.timeline || []).forEach(entry=>{
+      getTimeline().forEach(entry=>{
         (entry.photos || []).forEach((p, idx)=>{
-          generated.push({
-            id: p.id || ('pdf_' + Date.now() + '_' + idx),
-            data: p.src,
-            name: p.name || ('Foto_' + (idx+1)),
-            caption: entry.text || '',
-            area: entry.area || '',
-            firmId: entry.firmId || '',
-            note: entry.note || '',
-            time: entry.time || '',
-            timelineId: entry.id || ''
-          });
+          generated.push({ id: p.id || ('pdf_' + Date.now() + '_' + idx), data: p.src, name: p.name || ('Foto_' + (idx+1)), caption: entry.text || '', area: entry.area || '', firmId: entry.firmId || '', note: entry.note || '', time: entry.time || '', timelineId: entry.id || '' });
         });
       });
-      try {
-        if(generated.length) S.photos = [...originalPhotos, ...generated];
-        return await oldExportPDF.apply(this, arguments);
-      } finally {
-        S.photos = originalPhotos;
-      }
+      try{ if(generated.length) S.photos = [...originalPhotos, ...generated]; return await oldExportPDF.apply(this, arguments); }
+      finally { S.photos = originalPhotos; }
     };
     window.__unifiedPdfPatched = true;
+  }
+
+  function initGalleryEvents(){
+    document.getElementById('ubGalleryClose')?.addEventListener('click', closeGallery);
+    document.getElementById('ubGalleryPrev')?.addEventListener('click', function(e){ e.stopPropagation(); prevGallery(); });
+    document.getElementById('ubGalleryNext')?.addEventListener('click', function(e){ e.stopPropagation(); nextGallery(); });
+    document.getElementById('ubGalleryModal')?.addEventListener('click', function(e){ if(e.target === this) closeGallery(); });
+    document.addEventListener('keydown', function(e){
+      const modal = document.getElementById('ubGalleryModal');
+      if(!modal || modal.style.display !== 'flex') return;
+      if(e.key === 'Escape') closeGallery();
+      if(e.key === 'ArrowLeft') prevGallery();
+      if(e.key === 'ArrowRight') nextGallery();
+    });
   }
 
   function initUnifiedPatch(){
@@ -8293,49 +8241,27 @@ async function delPhoto(id){
     populateUnifiedFirmSelect();
     renderUnifiedList();
     patchExportPDF();
+    initGalleryEvents();
   }
 
-  window.addUnifiedEntry = addUnifiedEntry;
-  window.saveUnifiedEntry = saveUnifiedEntry;
-  window.attachUnifiedPhoto = attachUnifiedPhoto;
-  window.renderUnifiedList = renderUnifiedList;
-  window.editUnifiedEntry = editUnifiedEntry;
-  window.removeUnifiedEntry = removeUnifiedEntry;
-  window.removeUnifiedPhoto = removeUnifiedPhoto;
-  window.openUnifiedPhotoGallery = openUnifiedPhotoGallery;
-  window.showUnifiedGalleryIndex = showUnifiedGalleryIndex;
+  window.__ubEditEntry = editUnifiedEntry;
+  window.__ubDeleteEntry = deleteUnifiedEntry;
+  window.__ubOpenEntryGallery = function(entryId, idx){
+    const entry = getTimeline().find(x=>String(x.id)===String(entryId));
+    if(entry && Array.isArray(entry.photos)) openGallery(entry.photos, idx);
+  };
+  window.__ubRemoveTempPhoto = function(idx){ unifiedTempPhotos.splice(idx,1); updateUnifiedPhotoInfo(); };
+  window.__ubOpenTempPhoto = function(idx){ if(unifiedTempPhotos[idx]) openGallery(unifiedTempPhotos, idx); };
 
   document.addEventListener('DOMContentLoaded', initUnifiedPatch);
   window.addEventListener('load', initUnifiedPatch);
-  document.addEventListener('keydown', function(e){
-    const modal = document.getElementById('photoViewerModal');
-    if(!modal || !modal.classList.contains('open') || !unifiedGallery.photos.length) return;
-    if(e.key === 'ArrowLeft') showUnifiedGalleryIndex(unifiedGallery.index - 1);
-    if(e.key === 'ArrowRight') showUnifiedGalleryIndex(unifiedGallery.index + 1);
-  });
-
-  const oldClosePhotoViewer = window.closePhotoViewer;
-  if(typeof oldClosePhotoViewer === 'function'){
-    window.closePhotoViewer = function(){
-      const out = oldClosePhotoViewer.apply(this, arguments);
-      const counter = document.getElementById('unifiedGalleryCounter');
-      if(counter) counter.style.display = 'none';
-      return out;
-    };
-  }
 
   const originalRenderFirms = window.renderFirms;
   if(typeof originalRenderFirms === 'function'){
-    window.renderFirms = function(){
-      const result = originalRenderFirms.apply(this, arguments);
-      populateUnifiedFirmSelect();
-      renderUnifiedList();
-      return result;
-    };
+    window.renderFirms = function(){ const result = originalRenderFirms.apply(this, arguments); populateUnifiedFirmSelect(); return result; };
   }
 })();
 </script>
-
 
 </body>
 </html>
