@@ -3167,52 +3167,108 @@ async function exportBackup() {
 function importBackup(inp) {
   const file = inp.files && inp.files[0];
   if (!file) return;
+
+  const safeCall = (fnName) => {
+    try {
+      const fn = window[fnName];
+      if (typeof fn === 'function') fn();
+    } catch (err) {
+      console.warn('Import render warning in ' + fnName + ':', err);
+    }
+  };
+
+  const sanitizeImportedState = (src) => {
+    const base = deepMerge(newState(), src || {});
+    if (!Array.isArray(base.contractors)) base.contractors = [];
+    if (!Array.isArray(base.photos)) base.photos = [];
+    if (!Array.isArray(base.docs)) base.docs = [];
+    if (!Array.isArray(base.timeline)) base.timeline = [];
+    if (!Array.isArray(base.workAreas)) base.workAreas = [];
+    if (!Array.isArray(base.meetings)) base.meetings = [];
+    if (!Array.isArray(base.containers)) base.containers = [];
+    if (!Array.isArray(base.maengel)) base.maengel = [];
+    if (!Array.isArray(base.contacts)) base.contacts = [];
+    if (!base.kanban || typeof base.kanban !== 'object') base.kanban = {today:[], tomorrow:[], done:[]};
+    base.kanban.today = Array.isArray(base.kanban.today) ? base.kanban.today : [];
+    base.kanban.tomorrow = Array.isArray(base.kanban.tomorrow) ? base.kanban.tomorrow : [];
+    base.kanban.done = Array.isArray(base.kanban.done) ? base.kanban.done : [];
+    if (!base.progressPlan || typeof base.progressPlan !== 'object') {
+      base.progressPlan = {month:'',soll:'',ist:'',phase:'',note:''};
+    }
+    base.archive = undefined;
+    return makeStateSafeForStorage(base);
+  };
+
   const reader = new FileReader();
   reader.onload = async e => {
+    let data;
     try {
-      const data = JSON.parse(e.target.result);
-      if (data.state) S = deepMerge(newState(), data.state);
-      if (Array.isArray(data.archive)) archive = data.archive;
+      data = JSON.parse(e.target.result);
+    } catch (err) {
+      showToast('Backup JSON ist ungültig','err');
+      console.error('Backup JSON parse error:', err);
+      return;
+    }
+
+    try {
+      S = sanitizeImportedState(data.state || {});
+      archive = Array.isArray(data.archive) ? makeArchiveSafeForStorage(data.archive) : [];
+
       await openPhotoDB();
+
       for (const p of (S.photos || [])) {
         if (p.id && p.data) {
-          try { await idbSavePhoto({ id: p.id, data: p.data, name: p.name || '', savedAt: new Date().toISOString() }); } catch(err) {}
+          try {
+            await idbSavePhoto({ id: p.id, data: p.data, name: p.name || '', savedAt: new Date().toISOString() });
+          } catch (err) {
+            console.warn('Photo import warning:', err);
+          }
         }
       }
+
       for (const d of (S.docs || [])) {
         if (d.id && d.data) {
-          try { await idbSaveDoc({ id: d.id, data: d.data, name: d.name || '', type: d.type || '', savedAt: new Date().toISOString() }); } catch(err) {}
+          try {
+            await idbSaveDoc({ id: d.id, data: d.data, name: d.name || '', type: d.type || '', savedAt: new Date().toISOString() });
+          } catch (err) {
+            console.warn('Doc import warning:', err);
+          }
         }
       }
-      for (const d of (S.docs || [])) {
-        if (d.id && d.data) {
-          try { await idbSaveDoc({ id: d.id, data: d.data, name: d.name || '', type: d.type || '', savedAt: new Date().toISOString() }); } catch(err) {}
-        }
-      }
+
       persistState();
       applyStateToForm();
-      if (typeof syncProjectInfoToTB === 'function') syncProjectInfoToTB();
-      buildPersonnel();
-      buildGeraete();
-      renderSigGrid();
-      renderWorkEntries();
-      renderKanban();
-      renderFirms();
-      renderContainers();
-      renderMeetings();
-      renderPhotos();
-      renderDocs();
-      renderArchive();
-      renderTimeline();
-      renderWorkAreas();
-      renderWeeklyReports();
-      renderMaengel();
-      updateBadges();
-      refreshDash();
-      if (data.theme) setTheme(data.theme);
+      safeCall('syncProjectInfoToTB');
+      safeCall('buildPersonnel');
+      safeCall('buildGeraete');
+      safeCall('ensureTodoKanbanSync');
+      safeCall('populateTodoFirmSelects');
+      safeCall('renderSigGrid');
+      safeCall('renderWorkEntries');
+      safeCall('renderKanban');
+      safeCall('renderFirms');
+      safeCall('renderContacts');
+      safeCall('renderContainers');
+      safeCall('renderMeetings');
+      safeCall('renderPhotos');
+      safeCall('renderDocs');
+      safeCall('renderArchive');
+      safeCall('renderTimeline');
+      safeCall('renderWorkAreas');
+      safeCall('renderWeeklyReports');
+      safeCall('renderMaengel');
+      safeCall('renderTodoPage');
+      safeCall('updateBadges');
+      safeCall('refreshDash');
+      safeCall('syncSideNavActive');
+      safeCall('syncSideNavBadges');
+      if (data.theme) {
+        try { setTheme(data.theme); } catch (err) { console.warn('Theme import warning:', err); }
+      }
       showToast('Backup importiert','ok');
     } catch(err) {
-      showToast('Backup konnte nicht importiert werden','err');
+      console.error('Backup import failed:', err);
+      showToast('Backup Import Fehler: ' + (err && err.message ? err.message : 'unbekannt'),'err');
     }
   };
   reader.readAsText(file);
