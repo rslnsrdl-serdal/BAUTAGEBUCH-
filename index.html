@@ -6557,6 +6557,115 @@ function showToast(msg,type='ok'){
   window.currentFirmId = window.currentFirmId || '';
   window.currentNUCode = window.currentNUCode || '';
 
+  const GEWERK_TR = {
+    'TGA-allgemein':'Genel mekanik tesisat',
+    '(Ab-) Wasser_Sanitär':'Temiz ve atık su tesisatı',
+    'Sanitär':'Sıhhi tesisat',
+    'TW Rohrleitung':'İçme suyu borulama',
+    'Dachentwässerung':'Çatı yağmur suyu drenajı',
+    'HKL':'Isıtma-Klima-Havalandırma',
+    'Wärmeversorgung':'Isı temini sistemi',
+    'Lüftung':'Havalandırma',
+    'Kälteanlagen':'Soğutma sistemleri',
+    'Starkstromanlagen':'Kuvvetli akım tesisatı',
+    'Elektro Hauptvergabe':'Ana elektrik işleri',
+    'E-Mobilität':'Elektrikli araç altyapısı',
+    'E-Bike Ladestationen':'E-bike şarj istasyonları',
+    'Hallenbeleuchtung':'Salon aydınlatması',
+    'Blitzschutz':'Yıldırımdan korunma',
+    'PV-Anlagen':'Güneş enerjisi sistemi',
+    'Feuerlöschanlagen':'Yangın söndürme sistemleri',
+    'Sprinkleranlage':'Sprinkler sistemi',
+    'Feuerlöscher':'Yangın tüpleri',
+    'GLT':'Bina otomasyon sistemi',
+    'Tiefbau':'Altyapı kazı işleri',
+    'Erdbauer':'Toprak işleri',
+    'Rohbau':'Kaba inşaat',
+    'Stahlbetonarbeiten':'Betonarme işleri',
+    'Mauerwerk':'Duvar imalatı',
+    'Vergussbeton':'Grout betonu',
+    'Bewehrung':'Donatı işleri',
+    'Betonsohle':'Beton zemin plakası',
+    'Bauwerksabdichtung':'Yapı su yalıtımı',
+    'WHG_Folie unter Bodenplatte':'Radye altı membran',
+    'Estricharbeiten':'Şap işleri',
+    'Zementestriche':'Çimento şapı',
+    'Porenbeton':'Gazbeton',
+    'PU-Fugen':'PU derz',
+    'Betonkosmetik':'Beton yüzey düzeltme',
+    'Schalungsholz':'Kalıp kerestesi',
+    'Betonpumpe':'Beton pompası',
+    'Ringankerbewehrung':'Hatıl donatısı',
+    'Unterlegplatten':'Altlık plakalar',
+    'Schrägstützen':'Geçici destekler',
+    'Absturzsicherung':'Düşme koruma',
+    'vertikale Verfugung':'Dikey derz',
+    'Krananlagen':'Vinç sistemleri',
+    'Tore, Türen, Verladetechnik':'Kapılar ve yükleme rampaları',
+    'Stahltüren':'Çelik kapılar',
+    'Schnelllauftore':'Hızlı kapılar',
+    'Überladebrücken':'Yükleme köprüleri',
+    'Torabdichtung':'Kapı sızdırmazlık',
+    'Bauelemente Fassaden':'Cephe doğrama elemanları',
+    'Kunststofffenster':'PVC pencereler',
+    'Aluminiumfenster':'Alüminyum pencereler',
+    'Dachdecker':'Çatı kaplama işleri',
+    'Lichtkuppeln, Dachlichtbänder':'Çatı ışıklıkları',
+    'Innenausbau':'İç imalatlar',
+    'Trockenbau gesamt':'Alçıpan işleri',
+    'Innentüren':'İç kapılar',
+    'Sanitär Trennwände':'WC bölme panelleri',
+    'Sonnenschutz':'Güneş kırıcı sistemler',
+    'Sonnenschutz außen':'Dış güneş kırıcı',
+    'Sonnenschutz innen':'İç güneş kırıcı',
+    'Malerarbeiten, Tapezierarbeiten':'Boya işleri',
+    'Malerarbeiten':'Boya işleri',
+    'Fliesenarbeiten':'Seramik işleri',
+    'Fliesenleger':'Seramik ustası',
+    'Bodenbelagsarbeiten':'Zemin kaplamaları',
+    'Bodenleger':'Zemin kaplama ustası',
+    'Sauberlaufzonen Matten':'Paspas bölgeleri',
+    'Schlosserarbeiten':'Demir doğrama',
+    'Schlosser allgemein':'Genel demir doğrama',
+    'Baustelleneinrichtung':'Şantiye kurulumu',
+    'Unterkünfte, Toiletten, Reinigung':'Konteyner, tuvalet, temizlik',
+    'Pacht Miete (Grundstücke)':'Arsa kira bedeli',
+    'Verkehrssicherung':'Trafik güvenliği',
+    'Baustrom':'Şantiye elektriği',
+    'Bauwasser':'Şantiye suyu',
+    'Telekommunikation':'Telekomünikasyon',
+    'Bauzaun':'Şantiye çiti',
+    'Wachschutz':'Güvenlik hizmeti',
+    'Bauschild, Baustellenwerbung':'Şantiye tabelası',
+    'Webcam':'Web kamera',
+    'Fotos, Videos':'Fotoğraf, videolar',
+    'Gerüste, Aufzüge':'İskele ve asansörler',
+    'Turmdrehkran':'Kule vinç',
+    'Mobilkran':'Mobil vinç',
+    'Hebebühnen':'Yükseltici platformlar',
+    'Baustellenreinigung, Müllentsorgung':'Şantiye temizliği, atık bertarafı',
+    'Rohr, Kanal, Straßenreinigung':'Boru, kanal, yol temizliği',
+    'Bauendreinigung':'İnşaat sonu temizlik',
+    'Baustoffe':'İnşaat malzemeleri',
+    'Hotel-Reisekosten':'Otel-seyahat masrafları',
+    'Aufzugsanlage':'Asansör',
+    'Spezialtiefbau':'Özel temel mühendisliği',
+    'Blechverlegearbeiten':'Sac kaplama işleri',
+    'Blechverleger':'Sac kaplama ustası',
+    'Abbrucharbeiten':'Yıkım işleri',
+    'Abbruch komplett':'Komple yıkım',
+    'Betonschneiden, Kernbohrung':'Beton kesme ve karot',
+    'Betonschneiden':'Beton kesme',
+    'Kernbohrung':'Karot delme',
+    'Kühlhallenausbau':'Soğuk depo iç işleri'
+  };
+
+  function gewerkDisplay(name){
+    const key = String(name || '').trim();
+    const tr = GEWERK_TR[key];
+    return tr ? `${key} (${tr})` : key;
+  }
+
   function e(id){ return document.getElementById(id); }
   function h(s){ return String(s||'').replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
 
@@ -6960,82 +7069,188 @@ window.renderFirms = function renderFirmsPatched() {
     const badge = e('nb-firms');
     if (badge) badge.textContent = String((S.contractors||[]).length);
     if (!cont) return;
-    if (!S.contractors || !S.contractors.length) {
+
+    const presets = Array.isArray(S.gewerkePresets) ? S.gewerkePresets.slice() : [];
+    const contractors = Array.isArray(S.contractors) ? S.contractors.slice() : [];
+
+    if (!presets.length && !contractors.length) {
       cont.innerHTML = '<div class="empty-state"><div class="ei">📁</div><h4>Keine Gewerke / Nachunternehmer</h4><p>Gewerk altında firma ekle</p></div>';
       return;
     }
-    const grouped = {};
-    (S.gewerkePresets||[]).forEach(g => grouped[g.code] = {name:g.name, firms:[]});
-    (S.contractors||[]).forEach(c => {
-      if (!grouped[c.gewerkCode]) grouped[c.gewerkCode] = {name:getGewerkName(c.gewerkCode)||c.trade||'Gewerk', firms:[]};
-      grouped[c.gewerkCode].firms.push(c);
+
+    const parentForCode = (code) => {
+      const c = String(code || '').trim();
+      if (!c) return '';
+      if (/^1870\./.test(c)) return '925';
+      if (/^830\./.test(c) || /^834\./.test(c)) return '820';
+      if (c.includes('.')) return c.split('.')[0];
+      return c;
+    };
+
+    const isChildCode = (code) => {
+      const c = String(code || '').trim();
+      return c.includes('.') || /^1870\./.test(c) || /^830\./.test(c) || /^834\./.test(c);
+    };
+
+    const byCode = {};
+    presets.forEach(g => {
+      const code = String(g.code || '').trim();
+      if (!code) return;
+      byCode[code] = { code, name: String(g.name || '').trim() || code, type: isChildCode(code) ? 'child' : 'parent' };
     });
-    const html = Object.keys(grouped).sort().map(code => {
-      const g = grouped[code];
-      const firms = g.firms || [];
+
+    contractors.forEach(c => {
+      const code = String(c.gewerkCode || '').trim();
+      if (!code) return;
+      if (!byCode[code]) {
+        byCode[code] = {
+          code,
+          name: getGewerkName(code) || c.trade || code,
+          type: isChildCode(code) ? 'child' : 'parent'
+        };
+      }
+      const parent = parentForCode(code);
+      if (parent && !byCode[parent] && parent !== code) {
+        byCode[parent] = { code: parent, name: getGewerkName(parent) || parent, type: 'parent' };
+      }
+    });
+
+    const groups = {};
+    Object.values(byCode).forEach(item => {
+      if (item.type === 'parent') {
+        if (!groups[item.code]) groups[item.code] = { code: item.code, name: item.name, firms: [], children: {} };
+        else if (!groups[item.code].name) groups[item.code].name = item.name;
+      }
+    });
+
+    Object.values(byCode).forEach(item => {
+      if (item.type !== 'child') return;
+      const parent = parentForCode(item.code);
+      if (!groups[parent]) groups[parent] = { code: parent, name: getGewerkName(parent) || parent, firms: [], children: {} };
+      if (!groups[parent].children[item.code]) {
+        groups[parent].children[item.code] = { code: item.code, name: item.name, firms: [] };
+      } else if (!groups[parent].children[item.code].name) {
+        groups[parent].children[item.code].name = item.name;
+      }
+    });
+
+    contractors.forEach(c => {
+      const code = String(c.gewerkCode || '').trim();
+      if (!code) return;
+      const parent = parentForCode(code);
+      if (!groups[parent]) groups[parent] = { code: parent, name: getGewerkName(parent) || c.trade || parent, firms: [], children: {} };
+      if (code === parent && !isChildCode(code)) {
+        groups[parent].firms.push(c);
+      } else {
+        if (!groups[parent].children[code]) {
+          groups[parent].children[code] = { code, name: getGewerkName(code) || c.trade || code, firms: [] };
+        }
+        groups[parent].children[code].firms.push(c);
+      }
+    });
+
+    const sortCode = (a,b) => String(a).localeCompare(String(b), undefined, {numeric:true, sensitivity:'base'});
+
+    const renderFirmCard = (c, codeLabel) => {
+      const active = window.currentFirmId === c.id ? 'border-color:var(--accent2);box-shadow:0 0 0 2px rgba(59,130,246,.1);' : '';
+      const statusMap = {active:{lbl:'Aktiv',cls:'cs-a'},pause:{lbl:'Pause',cls:'cs-p'},done:{lbl:'Abgeschlossen',cls:'cs-d'}};
+      const sm = statusMap[c.status] || statusMap.active;
+      const noteCount = (c.notes||[]).length;
+      const notesHtml = (c.notes||[]).map(n=>`<div class="con-note-item">
+          <div style="flex:1"><div class="con-note-txt">${h(n.text)}</div></div>
+          <div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px;">
+            <div class="con-note-date">${h(n.date)}</div>
+            <div style="display:flex;gap:4px;">
+              <button class="btn-icon edit" style="width:22px;height:22px;font-size:10px;" onclick="event.stopPropagation();editFirmNotePrompt('${h(c.id)}','${h(n.id)}')">✎</button>
+              <button class="btn-icon" style="width:22px;height:22px;font-size:10px;" onclick="event.stopPropagation();deleteFirmNote('${h(c.id)}','${h(n.id)}')">✕</button>
+            </div>
+          </div>
+        </div>`).join('');
+      return `
+        <div class="con-card" style="${active}">
+          <div class="con-hd" onclick="applyNUToQuickContext('${h(c.nuCode||'')}','${h(c.name)}','${h(c.id)}')">
+            <div class="list-marker">•</div>
+            <div class="con-info">
+              <div class="con-name">${h(c.nuCode||'')} ${h(c.name)}</div>
+              <div class="con-trade">${h(c.contact||'')}${c.phone?' · '+h(c.phone):''}</div>
+              <div class="tag-row" style="margin-top:6px;">
+                <span class="tag">📁 ${h(codeLabel)}</span>
+                ${noteCount ? `<span class="tag">📝 ${noteCount}</span>`:''}
+              </div>
+            </div>
+            <span class="con-status-badge ${sm.cls}">${sm.lbl}</span>
+          </div>
+          <div class="con-body open">
+            ${notesHtml || '<div class="empty-state" style="padding:10px 0;"><p>Keine Notizen</p></div>'}
+            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;">
+              <button class="btn btn-blue btn-xs" onclick="event.stopPropagation();applyNUToQuickContext('${h(c.nuCode||'')}','${h(c.name)}','${h(c.id)}')">Als Kontext</button>
+              <button class="btn btn-ghost btn-xs" onclick="event.stopPropagation();editFirm('${h(c.id)}')">✏️ Bearbeiten</button>
+              <button class="btn btn-ghost btn-xs" onclick="event.stopPropagation();openAddNotePatched('${h(c.id)}')">+ Notiz</button>
+              <button class="btn btn-ghost btn-xs" onclick="event.stopPropagation();if(confirm('Diese Firma löschen?')) delFirm('${h(c.id)}')">🗑 Löschen</button>
+            </div>
+          </div>
+        </div>`;
+    };
+
+    const parentCodes = Object.keys(groups).sort(sortCode);
+
+    const html = parentCodes.map(parentCode => {
+      const g = groups[parentCode];
+      const parentFirmCount = (g.firms || []).length;
+      const childCodes = Object.keys(g.children || {}).sort(sortCode);
+      const childCount = childCodes.length;
+
       const headerBtns = `
         <div style="display:flex;gap:6px;flex-wrap:wrap;">
-          <button class="btn btn-ghost btn-xs" onclick="event.stopPropagation();editGewerkPrompt('${h(code)}')">✏️ Gewerk</button>
-          <button class="btn btn-ghost btn-xs" onclick="event.stopPropagation();deleteGewerkPrompt('${h(code)}')">🗑 Gewerk</button>
-          <button class="btn btn-primary btn-xs" onclick="event.stopPropagation();prepareFirmModal('${h(code)}')">+ Firma</button>
+          <button class="btn btn-ghost btn-xs" onclick="event.stopPropagation();editGewerkPrompt('${h(parentCode)}')">✏️ Gewerk</button>
+          <button class="btn btn-ghost btn-xs" onclick="event.stopPropagation();deleteGewerkPrompt('${h(parentCode)}')">🗑 Gewerk</button>
+          <button class="btn btn-primary btn-xs" onclick="event.stopPropagation();prepareFirmModal('${h(parentCode)}')">+ Firma</button>
         </div>`;
-      if (!firms.length) return `
-        <div class="card" style="margin-bottom:10px;">
-          <div class="card-hd" style="justify-content:space-between;">
-            <div class="card-hd-l"><div class="ci ci-b">📁</div><h3>${h(code)} ${h(g.name)}</h3></div>
-            ${headerBtns}
-          </div>
-          <div class="card-body"><div class="empty-state" style="padding:18px 10px;"><p>Noch keine Firma</p></div></div>
-        </div>`;
-      const firmsHtml = firms.sort((a,b)=>(a.nuCode||'').localeCompare(b.nuCode||'')).map(c => {
-        const active = window.currentFirmId === c.id ? 'border-color:var(--accent2);box-shadow:0 0 0 2px rgba(59,130,246,.1);' : '';
-        const statusMap = {active:{lbl:'Aktiv',cls:'cs-a'},pause:{lbl:'Pause',cls:'cs-p'},done:{lbl:'Abgeschlossen',cls:'cs-d'}};
-        const sm = statusMap[c.status] || statusMap.active;
-        const noteCount = (c.notes||[]).length;
-        const notesHtml = (c.notes||[]).map(n=>`<div class="con-note-item">
-            <div style="flex:1"><div class="con-note-txt">${h(n.text)}</div></div>
-            <div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px;">
-              <div class="con-note-date">${h(n.date)}</div>
-              <div style="display:flex;gap:4px;">
-                <button class="btn-icon edit" style="width:22px;height:22px;font-size:10px;" onclick="event.stopPropagation();editFirmNotePrompt('${h(c.id)}','${h(n.id)}')">✎</button>
-                <button class="btn-icon" style="width:22px;height:22px;font-size:10px;" onclick="event.stopPropagation();deleteFirmNote('${h(c.id)}','${h(n.id)}')">✕</button>
-              </div>
-            </div>
-          </div>`).join('');
+
+      const parentFirmsHtml = (g.firms || []).sort((a,b)=>(a.nuCode||'').localeCompare(b.nuCode||'', undefined, {numeric:true})).map(c => renderFirmCard(c, parentCode)).join('');
+
+      const childrenHtml = childCodes.map(childCode => {
+        const child = g.children[childCode];
+        const firmsHtml = (child.firms || []).sort((a,b)=>(a.nuCode||'').localeCompare(b.nuCode||'', undefined, {numeric:true})).map(c => renderFirmCard(c, childCode)).join('');
         return `
-          <div class="con-card" style="${active}">
-            <div class="con-hd" onclick="applyNUToQuickContext('${h(c.nuCode||'')}','${h(c.name)}','${h(c.id)}')">
-              <div class="list-marker">•</div>
-              <div class="con-info">
-                <div class="con-name">${h(c.nuCode||'')} ${h(c.name)}</div>
-                <div class="con-trade">${h(c.contact||'')}${c.phone?' · '+h(c.phone):''}</div>
-                <div class="tag-row" style="margin-top:6px;">
-                  <span class="tag">📁 ${h(code)}</span>
-                  ${noteCount ? `<span class="tag">📝 ${noteCount}</span>`:''}
+          <details style="margin-top:10px;background:var(--bg3);border:1px solid var(--border);border-radius:12px;overflow:hidden;" ${firmsHtml ? '' : ''}>
+            <summary style="list-style:none;cursor:pointer;padding:12px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px;">
+              <div style="display:flex;align-items:center;gap:10px;min-width:0;">
+                <div class="ci ci-c" style="width:26px;height:26px;font-size:12px;">↳</div>
+                <div style="min-width:0;">
+                  <div style="font-size:13px;font-weight:700;color:var(--text);">${h(child.code)} ${h(gewerkDisplay(child.name || child.code))}</div>
+                  <div style="font-size:10px;color:var(--text3);margin-top:2px;">${(child.firms||[]).length} Firma</div>
                 </div>
               </div>
-              <span class="con-status-badge ${sm.cls}">${sm.lbl}</span>
-            </div>
-            <div class="con-body open">
-              ${notesHtml || '<div class="empty-state" style="padding:10px 0;"><p>Keine Notizen</p></div>'}
-              <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;">
-                <button class="btn btn-blue btn-xs" onclick="event.stopPropagation();applyNUToQuickContext('${h(c.nuCode||'')}','${h(c.name)}','${h(c.id)}')">Als Kontext</button>
-                <button class="btn btn-ghost btn-xs" onclick="event.stopPropagation();editFirm('${h(c.id)}')">✏️ Bearbeiten</button>
-                <button class="btn btn-ghost btn-xs" onclick="event.stopPropagation();openAddNotePatched('${h(c.id)}')">+ Notiz</button>
-                <button class="btn btn-ghost btn-xs" onclick="event.stopPropagation();if(confirm('Diese Firma löschen?')) delFirm('${h(c.id)}')">🗑 Löschen</button>
+              <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                <button class="btn btn-primary btn-xs" onclick="event.stopPropagation();prepareFirmModal('${h(child.code)}')">+ Firma</button>
               </div>
+            </summary>
+            <div style="padding:0 14px 14px;">
+              ${firmsHtml || '<div class="empty-state" style="padding:14px 0 6px;"><p>Noch keine Firma</p></div>'}
             </div>
-          </div>`;
+          </details>`;
       }).join('');
-      return `<div class="card" style="margin-bottom:10px;">
-        <div class="card-hd" style="justify-content:space-between;">
-          <div class="card-hd-l"><div class="ci ci-b">📁</div><h3>${h(code)} ${h(g.name)} <small>${firms.length} Firma</small></h3></div>
-          ${headerBtns}
-        </div>
-        <div class="card-body">${firmsHtml}</div>
-      </div>`;
+
+      const hasAny = parentFirmCount || childCount;
+      return `
+        <div class="card" style="margin-bottom:10px;">
+          <div class="card-hd" style="justify-content:space-between;">
+            <div class="card-hd-l">
+              <div class="ci ci-b">📁</div>
+              <h3>${h(parentCode)} ${h(gewerkDisplay(g.name || parentCode))} <small>${parentFirmCount} Firma · ${childCount} Alt-Gewerk</small></h3>
+            </div>
+            ${headerBtns}
+          </div>
+          <div class="card-body">
+            ${parentFirmsHtml}
+            ${childrenHtml}
+            ${!hasAny ? '<div class="empty-state" style="padding:18px 10px;"><p>Noch keine Firma</p></div>' : ''}
+          </div>
+        </div>`;
     }).join('');
-    cont.innerHTML = html;
+
+    cont.innerHTML = html || '<div class="empty-state"><div class="ei">📁</div><h4>Keine Gewerke / Nachunternehmer</h4><p>Gewerk altında firma ekle</p></div>';
   };
 
   window.openAddNotePatched = function(fid){
