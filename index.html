@@ -5893,15 +5893,41 @@ function startNewDay(){
   try{
     if (typeof collectFormToState === 'function') collectFormToState();
 
+    const currentDate = S.reportDate || ((typeof todayStr === 'function')
+      ? todayStr()
+      : new Date().toISOString().slice(0,10));
+
     if (typeof saveReport === 'function') {
       try { saveReport(); } catch(e) {}
     }
 
-    const today = (typeof todayStr === 'function')
-      ? todayStr()
-      : new Date().toISOString().slice(0,10);
+    const preserved = {
+      projectNr: S.projectNr || '',
+      projectName: S.projectName || '',
+      bauleiter: S.bauleiter || '',
+      standort: S.standort || '',
+      personnelTypes: JSON.parse(JSON.stringify(S.personnelTypes || [])),
+      geraete: JSON.parse(JSON.stringify(S.geraete || [])),
+      contractors: JSON.parse(JSON.stringify(S.contractors || [])),
+      contacts: JSON.parse(JSON.stringify(S.contacts || [])),
+      gewerkePresets: JSON.parse(JSON.stringify(S.gewerkePresets || [])),
+      signatures: Array.isArray(S.signatures) && S.signatures.length
+        ? JSON.parse(JSON.stringify(S.signatures))
+        : [{id:'sig_'+Date.now(), role:'Bauleiter', name:S.bauleiter||'', firmId:''}]
+    };
 
-    S.reportDate = today;
+    const nextDateObj = new Date(currentDate + 'T12:00:00');
+    if (!isNaN(nextDateObj.getTime())) nextDateObj.setDate(nextDateObj.getDate() + 1);
+    const nextDate = !isNaN(nextDateObj.getTime())
+      ? nextDateObj.toISOString().slice(0,10)
+      : ((typeof todayStr === 'function') ? todayStr() : new Date().toISOString().slice(0,10));
+
+    const fresh = deepMerge(newState(), preserved);
+    S = fresh;
+    S.reportDate = nextDate;
+    S.reportNr = (nextDate || '').replace(/-/g,'');
+    S.progressPlan = {month:'',soll:'',ist:'',phase:'',note:'',actionToday:''};
+    S.progress = 0;
     S.weather = '';
     S.tempMin = '';
     S.tempMax = '';
@@ -5910,42 +5936,50 @@ function startNewDay(){
     S.remarks = '';
     S.workEntries = [];
     S.photos = [];
-    const carryStatuses = ['Offen','In Arbeit','Wartet auf Firma','Wartet auf Freigabe','Verschoben'];
-    ensureTodoState();
-    S.todos = (S.todos||[]).map(t => carryStatuses.includes(t.status) ? ({...t, updatedAt:new Date().toISOString()}) : t);
-    S.progressPlan = {month:'',soll:'',ist:'',phase:'',note:'',actionToday:''};
-    S.progress = 0;
+    S.docs = [];
+    S.timeline = [];
+    S.weeklyReports = [];
+    S.workAreas = [];
+    S.maengel = [];
+    S.meetings = [];
+    S.kanban = {today:[], tomorrow:[], done:[]};
 
     if (S.personnelCounts) Object.keys(S.personnelCounts).forEach(k => S.personnelCounts[k] = 0);
     if (S.personnelNames) Object.keys(S.personnelNames).forEach(k => S.personnelNames[k] = []);
+    if (S.personnelFirms) Object.keys(S.personnelFirms).forEach(k => S.personnelFirms[k] = '');
+    if (Array.isArray(S.geraete)) {
+      S.geraete = S.geraete.map(g => ({...g, count:0, hours:0, brand:'', model:'', firmId:'', note:''}));
+    }
 
-    if (Array.isArray(S.signatures)) {
+    if (!Array.isArray(S.signatures) || !S.signatures.length) {
       S.signatures = [{id:'sig_'+Date.now(), role:'Bauleiter', name:S.bauleiter||'', firmId:''}];
     }
-    S.sig1 = S.bauleiter || '';
-    S.sig2 = '';
-    S.sig3 = '';
-    S.sig1Firm = '';
-    S.sig2Firm = '';
-    S.sig3Firm = '';
+    S.sig1 = S.signatures[0]?.name || S.bauleiter || '';
+    S.sig2 = S.signatures[1]?.name || '';
+    S.sig3 = S.signatures[2]?.name || '';
+    S.sig1Firm = S.signatures[0]?.firmId || '';
+    S.sig2Firm = S.signatures[1]?.firmId || '';
+    S.sig3Firm = S.signatures[2]?.firmId || '';
 
-    const resetIds = ['tMin','tMax','wSel','bSel','rBem','progSoll','progIst','progAbw','progPhase','progNote','progActionToday'];
-    resetIds.forEach(id => {
-      const el = document.getElementById(id);
-      if (!el) return;
-      el.value = '';
-    });
-
-    const rDate = document.getElementById('rDate');
-    if (rDate) rDate.value = today;
+    if (typeof applyStateToForm === 'function') applyStateToForm();
+    const loadDate = document.getElementById('loadReportDate');
+    if (loadDate) loadDate.value = '';
 
     if (typeof renderWorkEntries === 'function') renderWorkEntries();
     if (typeof renderPhotos === 'function') renderPhotos();
+    if (typeof renderDocs === 'function') renderDocs();
+    if (typeof renderTimeline === 'function') renderTimeline();
+    if (typeof renderWorkAreas === 'function') renderWorkAreas();
+    if (typeof renderMaengel === 'function') renderMaengel();
+    if (typeof renderMeetings === 'function') renderMeetings();
+    if (typeof renderKanban === 'function') renderKanban();
     if (typeof buildPersonnel === 'function') buildPersonnel();
+    if (typeof buildGeraete === 'function') buildGeraete();
     if (typeof renderSigGrid === 'function') renderSigGrid();
     if (typeof renderProgressPanel === 'function') renderProgressPanel();
     if (typeof renderProgressLive === 'function') renderProgressLive();
     if (typeof updateWeatherSummary === 'function') updateWeatherSummary();
+    if (typeof renderFirms === 'function') renderFirms();
     if (typeof updateBadges === 'function') updateBadges();
     if (typeof autoSave === 'function') autoSave();
 
