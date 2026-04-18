@@ -5574,7 +5574,7 @@ function delArchive(id){ archive=archive.filter(a=>a.id!==id); persistState(); r
 function clearArchiveConfirm(){ if(confirm('Archiv wirklich löschen? / Arşivi silmek istediğinizden emin misiniz?')){archive=[];persistState();renderArchive();showToast('Archiv geleert','ok');} }
 
 function exportArchiveExcel(id){const ar=archive.find(a=>a.id===id);if(!ar)return;const tmp=JSON.parse(JSON.stringify(S));Object.assign(S,ar.snap);exportExcel(ar.snap.reportDate||ar.reportDate);Object.assign(S,tmp);}
-function exportArchivePDF(id){const ar=archive.find(a=>a.id===id);if(!ar)return;const tmp=JSON.parse(JSON.stringify(S));Object.assign(S,ar.snap);exportPDF();Object.assign(S,tmp);}
+async function exportArchivePDF(id){const ar=archive.find(a=>a.id===id);if(!ar)return;const tmp=JSON.parse(JSON.stringify(S));Object.assign(S,ar.snap);try{await hydratePhotosFromIDB();await hydrateDocsFromIDB();await exportPDF();}finally{Object.assign(S,tmp);}}
 
 // ═══════════════════════════════════════════════════
 // DASHBOARD REFRESH
