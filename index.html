@@ -7595,8 +7595,11 @@ window.renderFirms = function renderFirmsPatched() {
         </div>
       </div>`;
     grid.appendChild(wrap);
-    loadDefaultGewerkPresets(false);
-    syncSettingsFields();
+    if (!Array.isArray(S.gewerkePresets) || !S.gewerkePresets.length) {
+      loadDefaultGewerkPresets(false);
+    } else {
+      syncSettingsFields();
+    }
   }
 
   function syncSettingsFields(){
