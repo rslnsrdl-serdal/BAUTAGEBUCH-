@@ -5984,6 +5984,9 @@ function startNewDay(){
     if (typeof renderProgressPanel === 'function') renderProgressPanel();
     if (typeof renderProgressLive === 'function') renderProgressLive();
     if (typeof updateWeatherSummary === 'function') updateWeatherSummary();
+    if (typeof ensurePatchState === 'function') ensurePatchState();
+    if (typeof syncSettingsFields === 'function') syncSettingsFields();
+    if (typeof renderGewerkCodeDataList === 'function') renderGewerkCodeDataList();
     if (typeof renderFirms === 'function') renderFirms();
     if (typeof updateBadges === 'function') updateBadges();
     if (typeof autoSave === 'function') autoSave();
