@@ -3282,6 +3282,9 @@ function loadArchiveIntoCurrent(id) {
   const ar = archive.find(a => a.id === id);
   if (!ar || !ar.snap) return;
   S = deepMerge(newState(), ar.snap);
+  if (Array.isArray(ar.archivePhotos) && ar.archivePhotos.length) {
+    S.photos = JSON.parse(JSON.stringify(ar.archivePhotos));
+  }
   persistState();
   applyStateToForm();
   if (typeof syncProjectInfoToTB === 'function') syncProjectInfoToTB();
@@ -3324,37 +3327,103 @@ function loadReportByDate() {
 // ═══════════════════════════════════════════════════
 // SAVE REPORT TO ARCHIVE
 // ═══════════════════════════════════════════════════
-function saveReport() {
-  collectFormToState();
-  const now = new Date();
-  const snap = makeStateSafeForStorage(S);
-  const id = 'ar_' + now.getTime();
-  const entry = {
-    id,
-    savedAt: now.toISOString(),
-    savedAtDisplay: formatDateTimeDisplay(now),
-    reportDate: S.reportDate || todayStr(),
-    reportNr: S.reportNr || '—',
-    projectName: S.projectName || '—',
-    projectNr: S.projectNr || '—',
-    bauleiter: S.bauleiter || '—',
-    weather: S.weather || '—',
-    progress: S.progress || 0,
-    totalPersonnel: Object.values(S.personnelCounts || {}).reduce((a,b)=>a+b,0),
-    workCount: (S.workEntries || []).length,
-    snap,
-  };
-  const existIdx = archive.findIndex(a => a.reportDate === entry.reportDate);
-  if (existIdx >= 0) {
-    archive[existIdx] = entry;
-    showToast('Bericht für den Tag aktualisiert: '+entry.reportDate, 'ok');
-  } else {
-    archive.unshift(entry);
-    showToast('Neuer Tagesbericht gespeichert: '+entry.reportDate, 'ok');
+async function prepareArchivePhotos() {
+  await hydratePhotosFromIDB();
+  const photos = Array.isArray(S.photos) ? S.photos : [];
+  const result = [];
+
+  async function shrinkImageData(data) {
+    if (!data) return '';
+    try {
+      const img = new Image();
+      img.src = data;
+      if (typeof img.decode === 'function') {
+        await img.decode();
+      } else {
+        await new Promise((resolve, reject) => {
+          img.onload = resolve;
+          img.onerror = reject;
+        });
+      }
+      const iw = img.naturalWidth || img.width || 1;
+      const ih = img.naturalHeight || img.height || 1;
+      const maxW = 1200;
+      const scale = iw > maxW ? maxW / iw : 1;
+      const cw = Math.max(1, Math.round(iw * scale));
+      const ch = Math.max(1, Math.round(ih * scale));
+      const canvas = document.createElement('canvas');
+      canvas.width = cw;
+      canvas.height = ch;
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, cw, ch);
+      ctx.drawImage(img, 0, 0, cw, ch);
+      return canvas.toDataURL('image/jpeg', 0.78);
+    } catch (err) {
+      console.warn('Archive photo shrink warning:', err);
+      return data;
+    }
   }
-  persistState();
-  updateBadges();
-  renderArchive();
+
+  for (const p of photos) {
+    const q = JSON.parse(JSON.stringify(p || {}));
+    if (!q.data && q.id) {
+      try {
+        const saved = await idbGetPhoto(q.id);
+        if (saved && saved.data) q.data = saved.data;
+      } catch (err) {
+        console.warn('Archive photo hydrate warning:', err);
+      }
+    }
+    if (q.data) q.data = await shrinkImageData(q.data);
+    result.push(q);
+  }
+  return result;
+}
+
+async function saveReport() {
+  try {
+    collectFormToState();
+    const now = new Date();
+    const archivePhotos = await prepareArchivePhotos();
+    const snap = makeStateSafeForStorage(S);
+    snap.photos = (archivePhotos || []).map(p => {
+      const q = { ...p };
+      delete q.data;
+      return q;
+    });
+    const id = 'ar_' + now.getTime();
+    const entry = {
+      id,
+      savedAt: now.toISOString(),
+      savedAtDisplay: formatDateTimeDisplay(now),
+      reportDate: S.reportDate || todayStr(),
+      reportNr: S.reportNr || '—',
+      projectName: S.projectName || '—',
+      projectNr: S.projectNr || '—',
+      bauleiter: S.bauleiter || '—',
+      weather: S.weather || '—',
+      progress: S.progress || 0,
+      totalPersonnel: Object.values(S.personnelCounts || {}).reduce((a,b)=>a+b,0),
+      workCount: (S.workEntries || []).length,
+      archivePhotos,
+      snap,
+    };
+    const existIdx = archive.findIndex(a => a.reportDate === entry.reportDate);
+    if (existIdx >= 0) {
+      archive[existIdx] = entry;
+      showToast('Bericht für den Tag aktualisiert: '+entry.reportDate, 'ok');
+    } else {
+      archive.unshift(entry);
+      showToast('Neuer Tagesbericht gespeichert: '+entry.reportDate, 'ok');
+    }
+    persistState();
+    updateBadges();
+    renderArchive();
+  } catch (err) {
+    console.error('Archiv speichern Fehler:', err);
+    showToast('Archiv speichern Fehler: ' + (err && err.message ? err.message : 'unbekannt'), 'err');
+  }
 }
 
 function formatDateTimeDisplay(d) {
@@ -5574,7 +5643,25 @@ function delArchive(id){ archive=archive.filter(a=>a.id!==id); persistState(); r
 function clearArchiveConfirm(){ if(confirm('Archiv wirklich löschen? / Arşivi silmek istediğinizden emin misiniz?')){archive=[];persistState();renderArchive();showToast('Archiv geleert','ok');} }
 
 function exportArchiveExcel(id){const ar=archive.find(a=>a.id===id);if(!ar)return;const tmp=JSON.parse(JSON.stringify(S));Object.assign(S,ar.snap);exportExcel(ar.snap.reportDate||ar.reportDate);Object.assign(S,tmp);}
-function exportArchivePDF(id){const ar=archive.find(a=>a.id===id);if(!ar)return;const tmp=JSON.parse(JSON.stringify(S));Object.assign(S,ar.snap);exportPDF();Object.assign(S,tmp);}
+async function exportArchivePDF(id){
+  const ar = archive.find(a => a.id === id);
+  if (!ar || !ar.snap) return;
+  const tmp = JSON.parse(JSON.stringify(S));
+  try {
+    S = deepMerge(newState(), ar.snap);
+    if (Array.isArray(ar.archivePhotos) && ar.archivePhotos.length) {
+      S.photos = JSON.parse(JSON.stringify(ar.archivePhotos));
+    } else {
+      await hydratePhotosFromIDB();
+    }
+    await exportPDF();
+  } catch (err) {
+    console.error('Archiv PDF Fehler:', err);
+    showToast('Archiv PDF Fehler: ' + (err && err.message ? err.message : 'unbekannt'), 'err');
+  } finally {
+    S = tmp;
+  }
+}
 
 // ═══════════════════════════════════════════════════
 // DASHBOARD REFRESH
