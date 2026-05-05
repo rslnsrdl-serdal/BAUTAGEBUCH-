@@ -1699,6 +1699,12 @@ body{
 @media(max-width:400px){
   .fr2{grid-template-columns:1fr;}
 }
+
+/* PROJECT KNOWLEDGE EDIT BUTTON VISIBILITY FIX */
+#projectKnowledgeView .wr-card{overflow:visible!important;}
+#projectKnowledgeView .pk-action-row{display:flex!important;width:100%;clear:both;}
+#projectKnowledgeView .pk-action-row .btn{white-space:normal!important;}
+@media(max-width:700px){#projectKnowledgeView .pk-action-row .btn{width:auto;justify-content:center;}}
 </style>
 <!-- ═══════════ HTML BODY ═══════════ -->
 <body>
@@ -7990,14 +7996,81 @@ window.renderFirms = function renderFirmsPatched() {
   };
 
   function renderProjectKnowledge(){
-    const box = e('projectKnowledgeView'); if (!box) return;
+    const box = e('projectKnowledgeView');
+    if (!box) return;
     ensureProjectKnowledgeState();
-    const wiki = S.projectWiki || [], docs = S.documentRegister || [], checks = S.checklists || {}, templates = S.mangelTemplates || [];
-    if (!wiki.length && !docs.length && !Object.keys(checks).length && !templates.length) { box.innerHTML = '<div class="empty-state" style="padding:20px;"><div class="ei">📚</div><h4>Noch kein Projekt-Setup</h4><p>JSON import ederek doldurabilirsin</p></div>'; return; }
-    const wikiHtml = `<div class="fg"><div class="fl">Projekt-Wiki</div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;"><button class="btn btn-ghost btn-xs" onclick="addProjectKnowledgeItem('wiki')">+ Wiki-Eintrag</button></div>${wiki.map((w,i)=>`<div class="wr-card" id="pk_card_wiki_${i}"><div style="display:flex;justify-content:space-between;gap:8px;align-items:flex-start;"><div><div class="wr-title">${h(w.category||'Allgemein')} · ${h(w.title||'')}</div><div class="wr-meta">${h(w.text||'')}${w.status?` · Status: ${h(w.status)}`:''}</div></div><div style="display:flex;gap:6px;flex-shrink:0;"><button class="btn btn-ghost btn-xs" onclick="editProjectKnowledgeItem('wiki',${i})">Bearbeiten</button><button class="btn btn-ghost btn-xs" onclick="deleteProjectKnowledgeItem('wiki',${i})">Löschen</button></div></div></div>`).join('')}</div>`;
-    const docHtml = `<div class="fg"><div class="fl">Dokumentenregister</div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;"><button class="btn btn-ghost btn-xs" onclick="addProjectKnowledgeItem('doc')">+ Dokument</button></div>${docs.map((d,i)=>`<div class="wr-card" id="pk_card_doc_${i}"><div style="display:flex;justify-content:space-between;gap:8px;align-items:flex-start;"><div><div class="wr-title">${h(d.title||'')}</div><div class="wr-meta">${h(d.type||'')} · ${h(d.location||'')}${d.date?` · ${h(d.date)}`:''}<br>${h(d.note||'')}</div></div><div style="display:flex;gap:6px;flex-shrink:0;"><button class="btn btn-ghost btn-xs" onclick="editProjectKnowledgeItem('doc',${i})">Bearbeiten</button><button class="btn btn-ghost btn-xs" onclick="deleteProjectKnowledgeItem('doc',${i})">Löschen</button></div></div></div>`).join('')}</div>`;
-    const checklistHtml = Object.keys(checks).length ? `<div class="fg"><div class="fl">Checklisten</div>${Object.keys(checks).map(k=>`<div class="wr-card" id="pk_check_${h(k)}"><div style="display:flex;justify-content:space-between;gap:8px;align-items:flex-start;"><div><div class="wr-title">${h(k)}</div><div class="wr-meta">${(checks[k]||[]).map(x=>'✓ '+h(x)).join('<br>')}</div></div><button class="btn btn-ghost btn-xs" onclick="editChecklist('${h(k)}')">Bearbeiten</button></div></div>`).join('')}</div>` : '';
-    const tplHtml = `<div class="fg"><div class="fl">Mangel-Vorlagen</div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;"><button class="btn btn-ghost btn-xs" onclick="addProjectKnowledgeItem('tpl')">+ Vorlage</button></div>${templates.map((t,i)=>`<div class="wr-card" id="pk_card_tpl_${i}"><div style="display:flex;justify-content:space-between;gap:8px;align-items:flex-start;"><div><div class="wr-title">${h(t.title||'')}</div><div class="wr-meta">${h(t.description||t.desc||'')}</div></div><div style="display:flex;gap:6px;flex-shrink:0;"><button class="btn btn-ghost btn-xs" onclick="editProjectKnowledgeItem('tpl',${i})">Bearbeiten</button><button class="btn btn-ghost btn-xs" onclick="deleteProjectKnowledgeItem('tpl',${i})">Löschen</button></div></div></div>`).join('')}</div>`;
+    const wiki = S.projectWiki || [];
+    const docs = S.documentRegister || [];
+    const checks = S.checklists || {};
+    const templates = S.mangelTemplates || [];
+    const escHtml = (v)=>h(v || '');
+
+    if (!wiki.length && !docs.length && !Object.keys(checks).length && !templates.length) {
+      box.innerHTML = '<div class="empty-state" style="padding:20px;"><div class="ei">📚</div><h4>Noch kein Projekt-Setup</h4><p>JSON import ederek doldurabilirsin</p></div>';
+      return;
+    }
+
+    const actionRow = (type, i) => `
+      <div class="pk-action-row" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;">
+        <button class="btn btn-primary btn-xs" type="button" onclick="editProjectKnowledgeItem('${type}',${i})">✏️ Bearbeiten / Düzenle</button>
+        <button class="btn btn-ghost btn-xs" type="button" onclick="deleteProjectKnowledgeItem('${type}',${i})">🗑 Löschen / Sil</button>
+      </div>`;
+
+    const wikiHtml = `
+      <div class="fg">
+        <div class="fl">Projekt-Wiki</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;">
+          <button class="btn btn-primary btn-xs" type="button" onclick="addProjectKnowledgeItem('wiki')">+ Wiki-Eintrag</button>
+        </div>
+        ${wiki.map((w,i)=>`
+          <div class="wr-card" id="pk_card_wiki_${i}">
+            <div class="wr-title">${escHtml(w.category || 'Allgemein')} · ${escHtml(w.title || '')}</div>
+            <div class="wr-meta" style="margin-top:5px;">${escHtml(w.text || '')}${w.status ? ` · Status: ${escHtml(w.status)}` : ''}</div>
+            ${actionRow('wiki', i)}
+          </div>`).join('')}
+      </div>`;
+
+    const docHtml = `
+      <div class="fg">
+        <div class="fl">Dokumentenregister</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;">
+          <button class="btn btn-primary btn-xs" type="button" onclick="addProjectKnowledgeItem('doc')">+ Dokument</button>
+        </div>
+        ${docs.map((d,i)=>`
+          <div class="wr-card" id="pk_card_doc_${i}">
+            <div class="wr-title">${escHtml(d.title || '')}</div>
+            <div class="wr-meta" style="margin-top:5px;">${escHtml(d.type || '')} · ${escHtml(d.location || '')}${d.date ? ` · ${escHtml(d.date)}` : ''}<br>${escHtml(d.note || '')}</div>
+            ${actionRow('doc', i)}
+          </div>`).join('')}
+      </div>`;
+
+    const checklistHtml = Object.keys(checks).length ? `
+      <div class="fg">
+        <div class="fl">Checklisten</div>
+        ${Object.keys(checks).map(k=>`
+          <div class="wr-card" id="pk_check_${escHtml(k)}">
+            <div class="wr-title">${escHtml(k)}</div>
+            <div class="wr-meta" style="margin-top:5px;">${(checks[k] || []).map(x=>'✓ '+escHtml(x)).join('<br>')}</div>
+            <div class="pk-action-row" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;">
+              <button class="btn btn-primary btn-xs" type="button" onclick="editChecklist('${escHtml(k)}')">✏️ Bearbeiten / Düzenle</button>
+            </div>
+          </div>`).join('')}
+      </div>` : '';
+
+    const tplHtml = `
+      <div class="fg">
+        <div class="fl">Mangel-Vorlagen</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;">
+          <button class="btn btn-primary btn-xs" type="button" onclick="addProjectKnowledgeItem('tpl')">+ Vorlage</button>
+        </div>
+        ${templates.map((t,i)=>`
+          <div class="wr-card" id="pk_card_tpl_${i}">
+            <div class="wr-title">${escHtml(t.title || '')}</div>
+            <div class="wr-meta" style="margin-top:5px;">${escHtml(t.description || t.desc || '')}</div>
+            ${actionRow('tpl', i)}
+          </div>`).join('')}
+      </div>`;
+
     box.innerHTML = wikiHtml + docHtml + checklistHtml + tplHtml;
   }
 
