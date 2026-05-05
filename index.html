@@ -7635,6 +7635,29 @@ window.renderFirms = function renderFirmsPatched() {
     wrap.style.gridColumn = '1 / -1';
     wrap.innerHTML = `
       <div class="card" style="margin-bottom:14px;">
+        <div class="card-hd"><div class="card-hd-l"><div class="ci ci-b">🧩</div><h3>Projekt-Setup importieren <small>JSON ile otomatik başlangıç verileri</small></h3></div></div>
+        <div class="card-body">
+          <div class="fg"><div class="fl">Setup JSON <span class="tr">Projekt, Wiki, Register, Checklisten, To-dos, Kontakte, Bereiche</span></div>
+            <textarea class="fta" id="setProjectSetupJson" style="min-height:190px;" placeholder="JSON hier einfügen..."></textarea>
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <button class="btn btn-ghost" onclick="loadExampleProjectSetup()">Beispiel laden</button>
+            <button class="btn btn-primary" onclick="importProjectSetup('missing')">Nur fehlende Daten ergänzen</button>
+            <button class="btn btn-ghost" onclick="importProjectSetup('overwrite')">Vorhandenes überschreiben</button>
+          </div>
+          <p style="font-size:12px;color:var(--text3);margin-top:10px;line-height:1.6;">
+            Sicherer Import: Tagesberichte, Archiv und Fotos werden nicht gelöscht. Standardmäßig werden nur fehlende Felder und neue Einträge ergänzt.
+          </p>
+          <div id="projectSetupStatus" style="font-size:12px;color:var(--text2);margin-top:8px;"></div>
+        </div>
+      </div>
+      <div class="card" style="margin-bottom:14px;">
+        <div class="card-hd"><div class="card-hd-l"><div class="ci ci-c">📚</div><h3>Projekt-Wiki / Dokumentenregister <small>Elinin altındaki proje hafızası</small></h3></div></div>
+        <div class="card-body" id="projectKnowledgeView">
+          <div class="empty-state" style="padding:20px;"><div class="ei">📚</div><h4>Noch kein Projekt-Setup</h4><p>JSON import ederek doldurabilirsin</p></div>
+        </div>
+      </div>
+      <div class="card" style="margin-bottom:14px;">
         <div class="card-hd"><div class="card-hd-l"><div class="ci ci-o">🏗</div><h3>Gewerke verwalten <small>Düzenlenebilir preset liste</small></h3></div></div>
         <div class="card-body">
           <div class="fg"><div class="fl">Liste <span class="tr">Format: CODE|NAME</span></div>
@@ -7689,6 +7712,174 @@ window.renderFirms = function renderFirmsPatched() {
     }
   }
 
+
+  function getDefaultProjectSetup(){
+    return {
+      project: {
+        projectNr: "GI0548",
+        projectName: "Panattoni Park Altdorf",
+        standort: "Im Erlet 2 & 28, 90518 Altdorf bei Nürnberg",
+        bauleiter: "Serdal Arslan"
+      },
+      projectWiki: [
+        {category:"Baustrom", title:"Baustrom / Bauwasser", text:"Bestellung, EVU-Abstimmung und formale Beauftragung hier dokumentieren.", status:"offen"},
+        {category:"Zutritt", title:"Baustellenzugang", text:"Zutrittsregeln, Ansprechpartner und Besonderheiten eintragen.", status:"offen"},
+        {category:"Sicherheit", title:"Sicherheitsregeln", text:"PSA, Anmeldepflicht, Besucherregelung und besondere Gefahrenbereiche dokumentieren.", status:"offen"},
+        {category:"Einkauf", title:"Anlage 01 und Anlage 03", text:"FLB / Vertragsleistungen als Grundlage für Einkauf und Bauausführung durcharbeiten.", status:"offen"}
+      ],
+      documentRegister: [
+        {title:"Anlage 01 - GU-Vertragsleistungen", type:"FLB / Vertragsleistung", location:"Server / Projektordner", date:"2026-03-20", note:"Grundlage für Leistungsumfang und Einkauf."},
+        {title:"Anlage 03", type:"FLB / Leistungsbeschreibung", location:"Server / Projektordner", date:"", note:"Für Einkauf und Bauausführung prüfen."},
+        {title:"Baustrom / Bauwasser Bestellung", type:"Bestellung / EVU", location:"Projektordner / Einkauf", date:"", note:"Formale Bestellung und EVU-Anstoß dokumentieren."},
+        {title:"SiGe-Unterlagen", type:"Sicherheit", location:"Projektordner", date:"", note:"PSA, Unterweisung, Besucherregelung und besondere Gefahrenbereiche."}
+      ],
+      checklists: {
+        tagesabschluss: [
+          "Personal eingetragen?",
+          "Geräte / Container geprüft?",
+          "Tageschronologie vollständig?",
+          "Fotos mit Firma / Bereich / Uhrzeit verknüpft?",
+          "Mängel erfasst?",
+          "To-dos aktualisiert?",
+          "Bericht gespeichert und PDF kontrolliert?"
+        ],
+        wochencheck: [
+          "Offene Mängel prüfen",
+          "Wartet-auf-Punkte prüfen",
+          "Dokumentenregister aktualisieren",
+          "JSON Backup exportieren"
+        ]
+      },
+      defaultTodos: [
+        {title:"Baustrom / Bauwasser Bestellung prüfen", category:"Baustelleneinrichtung", priority:"Hoch", status:"Offen", comment:"Formale Bestellung und EVU-Anstoß prüfen."},
+        {title:"Anlage 01 und 03 durcharbeiten", category:"Einkauf", priority:"Hoch", status:"Offen", comment:"Leistungsumfang grob kennen, bevor Einkauf startet."},
+        {title:"Wichtige Ansprechpartner erfassen", category:"Organisation", priority:"Mittel", status:"Offen", comment:"Bauherr, NU, EVU, Entsorger, SiGeKo."},
+        {title:"Tagesabschluss-Routine testen", category:"Dokumentation", priority:"Mittel", status:"Offen", comment:"PDF, Fotos und Archiv einmal prüfen."}
+      ],
+      contacts: [
+        {name:"Serdal Arslan", firm:"GOLDBECK", role:"Bauleitung", group:"Bauleitung", phone:"", mail:"", note:"Projektverantwortung / Bauleitung"}
+      ],
+      standardAreas: [
+        "Baustelleneinrichtung", "Außenanlagen", "Halle", "Büro / Sozialbereich", "Dach", "Fassade", "TGA", "Elektro", "Verkehrsflächen"
+      ],
+      mangelTemplates: [
+        {title:"Beschädigung / Ausführungsmangel", status:"offen", description:"Mangel beschreiben, Foto verknüpfen, Firma und Bereich zuordnen."},
+        {title:"Restarbeit offen", status:"offen", description:"Restleistung dokumentieren und Frist setzen."}
+      ]
+    };
+  }
+
+  window.loadExampleProjectSetup = function(){
+    const ta = e('setProjectSetupJson');
+    if (ta) ta.value = JSON.stringify(getDefaultProjectSetup(), null, 2);
+    const st = e('projectSetupStatus');
+    if (st) st.textContent = 'Beispiel-Setup geladen. Jetzt importieren.';
+  };
+
+  function arrayMergeByKey(oldArr, newArr, keyFn, overwrite){
+    const out = Array.isArray(oldArr) ? JSON.parse(JSON.stringify(oldArr)) : [];
+    (Array.isArray(newArr) ? newArr : []).forEach(item=>{
+      const key = keyFn(item || {});
+      const idx = out.findIndex(x=>keyFn(x || {}) === key);
+      if (idx >= 0) { if (overwrite) out[idx] = Object.assign({}, out[idx], item); }
+      else out.push(item);
+    });
+    return out;
+  }
+
+  function ensureProjectKnowledgeState(){
+    if (!Array.isArray(S.projectWiki)) S.projectWiki = [];
+    if (!Array.isArray(S.documentRegister)) S.documentRegister = [];
+    if (!S.checklists || typeof S.checklists !== 'object') S.checklists = {};
+    if (!Array.isArray(S.mangelTemplates)) S.mangelTemplates = [];
+    if (!Array.isArray(S.workAreas)) S.workAreas = [];
+    if (!Array.isArray(S.contacts)) S.contacts = [];
+    if (!Array.isArray(S.todos)) S.todos = [];
+  }
+
+  function applyProjectSetupObject(setup, mode){
+    const overwrite = mode === 'overwrite';
+    ensureProjectKnowledgeState();
+    const counts = {project:0,wiki:0,docs:0,checklists:0,todos:0,contacts:0,areas:0,templates:0};
+    if (setup.project && typeof setup.project === 'object') {
+      [['projectNr','projectNr'],['projectName','projectName'],['standort','standort'],['bauleiter','bauleiter']].forEach(([dst,src])=>{
+        const val = setup.project[src];
+        if (val !== undefined && val !== null && (overwrite || !String(S[dst]||'').trim())) { S[dst] = String(val); counts.project++; }
+      });
+    }
+    const oldWikiLen = S.projectWiki.length;
+    S.projectWiki = arrayMergeByKey(S.projectWiki, setup.projectWiki, x => String((x.category||'')+'|'+(x.title||'')).toLowerCase(), overwrite);
+    counts.wiki = Math.max(0, S.projectWiki.length - oldWikiLen);
+    const oldDocLen = S.documentRegister.length;
+    S.documentRegister = arrayMergeByKey(S.documentRegister, setup.documentRegister, x => String((x.title||'')+'|'+(x.type||'')).toLowerCase(), overwrite);
+    counts.docs = Math.max(0, S.documentRegister.length - oldDocLen);
+    if (setup.checklists && typeof setup.checklists === 'object') {
+      Object.keys(setup.checklists).forEach(k=>{
+        const incoming = Array.isArray(setup.checklists[k]) ? setup.checklists[k] : [];
+        if (overwrite || !Array.isArray(S.checklists[k])) { S.checklists[k] = incoming.slice(); counts.checklists += incoming.length; }
+        else incoming.forEach(v=>{ if (!S.checklists[k].includes(v)) { S.checklists[k].push(v); counts.checklists++; } });
+      });
+    }
+    (Array.isArray(setup.defaultTodos) ? setup.defaultTodos : []).forEach(t=>{
+      const title = String(t.title||'').trim(); if (!title) return;
+      const idx = S.todos.findIndex(x=>String(x.title||'').trim().toLowerCase() === title.toLowerCase());
+      const item = { id: idx >= 0 ? S.todos[idx].id : ('td_setup_'+Date.now()+'_'+Math.random().toString(36).slice(2)), title, desc: t.desc || t.description || '', firmId: t.firmId || '', category: t.category || 'Allgemein', priority: t.priority || 'Mittel', status: t.status || 'Offen', due: t.due || '', comment: t.comment || '', createdAt: idx >= 0 ? (S.todos[idx].createdAt || new Date().toISOString()) : new Date().toISOString(), updatedAt: new Date().toISOString(), history: idx >= 0 && Array.isArray(S.todos[idx].history) ? S.todos[idx].history : [] };
+      if (idx >= 0) { if (overwrite) S.todos[idx] = Object.assign({}, S.todos[idx], item); }
+      else { S.todos.unshift(item); counts.todos++; }
+    });
+    (Array.isArray(setup.contacts) ? setup.contacts : []).forEach(c=>{
+      const name = String(c.name||'').trim(); if (!name) return;
+      const key = (name+'|'+(c.mail||'')+'|'+(c.phone||'')).toLowerCase();
+      const idx = S.contacts.findIndex(x => String((x.name||'')+'|'+(x.mail||'')+'|'+(x.phone||'')).toLowerCase() === key);
+      const item = { id: idx >= 0 ? S.contacts[idx].id : ('co_setup_'+Date.now()+'_'+Math.random().toString(36).slice(2)), name, firmId:c.firmId||'', role:c.role||'', group:c.group||'Sonstige', phone:c.phone||'', mail:c.mail||'', note:c.note||'' };
+      if (idx >= 0) { if (overwrite) S.contacts[idx] = Object.assign({}, S.contacts[idx], item); }
+      else { S.contacts.push(item); counts.contacts++; }
+    });
+    (Array.isArray(setup.standardAreas) ? setup.standardAreas : []).forEach(a=>{
+      const name = typeof a === 'string' ? a : (a && a.name); const val = String(name||'').trim(); if (!val) return;
+      const exists = S.workAreas.some(x => String((typeof x === 'string' ? x : x.name)||'').trim().toLowerCase() === val.toLowerCase());
+      if (!exists) { S.workAreas.push(val); counts.areas++; }
+    });
+    const oldTplLen = S.mangelTemplates.length;
+    S.mangelTemplates = arrayMergeByKey(S.mangelTemplates, setup.mangelTemplates, x => String(x.title||'').toLowerCase(), overwrite);
+    counts.templates = Math.max(0, S.mangelTemplates.length - oldTplLen);
+    return counts;
+  }
+
+  window.importProjectSetup = function(mode='missing'){
+    const ta = e('setProjectSetupJson');
+    const raw = (ta && ta.value ? ta.value : '').trim();
+    if (!raw) { if (typeof showToast === 'function') showToast('Projekt-Setup JSON einfügen oder Beispiel laden','warn'); return; }
+    let setup;
+    try { setup = JSON.parse(raw); } catch(err) { if (typeof showToast === 'function') showToast('JSON Fehler: '+err.message,'err'); return; }
+    const counts = applyProjectSetupObject(setup, mode);
+    applyStateToForm();
+    if (typeof syncProjectInfoToTB === 'function') syncProjectInfoToTB();
+    if (typeof populateTodoFirmSelects === 'function') populateTodoFirmSelects();
+    if (typeof renderTodoPage === 'function') renderTodoPage();
+    if (typeof renderContacts === 'function') renderContacts();
+    if (typeof renderWorkAreas === 'function') renderWorkAreas();
+    if (typeof updateBadges === 'function') updateBadges();
+    if (typeof refreshDash === 'function') refreshDash();
+    renderProjectKnowledge();
+    if (typeof autoSave === 'function') autoSave();
+    const msg = `Projekt-Setup übernommen: ${counts.project} Projektfelder, ${counts.wiki} Wiki, ${counts.docs} Dokumente, ${counts.todos} To-dos, ${counts.contacts} Kontakte, ${counts.areas} Bereiche`;
+    const st = e('projectSetupStatus'); if (st) st.textContent = msg;
+    if (typeof showToast === 'function') showToast('Projekt-Setup übernommen','ok');
+  };
+
+  function renderProjectKnowledge(){
+    const box = e('projectKnowledgeView'); if (!box) return;
+    ensureProjectKnowledgeState();
+    const wiki = S.projectWiki || [], docs = S.documentRegister || [], checks = S.checklists || {}, templates = S.mangelTemplates || [];
+    if (!wiki.length && !docs.length && !Object.keys(checks).length && !templates.length) { box.innerHTML = '<div class="empty-state" style="padding:20px;"><div class="ei">📚</div><h4>Noch kein Projekt-Setup</h4><p>JSON import ederek doldurabilirsin</p></div>'; return; }
+    const wikiHtml = wiki.length ? `<div class="fg"><div class="fl">Projekt-Wiki</div>${wiki.map(w=>`<div class="wr-card"><div class="wr-title">${h(w.category||'Allgemein')} · ${h(w.title||'')}</div><div class="wr-meta">${h(w.text||'')}${w.status?` · Status: ${h(w.status)}`:''}</div></div>`).join('')}</div>` : '';
+    const docHtml = docs.length ? `<div class="fg"><div class="fl">Dokumentenregister</div>${docs.map(d=>`<div class="wr-card"><div class="wr-title">${h(d.title||'')}</div><div class="wr-meta">${h(d.type||'')} · ${h(d.location||'')}${d.date?` · ${h(d.date)}`:''}<br>${h(d.note||'')}</div></div>`).join('')}</div>` : '';
+    const checklistHtml = Object.keys(checks).length ? `<div class="fg"><div class="fl">Checklisten</div>${Object.keys(checks).map(k=>`<div class="wr-card"><div class="wr-title">${h(k)}</div><div class="wr-meta">${(checks[k]||[]).map(x=>'✓ '+h(x)).join('<br>')}</div></div>`).join('')}</div>` : '';
+    const tplHtml = templates.length ? `<div class="fg"><div class="fl">Mangel-Vorlagen</div>${templates.map(t=>`<div class="wr-card"><div class="wr-title">${h(t.title||'')}</div><div class="wr-meta">${h(t.description||t.desc||'')}</div></div>`).join('')}</div>` : '';
+    box.innerHTML = wikiHtml + docHtml + checklistHtml + tplHtml;
+  }
+
   function syncSettingsFields(){
     const from = e('setExcelFrom'), to = e('setExcelTo');
     if (from && !from.value) from.value = S.reportDate || (window.todayStr?todayStr():new Date().toISOString().slice(0,10));
@@ -7702,6 +7893,7 @@ window.renderFirms = function renderFirmsPatched() {
     }
     const list = e('setGewerkList');
     if (list) list.value = (S.gewerkePresets||[]).map(g=>`${g.code}|${g.name}`).join('\n');
+    renderProjectKnowledge();
   }
 
   window.loadDefaultGewerkPresets = function(showMsg=true){
