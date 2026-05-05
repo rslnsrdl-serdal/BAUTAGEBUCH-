@@ -7868,15 +7868,136 @@ window.renderFirms = function renderFirmsPatched() {
     if (typeof showToast === 'function') showToast('Projekt-Setup übernommen','ok');
   };
 
+  window.editProjectKnowledgeItem = function(type, idx){
+    ensureProjectKnowledgeState();
+    const box = e('projectKnowledgeView'); if (!box) return;
+    const dataMap = {
+      wiki: S.projectWiki || [],
+      doc: S.documentRegister || [],
+      tpl: S.mangelTemplates || []
+    };
+    const arr = dataMap[type];
+    const item = arr && arr[idx];
+    if (!item) return;
+    const h = (v)=>String(v ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    let form = '';
+    if (type === 'wiki') {
+      form = `
+        <div class="wr-card">
+          <div class="fr2">
+            <div class="fg"><div class="fl">Kategorie</div><input class="fi" id="pk_cat_${idx}" value="${h(item.category||'')}"></div>
+            <div class="fg"><div class="fl">Titel</div><input class="fi" id="pk_title_${idx}" value="${h(item.title||'')}"></div>
+          </div>
+          <div class="fg"><div class="fl">Text</div><textarea class="fta" id="pk_text_${idx}" style="min-height:110px;">${h(item.text||'')}</textarea></div>
+          <div class="fr2">
+            <div class="fg"><div class="fl">Status</div><input class="fi" id="pk_status_${idx}" value="${h(item.status||'')}"></div>
+            <div class="fg" style="display:flex;align-items:flex-end;gap:8px;"><button class="btn btn-primary btn-sm" onclick="saveProjectKnowledgeItem('wiki',${idx})">Speichern</button><button class="btn btn-ghost btn-sm" onclick="renderProjectKnowledge()">Abbrechen</button></div>
+          </div>
+        </div>`;
+    } else if (type === 'doc') {
+      form = `
+        <div class="wr-card">
+          <div class="fr2">
+            <div class="fg"><div class="fl">Titel</div><input class="fi" id="pk_doc_title_${idx}" value="${h(item.title||'')}"></div>
+            <div class="fg"><div class="fl">Typ</div><input class="fi" id="pk_doc_type_${idx}" value="${h(item.type||'')}"></div>
+          </div>
+          <div class="fr2">
+            <div class="fg"><div class="fl">Ablage / Ort</div><input class="fi" id="pk_doc_loc_${idx}" value="${h(item.location||'')}"></div>
+            <div class="fg"><div class="fl">Datum</div><input class="fi" id="pk_doc_date_${idx}" value="${h(item.date||'')}"></div>
+          </div>
+          <div class="fg"><div class="fl">Notiz</div><textarea class="fta" id="pk_doc_note_${idx}" style="min-height:90px;">${h(item.note||'')}</textarea></div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;"><button class="btn btn-primary btn-sm" onclick="saveProjectKnowledgeItem('doc',${idx})">Speichern</button><button class="btn btn-ghost btn-sm" onclick="renderProjectKnowledge()">Abbrechen</button></div>
+        </div>`;
+    } else if (type === 'tpl') {
+      form = `
+        <div class="wr-card">
+          <div class="fg"><div class="fl">Titel</div><input class="fi" id="pk_tpl_title_${idx}" value="${h(item.title||'')}"></div>
+          <div class="fg"><div class="fl">Beschreibung</div><textarea class="fta" id="pk_tpl_desc_${idx}" style="min-height:90px;">${h(item.description||item.desc||'')}</textarea></div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;"><button class="btn btn-primary btn-sm" onclick="saveProjectKnowledgeItem('tpl',${idx})">Speichern</button><button class="btn btn-ghost btn-sm" onclick="renderProjectKnowledge()">Abbrechen</button></div>
+        </div>`;
+    }
+    const target = document.getElementById(`pk_card_${type}_${idx}`);
+    if (target) target.outerHTML = form;
+  };
+
+  window.saveProjectKnowledgeItem = function(type, idx){
+    ensureProjectKnowledgeState();
+    if (type === 'wiki' && S.projectWiki[idx]) {
+      S.projectWiki[idx].category = (e(`pk_cat_${idx}`)?.value || '').trim() || 'Allgemein';
+      S.projectWiki[idx].title = (e(`pk_title_${idx}`)?.value || '').trim();
+      S.projectWiki[idx].text = (e(`pk_text_${idx}`)?.value || '').trim();
+      S.projectWiki[idx].status = (e(`pk_status_${idx}`)?.value || '').trim();
+    }
+    if (type === 'doc' && S.documentRegister[idx]) {
+      S.documentRegister[idx].title = (e(`pk_doc_title_${idx}`)?.value || '').trim();
+      S.documentRegister[idx].type = (e(`pk_doc_type_${idx}`)?.value || '').trim();
+      S.documentRegister[idx].location = (e(`pk_doc_loc_${idx}`)?.value || '').trim();
+      S.documentRegister[idx].date = (e(`pk_doc_date_${idx}`)?.value || '').trim();
+      S.documentRegister[idx].note = (e(`pk_doc_note_${idx}`)?.value || '').trim();
+    }
+    if (type === 'tpl' && S.mangelTemplates[idx]) {
+      S.mangelTemplates[idx].title = (e(`pk_tpl_title_${idx}`)?.value || '').trim();
+      S.mangelTemplates[idx].description = (e(`pk_tpl_desc_${idx}`)?.value || '').trim();
+    }
+    persistState();
+    renderProjectKnowledge();
+    if (typeof showToast === 'function') showToast('Eintrag gespeichert','ok');
+  };
+
+  window.addProjectKnowledgeItem = function(type){
+    ensureProjectKnowledgeState();
+    if (type === 'wiki') S.projectWiki.push({category:'Allgemein', title:'Neuer Wiki-Eintrag', text:'', status:'offen'});
+    if (type === 'doc') S.documentRegister.push({title:'Neues Dokument', type:'', location:'', date:'', note:''});
+    if (type === 'tpl') S.mangelTemplates.push({title:'Neue Vorlage', description:''});
+    persistState();
+    renderProjectKnowledge();
+    const arr = type === 'wiki' ? S.projectWiki : (type === 'doc' ? S.documentRegister : S.mangelTemplates);
+    setTimeout(()=>editProjectKnowledgeItem(type, arr.length-1), 0);
+  };
+
+  window.deleteProjectKnowledgeItem = function(type, idx){
+    ensureProjectKnowledgeState();
+    if (!confirm('Eintrag löschen?')) return;
+    if (type === 'wiki') S.projectWiki.splice(idx,1);
+    if (type === 'doc') S.documentRegister.splice(idx,1);
+    if (type === 'tpl') S.mangelTemplates.splice(idx,1);
+    persistState();
+    renderProjectKnowledge();
+    if (typeof showToast === 'function') showToast('Eintrag gelöscht','ok');
+  };
+
+  window.editChecklist = function(key){
+    ensureProjectKnowledgeState();
+    const arr = Array.isArray(S.checklists[key]) ? S.checklists[key] : [];
+    const h = (v)=>String(v ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    const target = document.getElementById(`pk_check_${key}`);
+    if (!target) return;
+    target.outerHTML = `
+      <div class="wr-card" id="pk_check_${h(key)}">
+        <div class="wr-title">${h(key)}</div>
+        <div class="fg" style="margin-top:8px;"><div class="fl">Checklisteneinträge <span class="tr">Her satır bir madde</span></div><textarea class="fta" id="pk_check_txt_${h(key)}" style="min-height:120px;">${h(arr.join('\n'))}</textarea></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;"><button class="btn btn-primary btn-sm" onclick="saveChecklist('${h(key)}')">Speichern</button><button class="btn btn-ghost btn-sm" onclick="renderProjectKnowledge()">Abbrechen</button></div>
+      </div>`;
+  };
+
+  window.saveChecklist = function(key){
+    ensureProjectKnowledgeState();
+    const txt = e(`pk_check_txt_${key}`)?.value || '';
+    S.checklists[key] = txt.split('\n').map(x=>x.trim()).filter(Boolean);
+    persistState();
+    renderProjectKnowledge();
+    if (typeof showToast === 'function') showToast('Checkliste gespeichert','ok');
+  };
+
   function renderProjectKnowledge(){
     const box = e('projectKnowledgeView'); if (!box) return;
     ensureProjectKnowledgeState();
     const wiki = S.projectWiki || [], docs = S.documentRegister || [], checks = S.checklists || {}, templates = S.mangelTemplates || [];
     if (!wiki.length && !docs.length && !Object.keys(checks).length && !templates.length) { box.innerHTML = '<div class="empty-state" style="padding:20px;"><div class="ei">📚</div><h4>Noch kein Projekt-Setup</h4><p>JSON import ederek doldurabilirsin</p></div>'; return; }
-    const wikiHtml = wiki.length ? `<div class="fg"><div class="fl">Projekt-Wiki</div>${wiki.map(w=>`<div class="wr-card"><div class="wr-title">${h(w.category||'Allgemein')} · ${h(w.title||'')}</div><div class="wr-meta">${h(w.text||'')}${w.status?` · Status: ${h(w.status)}`:''}</div></div>`).join('')}</div>` : '';
-    const docHtml = docs.length ? `<div class="fg"><div class="fl">Dokumentenregister</div>${docs.map(d=>`<div class="wr-card"><div class="wr-title">${h(d.title||'')}</div><div class="wr-meta">${h(d.type||'')} · ${h(d.location||'')}${d.date?` · ${h(d.date)}`:''}<br>${h(d.note||'')}</div></div>`).join('')}</div>` : '';
-    const checklistHtml = Object.keys(checks).length ? `<div class="fg"><div class="fl">Checklisten</div>${Object.keys(checks).map(k=>`<div class="wr-card"><div class="wr-title">${h(k)}</div><div class="wr-meta">${(checks[k]||[]).map(x=>'✓ '+h(x)).join('<br>')}</div></div>`).join('')}</div>` : '';
-    const tplHtml = templates.length ? `<div class="fg"><div class="fl">Mangel-Vorlagen</div>${templates.map(t=>`<div class="wr-card"><div class="wr-title">${h(t.title||'')}</div><div class="wr-meta">${h(t.description||t.desc||'')}</div></div>`).join('')}</div>` : '';
+    const wikiHtml = `<div class="fg"><div class="fl">Projekt-Wiki</div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;"><button class="btn btn-ghost btn-xs" onclick="addProjectKnowledgeItem('wiki')">+ Wiki-Eintrag</button></div>${wiki.map((w,i)=>`<div class="wr-card" id="pk_card_wiki_${i}"><div style="display:flex;justify-content:space-between;gap:8px;align-items:flex-start;"><div><div class="wr-title">${h(w.category||'Allgemein')} · ${h(w.title||'')}</div><div class="wr-meta">${h(w.text||'')}${w.status?` · Status: ${h(w.status)}`:''}</div></div><div style="display:flex;gap:6px;flex-shrink:0;"><button class="btn btn-ghost btn-xs" onclick="editProjectKnowledgeItem('wiki',${i})">Bearbeiten</button><button class="btn btn-ghost btn-xs" onclick="deleteProjectKnowledgeItem('wiki',${i})">Löschen</button></div></div></div>`).join('')}</div>`;
+    const docHtml = `<div class="fg"><div class="fl">Dokumentenregister</div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;"><button class="btn btn-ghost btn-xs" onclick="addProjectKnowledgeItem('doc')">+ Dokument</button></div>${docs.map((d,i)=>`<div class="wr-card" id="pk_card_doc_${i}"><div style="display:flex;justify-content:space-between;gap:8px;align-items:flex-start;"><div><div class="wr-title">${h(d.title||'')}</div><div class="wr-meta">${h(d.type||'')} · ${h(d.location||'')}${d.date?` · ${h(d.date)}`:''}<br>${h(d.note||'')}</div></div><div style="display:flex;gap:6px;flex-shrink:0;"><button class="btn btn-ghost btn-xs" onclick="editProjectKnowledgeItem('doc',${i})">Bearbeiten</button><button class="btn btn-ghost btn-xs" onclick="deleteProjectKnowledgeItem('doc',${i})">Löschen</button></div></div></div>`).join('')}</div>`;
+    const checklistHtml = Object.keys(checks).length ? `<div class="fg"><div class="fl">Checklisten</div>${Object.keys(checks).map(k=>`<div class="wr-card" id="pk_check_${h(k)}"><div style="display:flex;justify-content:space-between;gap:8px;align-items:flex-start;"><div><div class="wr-title">${h(k)}</div><div class="wr-meta">${(checks[k]||[]).map(x=>'✓ '+h(x)).join('<br>')}</div></div><button class="btn btn-ghost btn-xs" onclick="editChecklist('${h(k)}')">Bearbeiten</button></div></div>`).join('')}</div>` : '';
+    const tplHtml = `<div class="fg"><div class="fl">Mangel-Vorlagen</div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;"><button class="btn btn-ghost btn-xs" onclick="addProjectKnowledgeItem('tpl')">+ Vorlage</button></div>${templates.map((t,i)=>`<div class="wr-card" id="pk_card_tpl_${i}"><div style="display:flex;justify-content:space-between;gap:8px;align-items:flex-start;"><div><div class="wr-title">${h(t.title||'')}</div><div class="wr-meta">${h(t.description||t.desc||'')}</div></div><div style="display:flex;gap:6px;flex-shrink:0;"><button class="btn btn-ghost btn-xs" onclick="editProjectKnowledgeItem('tpl',${i})">Bearbeiten</button><button class="btn btn-ghost btn-xs" onclick="deleteProjectKnowledgeItem('tpl',${i})">Löschen</button></div></div></div>`).join('')}</div>`;
     box.innerHTML = wikiHtml + docHtml + checklistHtml + tplHtml;
   }
 
