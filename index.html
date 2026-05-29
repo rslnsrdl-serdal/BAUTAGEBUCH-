@@ -6347,6 +6347,7 @@ function ensureSeroPdfFonts(doc){
 async function exportPDF() {
   try {
     collectFormToState();
+    if (typeof hydratePhotosFromIDB === 'function') await hydratePhotosFromIDB();
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF({ unit: 'mm', format: 'a4' });
 
@@ -6569,12 +6570,55 @@ async function exportPDF() {
       ['Bauleiter', S.bauleiter || '']
     ]);
 
+    const ps = S.projectSetup || {};
+    const psRows = [
+      ['Baustellenadresse', ps.baustellenadresse || ''],
+      ['Lieferadresse', ps.lieferadresse || ''],
+      ['Notfall / Sicherheit', ps.notfall || ''],
+      ['Besonderheiten', ps.besonderheiten || '']
+    ].filter(r => String(r[1] || '').trim());
+    if (psRows.length) {
+      addSectionTitle('Projekt-Stammdaten');
+      addKV(psRows);
+    }
+
+    if ((S.documentRegister || []).length) {
+      addSectionTitle('Dokumentenregister');
+      const docRegRows = (S.documentRegister || []).map(d => [
+        d.title || '',
+        d.type || '',
+        [d.date || '', d.location || ''].filter(Boolean).join(' | '),
+        d.note || ''
+      ]);
+      drawTable(['Dokument','Typ','Stand / Ablage','Notiz'], docRegRows, [48, 28, 50, 56]);
+    }
+
     addSectionTitle('Wetter');
     addKV([
       ['Wetter automatisch', (S.autoWeather && S.autoWeather.weather) ? S.autoWeather.weather : (S.weather || '-')],
       ['Temperatur', (S.autoWeather ? `${S.autoWeather.tempMin} °C bis ${S.autoWeather.tempMax} °C` : `${S.tempMin || '-'} °C bis ${S.tempMax || '-'} °C`)],
       ['Wind / Regen', (S.autoWeather ? `${S.autoWeather.wind} km/h / ${S.autoWeather.rainDay} mm` : `${S.wind || '-'} / -`)]
     ]);
+
+    addSectionTitle('Aktive Firmen');
+    const referencedFirmIds = new Set();
+    (S.workEntries || []).forEach(w => { if (w.firmId) referencedFirmIds.add(w.firmId); });
+    (S.timeline || []).forEach(t => { if (t.firmId) referencedFirmIds.add(t.firmId); });
+    Object.values(S.personnelFirms || {}).forEach(id => { if (id) referencedFirmIds.add(id); });
+    (S.geraete || []).forEach(g => { if (g.firmId) referencedFirmIds.add(g.firmId); });
+    (S.maengel || []).forEach(m => { if (m.firmId && m.status !== 'erledigt') referencedFirmIds.add(m.firmId); });
+    (S.todos || []).forEach(t => { if (t.firmId && !['Erledigt','Entfällt'].includes(t.status)) referencedFirmIds.add(t.firmId); });
+    const activeFirmRows = (S.contractors || [])
+      .filter(f => f.status === 'active' || referencedFirmIds.has(f.id))
+      .map(f => [
+        f.name || '',
+        f.trade || '',
+        f.contact || '',
+        f.phone || '',
+        f.status || ''
+      ]);
+    if (activeFirmRows.length) drawTable(['Firma','Gewerk','Ansprechpartner','Telefon','Status'], activeFirmRows, [44, 38, 42, 32, 24]);
+    else addKV([['Aktive Firmen','Keine aktiven Firmen']]);
 
     addSectionTitle('Bauarbeiten');
     const workRows = (S.workEntries || []).map((w) => {
@@ -6642,6 +6686,69 @@ async function exportPDF() {
     }).filter(Boolean);
     if (geraetRows.length) drawTable(['Gerät','Anzahl','Typ','Firma','Bemerkung'], geraetRows, [28, 15, 34, 38, 57]);
     else addKV([['Geräte','Keine aktiven Einträge']]);
+
+    addSectionTitle('Offene Mängel');
+    const mangelRows = (S.maengel || [])
+      .filter(m => m.status !== 'erledigt')
+      .map(m => {
+        const firmName = (S.contractors || []).find(f => f.id === m.firmId)?.name || '';
+        const photo = (S.photos || []).find(p => p.id === m.photoId);
+        return [
+          m.title || '',
+          m.status === 'bearbeitung' ? 'In Bearbeitung' : 'Offen',
+          [m.area || '', firmName || '', m.owner || ''].filter(Boolean).join(' | '),
+          [m.deadline ? `Frist: ${m.deadline}` : '', m.desc || '', photo ? `Foto: ${photo.caption || photo.name || photo.id}` : ''].filter(Boolean).join(' | ')
+        ];
+      });
+    if (mangelRows.length) drawTable(['Mangel','Status','Ort / Firma / Verantwortlich','Beschreibung'], mangelRows, [42, 28, 52, 60]);
+    else addKV([['Offene Mängel','Keine offenen Mängel']]);
+
+    addSectionTitle('Offene To-dos');
+    const todoRows = (S.todos || [])
+      .filter(t => !['Erledigt','Entfällt'].includes(t.status))
+      .map(t => {
+        const firmName = (S.contractors || []).find(f => f.id === t.firmId)?.name || '';
+        return [
+          t.title || '',
+          t.status || 'Offen',
+          [t.priority || '', t.due ? `Fällig: ${t.due}` : '', firmName || ''].filter(Boolean).join(' | '),
+          [t.desc || '', t.comment || ''].filter(Boolean).join(' | ')
+        ];
+      });
+    if (todoRows.length) drawTable(['Aufgabe','Status','Priorität / Frist / Firma','Beschreibung'], todoRows, [45, 30, 52, 55]);
+    else addKV([['Offene To-dos','Keine offenen Aufgaben']]);
+
+    addSectionTitle('Container');
+    const containerRows = (S.containers || []).map(c => [
+      c.id || '',
+      c.type || '',
+      c.status || '',
+      [c.size || '', c.loc || c.location || '', c.note || ''].filter(Boolean).join(' | ')
+    ]);
+    if (containerRows.length) drawTable(['ID','Typ','Status','Standort / Notiz'], containerRows, [24, 38, 32, 88]);
+    else addKV([['Container','Keine Container']]);
+
+    addSectionTitle('Besprechungen');
+    const reportDate = S.reportDate || todayStr();
+    const meetingRows = (S.meetings || [])
+      .filter(m => !m.date || m.date === reportDate)
+      .map(m => [
+        [m.date || reportDate, m.time || ''].filter(Boolean).join(' '),
+        m.title || '',
+        m.loc || '',
+        [m.att || '', m.agenda || '', m.dec || '', m.next ? `Nächster Termin: ${m.next}` : ''].filter(Boolean).join(' | ')
+      ]);
+    if (meetingRows.length) drawTable(['Datum / Zeit','Thema','Ort','Details'], meetingRows, [32, 42, 30, 78]);
+    else addKV([['Besprechungen','Keine Besprechungen für diesen Berichtstag']]);
+
+    if (S.checklists && Array.isArray(S.checklists.tagesabschluss) && S.checklists.tagesabschluss.length) {
+      addSectionTitle('Tagesabschluss-Checkliste');
+      const checklistRows = S.checklists.tagesabschluss.map(c => [
+        c.done ? 'OK' : 'Offen',
+        c.text || ''
+      ]);
+      drawTable(['Status','Punkt'], checklistRows, [22, 160]);
+    }
 
     addSectionTitle('Bemerkungen');
     if (S.remarks) addParagraph(S.remarks);
