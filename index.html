@@ -1699,6 +1699,17 @@ body{
 @media(max-width:400px){
   .fr2{grid-template-columns:1fr;}
 }
+
+
+/* PROJECT STAMMDATEN / REGISTER PATCH */
+.ps-register-card{padding:10px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:12px;margin-bottom:8px;}
+.ps-register-title{font-size:13px;font-weight:700;color:var(--text);line-height:1.4;}
+.ps-register-meta{font-size:11px;color:var(--text3);line-height:1.6;margin-top:3px;}
+.ps-register-note{font-size:12px;color:var(--text2);line-height:1.6;margin-top:6px;white-space:pre-wrap;}
+.ps-check-row{display:flex;align-items:flex-start;gap:9px;padding:9px 10px;border:1px solid var(--border);background:var(--bg3);border-radius:10px;margin-bottom:7px;}
+.ps-check-row input{margin-top:2px;}
+.ps-check-text{flex:1;font-size:12px;line-height:1.5;color:var(--text);}
+
 </style>
 <!-- ═══════════ HTML BODY ═══════════ -->
 <body>
@@ -2376,6 +2387,80 @@ body{
         <p style="font-size:12px;color:var(--text3);margin-top:10px;">
           Belirli bir günü arşivden açabilir veya yeni güne geçebilirsin.
         </p>
+      </div>
+    </div>
+
+
+    <div class="card" style="grid-column:1/-1;">
+      <div class="card-hd">
+        <div class="card-hd-l"><div class="ci ci-c">🏗️</div><h3>Projekt-Stammdaten <small>Proje sabit bilgileri</small></h3></div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;">
+          <button class="btn btn-primary btn-xs" type="button" onclick="psSaveProjectStammdaten()">Speichern</button>
+          <button class="btn btn-ghost btn-xs" type="button" onclick="psApplyProjectToHeader()">Header übernehmen</button>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="fr2">
+          <div class="fg"><div class="fl">Projekt-Nr.</div><input class="fi" id="psProjectNr" placeholder="z. B. GI0548"></div>
+          <div class="fg"><div class="fl">Bauvorhaben</div><input class="fi" id="psProjectName" placeholder="Projektname"></div>
+          <div class="fg"><div class="fl">Standort</div><input class="fi" id="psStandort" placeholder="Ort / Adresse"></div>
+          <div class="fg"><div class="fl">Bauleiter</div><input class="fi" id="psBauleiter" placeholder="Name"></div>
+          <div class="fg"><div class="fl">Baustellenadresse</div><input class="fi" id="psBaustellenadresse" placeholder="Liefer-/Navigationsadresse"></div>
+          <div class="fg"><div class="fl">Lieferadresse</div><input class="fi" id="psLieferadresse" placeholder="exakte Lieferadresse"></div>
+          <div class="fg"><div class="fl">Notfall / Sicherheit</div><input class="fi" id="psNotfall" placeholder="z. B. Ersthelfer, SiGeKo, Rettungspunkt"></div>
+          <div class="fg"><div class="fl">Besonderheiten</div><input class="fi" id="psBesonderheiten" placeholder="Zufahrt, Anmeldung, Bauherr-Vorgaben…"></div>
+        </div>
+        <p style="font-size:12px;color:var(--text3);line-height:1.6;margin-top:6px;">Bu alan Wiki değildir. Sadece proje boyunca sık lazım olan sabit bilgileri tutar.</p>
+      </div>
+    </div>
+
+    <div class="card" style="grid-column:1/-1;">
+      <div class="card-hd">
+        <div class="card-hd-l"><div class="ci ci-b">📑</div><h3>Dokumentenregister <small>Belge referans listesi</small></h3></div>
+        <button class="btn btn-primary btn-xs" type="button" onclick="psSaveDocRegisterItem()">+ Dokument speichern</button>
+      </div>
+      <div class="card-body">
+        <input type="hidden" id="psDocEditId">
+        <div class="fr2">
+          <div class="fg"><div class="fl">Dokument</div><input class="fi" id="psDocTitle" placeholder="z. B. Anlage 01 – GU-Vertragsleistungen"></div>
+          <div class="fg"><div class="fl">Typ</div><input class="fi" id="psDocType" placeholder="Plan, Vertrag, Statik, Brandschutz…"></div>
+          <div class="fg"><div class="fl">Ablageort</div><input class="fi" id="psDocLocation" placeholder="Serverpfad / SharePoint / Ordner"></div>
+          <div class="fg"><div class="fl">Datum / Version</div><input class="fi" id="psDocDate" placeholder="z. B. 20.03.2026 / Rev.03"></div>
+        </div>
+        <div class="fg"><div class="fl">Notiz</div><textarea class="fta" id="psDocNote" style="min-height:58px;" placeholder="Kurze Bedeutung / worauf achten?"></textarea></div>
+        <div id="psDocRegisterList" style="margin-top:10px;"></div>
+      </div>
+    </div>
+
+    <div class="card" style="grid-column:1/-1;">
+      <div class="card-hd">
+        <div class="card-hd-l"><div class="ci ci-g">✅</div><h3>Tagesabschluss-Checkliste <small>Gün sonu kontrolü</small></h3></div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;">
+          <button class="btn btn-ghost btn-xs" type="button" onclick="psResetDailyChecklist()">Heute zurücksetzen</button>
+          <button class="btn btn-primary btn-xs" type="button" onclick="psAddChecklistItem()">+ Punkt</button>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="fr2">
+          <input class="fi" id="psChecklistNew" placeholder="z. B. PDF kontrolliert?">
+          <button class="btn btn-ghost" type="button" onclick="psLoadDefaultChecklist()">Standard laden</button>
+        </div>
+        <div id="psChecklistList" style="margin-top:12px;"></div>
+      </div>
+    </div>
+
+    <div class="card" style="grid-column:1/-1;">
+      <div class="card-hd">
+        <div class="card-hd-l"><div class="ci ci-p">📥</div><h3>Projekt-Setup JSON importieren <small>Opsiyonel otomatik doldurma</small></h3></div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;">
+          <button class="btn btn-ghost btn-xs" type="button" onclick="psFillExampleSetupJson()">Beispiel laden</button>
+          <button class="btn btn-primary btn-xs" type="button" onclick="psImportSetupJson(false)">Nur ergänzen</button>
+          <button class="btn btn-ghost btn-xs" type="button" onclick="psImportSetupJson(true)">Überschreiben</button>
+        </div>
+      </div>
+      <div class="card-body">
+        <textarea class="fta" id="psSetupJson" style="min-height:150px;font-family:'JetBrains Mono',monospace;font-size:11px;" placeholder='{"project":{"projectNr":"GI0548"},"documentRegister":[],"checklists":{"tagesabschluss":[]}}'></textarea>
+        <p style="font-size:12px;color:var(--text3);line-height:1.6;margin-top:8px;">Bu import günlük raporları, arşivi, fotoğrafları ve gewerkleri silmez. Sadece Stammdaten, Dokumentenregister, Checkliste, Kontakte, Arbeitsbereiche ve isteğe bağlı başlangıç To-do bilgilerini ekler.</p>
       </div>
     </div>
 
@@ -8708,6 +8793,334 @@ async function delPhoto(id){
   document.addEventListener('DOMContentLoaded', initUB);
   window.addEventListener('load', initUB);
 })();
+
+
+// ═══════════════════════════════════════════════════
+// PROJEKT-STAMMDATEN + DOKUMENTENREGISTER + CHECKLISTE
+// Wiki yok: sadece sabit proje bilgileri, belge referansı ve gün sonu kontrolü.
+// ═══════════════════════════════════════════════════
+(function(){
+  const DEFAULT_DAILY_CHECKLIST = [
+    'Personal eingetragen?',
+    'Geräte / Container geprüft?',
+    'Tageschronologie vollständig?',
+    'Fotos mit Firma / Bereich / Uhrzeit verknüpft?',
+    'Mängel erfasst oder aktualisiert?',
+    'To-dos / Kanban aktualisiert?',
+    'Bericht gespeichert / archiviert?',
+    'PDF kurz kontrolliert?'
+  ];
+
+  function ensureProjectAdminState(){
+    if(!window.S) return;
+    if(!S.projectSetup || typeof S.projectSetup !== 'object') S.projectSetup = {};
+    if(!Array.isArray(S.documentRegister)) S.documentRegister = [];
+    if(!S.checklists || typeof S.checklists !== 'object') S.checklists = {};
+    if(!Array.isArray(S.checklists.tagesabschluss)) {
+      S.checklists.tagesabschluss = DEFAULT_DAILY_CHECKLIST.map((text, idx)=>({id:'dc_'+idx, text, done:false}));
+    }
+  }
+
+  function val(id){ return (document.getElementById(id)?.value || '').trim(); }
+  function setVal(id,v){ const el=document.getElementById(id); if(el) el.value = v || ''; }
+  function uid(prefix){ return prefix + '_' + Date.now() + '_' + Math.random().toString(16).slice(2); }
+
+  function saveProjectFieldsToState(){
+    ensureProjectAdminState();
+    S.projectSetup = Object.assign({}, S.projectSetup || {}, {
+      projectNr: val('psProjectNr'),
+      projectName: val('psProjectName'),
+      standort: val('psStandort'),
+      bauleiter: val('psBauleiter'),
+      baustellenadresse: val('psBaustellenadresse'),
+      lieferadresse: val('psLieferadresse'),
+      notfall: val('psNotfall'),
+      besonderheiten: val('psBesonderheiten')
+    });
+  }
+
+  window.psApplyProjectToHeader = function(){
+    ensureProjectAdminState();
+    saveProjectFieldsToState();
+    const p = S.projectSetup || {};
+    S.projectNr = p.projectNr || S.projectNr || '';
+    S.projectName = p.projectName || S.projectName || '';
+    S.standort = p.standort || S.standort || p.baustellenadresse || '';
+    S.bauleiter = p.bauleiter || S.bauleiter || '';
+    if(typeof sv === 'function'){
+      sv('hPN', S.projectNr); sv('hPName', S.projectName); sv('hST', S.standort); sv('hBL', S.bauleiter);
+      sv('tbPN', S.projectNr); sv('tbPName', S.projectName); sv('tbST', S.standort); sv('tbBL', S.bauleiter);
+    }
+    if(typeof persistState === 'function') persistState();
+    if(typeof refreshDash === 'function') refreshDash();
+    if(typeof showToast === 'function') showToast('Projekt-Stammdaten übernommen','ok');
+  };
+
+  window.psSaveProjectStammdaten = function(){
+    ensureProjectAdminState();
+    saveProjectFieldsToState();
+    if(typeof persistState === 'function') persistState();
+    if(typeof showToast === 'function') showToast('Projekt-Stammdaten gespeichert','ok');
+  };
+
+  function renderProjectFields(){
+    ensureProjectAdminState();
+    const p = Object.assign({
+      projectNr: S.projectNr || '', projectName: S.projectName || '', standort: S.standort || '', bauleiter: S.bauleiter || ''
+    }, S.projectSetup || {});
+    setVal('psProjectNr', p.projectNr);
+    setVal('psProjectName', p.projectName);
+    setVal('psStandort', p.standort);
+    setVal('psBauleiter', p.bauleiter);
+    setVal('psBaustellenadresse', p.baustellenadresse);
+    setVal('psLieferadresse', p.lieferadresse);
+    setVal('psNotfall', p.notfall);
+    setVal('psBesonderheiten', p.besonderheiten);
+  }
+
+  window.psSaveDocRegisterItem = function(){
+    ensureProjectAdminState();
+    const title = val('psDocTitle');
+    if(!title){ if(typeof showToast === 'function') showToast('Dokumentnamen eingeben','warn'); return; }
+    const editId = val('psDocEditId');
+    const item = {
+      id: editId || uid('docreg'),
+      title,
+      type: val('psDocType'),
+      location: val('psDocLocation'),
+      date: val('psDocDate'),
+      note: val('psDocNote')
+    };
+    const idx = S.documentRegister.findIndex(d=>String(d.id)===String(item.id));
+    if(idx >= 0) S.documentRegister[idx] = item; else S.documentRegister.unshift(item);
+    ['psDocEditId','psDocTitle','psDocType','psDocLocation','psDocDate','psDocNote'].forEach(id=>setVal(id,''));
+    if(typeof persistState === 'function') persistState();
+    renderDocRegister();
+    if(typeof showToast === 'function') showToast('Dokument gespeichert','ok');
+  };
+
+  window.psEditDocRegisterItem = function(id){
+    ensureProjectAdminState();
+    const d = S.documentRegister.find(x=>String(x.id)===String(id));
+    if(!d) return;
+    setVal('psDocEditId', d.id);
+    setVal('psDocTitle', d.title);
+    setVal('psDocType', d.type);
+    setVal('psDocLocation', d.location);
+    setVal('psDocDate', d.date);
+    setVal('psDocNote', d.note);
+    document.getElementById('psDocTitle')?.focus();
+  };
+
+  window.psDeleteDocRegisterItem = function(id){
+    ensureProjectAdminState();
+    if(!confirm('Dokument aus Register löschen?')) return;
+    S.documentRegister = S.documentRegister.filter(d=>String(d.id)!==String(id));
+    if(typeof persistState === 'function') persistState();
+    renderDocRegister();
+  };
+
+  function renderDocRegister(){
+    ensureProjectAdminState();
+    const box = document.getElementById('psDocRegisterList');
+    if(!box) return;
+    const docs = S.documentRegister || [];
+    if(!docs.length){
+      box.innerHTML = '<div class="empty-state" style="padding:18px;"><div class="ei">📑</div><h4>Noch keine Dokumente</h4><p>Buraya dosya değil, belge referansı ekle.</p></div>';
+      return;
+    }
+    box.innerHTML = docs.map(d=>`
+      <div class="ps-register-card">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;">
+          <div style="min-width:0;flex:1;">
+            <div class="ps-register-title">${esc(d.title || 'Dokument')}</div>
+            <div class="ps-register-meta">${esc(d.type || '—')} · ${esc(d.date || '—')} · ${esc(d.location || '—')}</div>
+            ${d.note ? `<div class="ps-register-note">${esc(d.note)}</div>` : ''}
+          </div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;">
+            <button class="btn btn-ghost btn-xs" type="button" onclick="psEditDocRegisterItem('${esc(d.id)}')">Bearbeiten</button>
+            <button class="btn btn-ghost btn-xs" type="button" onclick="psDeleteDocRegisterItem('${esc(d.id)}')">Löschen</button>
+          </div>
+        </div>
+      </div>`).join('');
+  }
+
+  window.psAddChecklistItem = function(){
+    ensureProjectAdminState();
+    const text = val('psChecklistNew');
+    if(!text){ if(typeof showToast === 'function') showToast('Checklistenpunkt eingeben','warn'); return; }
+    S.checklists.tagesabschluss.push({id:uid('dc'), text, done:false});
+    setVal('psChecklistNew','');
+    if(typeof persistState === 'function') persistState();
+    renderDailyChecklist();
+  };
+
+  window.psDeleteChecklistItem = function(id){
+    ensureProjectAdminState();
+    S.checklists.tagesabschluss = (S.checklists.tagesabschluss || []).filter(x=>String(x.id)!==String(id));
+    if(typeof persistState === 'function') persistState();
+    renderDailyChecklist();
+  };
+
+  window.psToggleChecklistItem = function(id, checked){
+    ensureProjectAdminState();
+    const item = (S.checklists.tagesabschluss || []).find(x=>String(x.id)===String(id));
+    if(item) item.done = !!checked;
+    if(typeof persistState === 'function') persistState();
+  };
+
+  window.psResetDailyChecklist = function(){
+    ensureProjectAdminState();
+    (S.checklists.tagesabschluss || []).forEach(x=>x.done=false);
+    if(typeof persistState === 'function') persistState();
+    renderDailyChecklist();
+    if(typeof showToast === 'function') showToast('Checkliste zurückgesetzt','ok');
+  };
+
+  window.psLoadDefaultChecklist = function(){
+    ensureProjectAdminState();
+    const existing = new Set((S.checklists.tagesabschluss || []).map(x=>String(x.text).toLowerCase()));
+    DEFAULT_DAILY_CHECKLIST.forEach((text, idx)=>{
+      if(!existing.has(text.toLowerCase())) S.checklists.tagesabschluss.push({id:uid('dc'), text, done:false});
+    });
+    if(typeof persistState === 'function') persistState();
+    renderDailyChecklist();
+  };
+
+  function renderDailyChecklist(){
+    ensureProjectAdminState();
+    const box = document.getElementById('psChecklistList');
+    if(!box) return;
+    const list = S.checklists.tagesabschluss || [];
+    if(!list.length){
+      box.innerHTML = '<div class="empty-state" style="padding:18px;"><div class="ei">✅</div><h4>Keine Checkliste</h4><p>Standard laden veya kendi maddeni ekle.</p></div>';
+      return;
+    }
+    box.innerHTML = list.map(item=>`
+      <div class="ps-check-row">
+        <input type="checkbox" ${item.done?'checked':''} onchange="psToggleChecklistItem('${esc(item.id)}', this.checked)">
+        <div class="ps-check-text" style="${item.done?'text-decoration:line-through;color:var(--text3);':''}">${esc(item.text)}</div>
+        <button class="btn btn-ghost btn-xs" type="button" onclick="psDeleteChecklistItem('${esc(item.id)}')">Löschen</button>
+      </div>`).join('');
+  }
+
+  window.psFillExampleSetupJson = function(){
+    const example = {
+      project: {
+        projectNr: 'GI0548',
+        projectName: 'Panattoni Park Altdorf',
+        standort: 'Altdorf bei Nürnberg',
+        bauleiter: 'Serdal Arslan',
+        baustellenadresse: 'Im Erlet 2 & 28, 90518 Altdorf bei Nürnberg',
+        lieferadresse: 'Goldbeck Baustelle GI0548, Im Erlet 2 & 28, 90518 Altdorf bei Nürnberg',
+        notfall: 'SiGeKo / Ersthelfer / Rettungspunkt hier eintragen',
+        besonderheiten: 'Zufahrt, Anmeldung, Bauherr-Vorgaben hier eintragen'
+      },
+      documentRegister: [
+        {title:'Anlage 01 – GU-Vertragsleistungen', type:'Vertrag / Leistungsumfang', location:'Server / Projektordner', date:'20.03.2026', note:'Grundlage für Einkauf und Bauausführung.'},
+        {title:'Entwässerungsplan', type:'Plan', location:'Server / Planordner', date:'', note:'Aktuelle Revision prüfen.'}
+      ],
+      checklists: { tagesabschluss: DEFAULT_DAILY_CHECKLIST },
+      standardAreas: ['Baustelleneinrichtung','Außenanlagen','Halle','Büro / Sozialbereich','Dach','Fassade','TGA','Elektro','Verkehrsflächen'],
+      defaultTodos: [
+        {title:'Wichtige Ansprechpartner erfassen', category:'Organisation', priority:'Mittel', status:'Offen', comment:'Bauherr, NU, EVU, Entsorger, SiGeKo.'},
+        {title:'Dokumentenregister vervollständigen', category:'Dokumentation', priority:'Mittel', status:'Offen', comment:'Planstand, Ablageort und wichtige Hinweise ergänzen.'}
+      ],
+      contacts: []
+    };
+    setVal('psSetupJson', JSON.stringify(example, null, 2));
+  };
+
+  window.psImportSetupJson = function(overwrite){
+    ensureProjectAdminState();
+    let data;
+    try{ data = JSON.parse(val('psSetupJson') || '{}'); }
+    catch(e){ if(typeof showToast === 'function') showToast('JSON Format ungültig','err'); return; }
+    const p = data.project || {};
+    S.projectSetup = overwrite ? {} : (S.projectSetup || {});
+    ['projectNr','projectName','standort','bauleiter','baustellenadresse','lieferadresse','notfall','besonderheiten'].forEach(k=>{
+      if(overwrite || !S.projectSetup[k]) S.projectSetup[k] = p[k] || S.projectSetup[k] || '';
+    });
+    if(data.project && (overwrite || !S.projectNr)) S.projectNr = S.projectSetup.projectNr || S.projectNr || '';
+    if(data.project && (overwrite || !S.projectName)) S.projectName = S.projectSetup.projectName || S.projectName || '';
+    if(data.project && (overwrite || !S.standort)) S.standort = S.projectSetup.standort || S.projectSetup.baustellenadresse || S.standort || '';
+    if(data.project && (overwrite || !S.bauleiter)) S.bauleiter = S.projectSetup.bauleiter || S.bauleiter || '';
+
+    if(Array.isArray(data.documentRegister)){
+      if(overwrite) S.documentRegister = [];
+      const existing = new Set((S.documentRegister||[]).map(d=>(d.title||'').toLowerCase()));
+      data.documentRegister.forEach(d=>{
+        if(!d || !d.title) return;
+        if(overwrite || !existing.has(String(d.title).toLowerCase())){
+          S.documentRegister.push({id:uid('docreg'), title:d.title||'', type:d.type||'', location:d.location||'', date:d.date||'', note:d.note||''});
+        }
+      });
+    }
+
+    if(data.checklists && Array.isArray(data.checklists.tagesabschluss)){
+      const arr = data.checklists.tagesabschluss.map((x,i)=>({id:uid('dc'), text: typeof x === 'string' ? x : (x.text||''), done:false})).filter(x=>x.text);
+      if(overwrite) S.checklists.tagesabschluss = arr;
+      else {
+        const existing = new Set((S.checklists.tagesabschluss||[]).map(x=>String(x.text).toLowerCase()));
+        arr.forEach(x=>{ if(!existing.has(String(x.text).toLowerCase())) S.checklists.tagesabschluss.push(x); });
+      }
+    }
+
+    if(Array.isArray(data.standardAreas)){
+      if(!Array.isArray(S.workAreas)) S.workAreas = [];
+      const existing = new Set(S.workAreas.map(a=>String(a.name || a).toLowerCase()));
+      data.standardAreas.forEach(name=>{
+        if(!name) return;
+        if(overwrite || !existing.has(String(name).toLowerCase())) S.workAreas.push({id:uid('wa'), name:String(name), note:'', createdAt:new Date().toISOString()});
+      });
+    }
+
+    if(Array.isArray(data.contacts)){
+      if(!Array.isArray(S.contacts)) S.contacts = [];
+      const existing = new Set(S.contacts.map(c=>String(c.name||'').toLowerCase()+'|'+String(c.mail||'')));
+      data.contacts.forEach(c=>{
+        if(!c || !c.name) return;
+        const key = String(c.name||'').toLowerCase()+'|'+String(c.mail||'');
+        if(overwrite || !existing.has(key)) S.contacts.push({id:uid('contact'), name:c.name||'', firm:c.firm||'', role:c.role||'', group:c.group||'Sonstige', phone:c.phone||'', mail:c.mail||'', note:c.note||''});
+      });
+    }
+
+    if(Array.isArray(data.defaultTodos)){
+      if(!Array.isArray(S.todos)) S.todos = [];
+      const existing = new Set(S.todos.map(t=>String(t.title||'').toLowerCase()));
+      data.defaultTodos.forEach(t=>{
+        if(!t || !t.title) return;
+        if(overwrite || !existing.has(String(t.title).toLowerCase())){
+          S.todos.push({id:uid('todo'), title:t.title||'', desc:t.desc||'', category:t.category||'Allgemein', priority:t.priority||'Mittel', status:t.status||'Offen', due:t.due||'', comment:t.comment||'', firmId:t.firmId||'', createdAt:new Date().toISOString(), history:[]});
+        }
+      });
+    }
+
+    renderProjectAdmin();
+    if(typeof applyStateToForm === 'function') applyStateToForm();
+    if(typeof renderWorkAreas === 'function') renderWorkAreas();
+    if(typeof renderContacts === 'function') renderContacts();
+    if(typeof renderTodoPage === 'function') renderTodoPage();
+    if(typeof updateBadges === 'function') updateBadges();
+    if(typeof refreshDash === 'function') refreshDash();
+    if(typeof persistState === 'function') persistState();
+    if(typeof showToast === 'function') showToast('Projekt-Setup übernommen','ok');
+  };
+
+  function renderProjectAdmin(){
+    ensureProjectAdminState();
+    renderProjectFields();
+    renderDocRegister();
+    renderDailyChecklist();
+  }
+
+  window.renderProjectAdmin = renderProjectAdmin;
+
+  document.addEventListener('DOMContentLoaded', function(){
+    setTimeout(renderProjectAdmin, 80);
+  });
+})();
+
 </script>
 
 </body>
