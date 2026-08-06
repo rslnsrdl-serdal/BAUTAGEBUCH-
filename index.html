@@ -1710,6 +1710,62 @@ body{
 .ps-check-row input{margin-top:2px;}
 .ps-check-text{flex:1;font-size:12px;line-height:1.5;color:var(--text);}
 
+
+
+/* ═══════════════════════════════════════════════════
+   GROBTERMINPLAN VISUALISIERUNG
+═══════════════════════════════════════════════════ */
+.term-hero{
+  position:relative;overflow:hidden;border-radius:22px;padding:22px;
+  background:linear-gradient(135deg,#0f172a 0%,#172554 52%,#0c4a6e 100%);
+  color:#fff;box-shadow:0 18px 50px rgba(15,23,42,.22);margin-bottom:16px;
+}
+.term-hero::before{content:'';position:absolute;width:280px;height:280px;border-radius:50%;right:-90px;top:-130px;background:rgba(56,189,248,.20);filter:blur(2px)}
+.term-hero::after{content:'';position:absolute;width:210px;height:210px;border-radius:50%;left:38%;bottom:-170px;background:rgba(99,102,241,.28)}
+.term-hero-inner{position:relative;z-index:1;display:flex;justify-content:space-between;align-items:flex-end;gap:18px;flex-wrap:wrap}
+.term-eyebrow{font-size:10px;font-weight:800;letter-spacing:1.6px;text-transform:uppercase;color:#7dd3fc;margin-bottom:8px}
+.term-hero h3{font-size:25px;letter-spacing:-.04em;line-height:1.12;margin:0 0 7px;font-weight:800}
+.term-hero p{font-size:12px;color:#cbd5e1;line-height:1.65;max-width:760px}
+.term-kpis{display:flex;gap:8px;flex-wrap:wrap}
+.term-kpi{min-width:92px;padding:10px 12px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.08);border-radius:14px;backdrop-filter:blur(8px)}
+.term-kpi strong{display:block;font-size:19px;line-height:1.1;color:#fff}.term-kpi span{display:block;font-size:9px;color:#bae6fd;margin-top:4px;text-transform:uppercase;letter-spacing:.8px}
+.term-toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+.term-filter{border:1px solid var(--border);background:var(--bg2);color:var(--text2);padding:8px 12px;border-radius:999px;font-size:11px;font-weight:700;cursor:pointer}
+.term-filter.active{background:var(--accent2);color:#fff;border-color:transparent;box-shadow:0 6px 16px rgba(10,132,255,.22)}
+.term-legend{margin-left:auto;display:flex;gap:10px;flex-wrap:wrap;font-size:10px;color:var(--text3)}
+.term-legend span{display:flex;align-items:center;gap:5px}.term-legend i{width:9px;height:9px;border-radius:50%;display:block}
+.term-board{background:var(--bg2);border:1px solid var(--border);border-radius:18px;box-shadow:var(--shadow);overflow:hidden}
+.term-board-scroll{overflow-x:auto;padding-bottom:4px}
+.term-grid{min-width:1320px}
+.term-week-head,.term-row{display:grid;grid-template-columns:230px repeat(27,1fr);align-items:stretch}
+.term-week-head{position:sticky;top:0;z-index:5;background:var(--bg2);border-bottom:1px solid var(--border)}
+.term-week-label{padding:12px 14px;font-size:10px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--text3);border-right:1px solid var(--border)}
+.term-week{padding:9px 2px;text-align:center;font-size:9px;font-weight:700;color:var(--text3);border-right:1px solid var(--border);position:relative}
+.term-week.year-start{border-left:2px solid var(--accent2)}
+.term-week.current{background:rgba(255,159,10,.13);color:#b45309}
+.term-group-title{padding:13px 14px;background:linear-gradient(90deg,var(--bg3),var(--bg2));border-top:1px solid var(--border);border-bottom:1px solid var(--border);font-size:12px;font-weight:800;color:var(--text);display:flex;justify-content:space-between;align-items:center;gap:8px}
+.term-group-title small{font-size:10px;font-weight:500;color:var(--text3)}
+.term-row{min-height:42px;border-bottom:1px solid var(--border)}
+.term-task-name{padding:9px 12px;border-right:1px solid var(--border);font-size:11px;color:var(--text);display:flex;flex-direction:column;justify-content:center;line-height:1.35}
+.term-task-name small{font-size:9px;color:var(--text3);margin-top:2px}
+.term-cell{border-right:1px solid var(--border);position:relative;background:linear-gradient(180deg,transparent,rgba(148,163,184,.025))}
+.term-cell.current{background:rgba(255,159,10,.07)}
+.term-bar{height:22px;margin-top:9px;border-radius:7px;position:relative;z-index:2;box-shadow:0 4px 10px rgba(15,23,42,.10);display:flex;align-items:center;padding:0 7px;font-size:9px;font-weight:800;white-space:nowrap;overflow:visible;color:#fff}
+.term-bar.shell{background:linear-gradient(90deg,#ef4444,#f97316)}
+.term-bar.interior{background:linear-gradient(90deg,#2563eb,#06b6d4)}
+.term-bar.finish{background:linear-gradient(90deg,#8b5cf6,#d946ef)}
+.term-bar.accept{background:linear-gradient(90deg,#059669,#22c55e)}
+.term-bar.global{background:linear-gradient(90deg,#334155,#0f172a)}
+.term-summary-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-top:14px}
+.term-summary-card{padding:15px;background:var(--bg2);border:1px solid var(--border);border-radius:16px;box-shadow:var(--shadow)}
+.term-summary-card h4{font-size:12px;margin:0 0 10px;color:var(--text)}
+.term-milestone{display:flex;gap:9px;align-items:flex-start;padding:7px 0;border-bottom:1px dashed var(--border)}
+.term-milestone:last-child{border-bottom:none}.term-dot{width:9px;height:9px;border-radius:50%;margin-top:4px;flex-shrink:0}.term-ms-text{font-size:10px;line-height:1.5;color:var(--text2)}.term-ms-text strong{color:var(--text);display:block;font-size:11px}
+.term-source-note{margin-top:12px;padding:10px 12px;border-radius:12px;background:var(--bg3);border:1px solid var(--border);font-size:10px;color:var(--text3);line-height:1.6}
+@media(max-width:900px){.term-summary-grid{grid-template-columns:1fr 1fr}.term-legend{margin-left:0;width:100%}}
+@media(max-width:600px){.term-summary-grid{grid-template-columns:1fr}.term-hero{padding:18px}.term-hero h3{font-size:21px}.term-week-head,.term-row{grid-template-columns:180px repeat(27,36px)}.term-grid{min-width:1152px}}
+[data-theme="dark"] .term-board,[data-theme="dark"] .term-week-head,[data-theme="dark"] .term-summary-card{background:var(--bg2)!important}
+
 </style>
 <!-- ═══════════ HTML BODY ═══════════ -->
 <body>
@@ -1765,6 +1821,7 @@ body{
       <button class="nav-tab" data-page="pg-mangel" onclick="goPage(this)"><span class="ti">⚠️</span>Mängel <span class="nav-badge" id="nb-mangel">0</span></button>
       <button class="nav-tab" data-page="pg-archive" onclick="goPage(this)"><span class="ti">🗃</span>Archiv <span class="nav-badge" id="nb-archive">0</span></button>
       <button class="nav-tab" data-page="pg-todos" onclick="goPage(this)"><span class="ti">🗂️</span>To-do <span class="nav-badge" id="nb-todos">0</span></button>
+      <button class="nav-tab" data-page="pg-termine" onclick="goPage(this)"><span class="ti">🗓️</span>Terminplan</button>
       <button class="nav-tab" data-page="pg-settings" onclick="goPage(this)"><span class="ti">⚙️</span>Einstellungen</button>
     </div>
   </div>
@@ -1782,6 +1839,7 @@ body{
       <div class="side-group-label">Hauptbereich</div>
       <button class="side-link active" data-side-page="pg-dash" onclick="sideGo('pg-dash')"><span class="side-link-main"><span class="ti">🏠</span><span>Dashboard</span></span></button>
       <button class="side-link" data-side-page="pg-tb" onclick="sideGo('pg-tb')"><span class="side-link-main"><span class="ti">📝</span><span>Tagesbericht</span></span></button>
+      <button class="side-link" data-side-page="pg-termine" onclick="sideGo('pg-termine')"><span class="side-link-main"><span class="ti">🗓️</span><span>Terminplan</span></span></button>
       <button class="side-link" data-side-page="pg-todos" onclick="sideGo('pg-todos')"><span class="side-link-main"><span class="ti">🗂️</span><span>To-do</span></span><span class="nav-badge" id="side-nb-todos">0</span></button>
       <button class="side-link" data-side-page="pg-kanban" onclick="sideGo('pg-kanban')"><span class="side-link-main"><span class="ti">📋</span><span>Kanban</span></span><span class="nav-badge" id="side-nb-kanban">0</span></button>
     </div>
@@ -2346,6 +2404,39 @@ body{
     <div class="card-hd"><div class="card-hd-l"><div class="ci ci-o">🗂️</div><h3>Liste</h3></div></div>
     <div class="card-body" id="todoListWrap"></div>
   </div>
+</div>
+
+
+<!-- ═══════════ PAGE: TERMINPLAN ═══════════ -->
+<div class="page" id="pg-termine">
+  <div class="sh">
+    <h2>Grobterminplan <span class="sub">LD0104 DHL Apolda</span></h2>
+    <div class="sh-act">
+      <button class="btn btn-ghost btn-sm" onclick="termSetFilter('all')">Alle Bereiche</button>
+      <button class="btn btn-primary btn-sm" onclick="termScrollToday()">Aktuelle KW</button>
+    </div>
+  </div>
+  <div class="term-hero">
+    <div class="term-hero-inner">
+      <div>
+        <div class="term-eyebrow">Bauzeiten · Kalenderwochen 2026 / 2027</div>
+        <h3>Vom Rohbau bis zur SV-Abnahme</h3>
+        <p>Visuelle Terminübersicht für Unit 1, Unit 2, Unit 3 sowie SPZ + Tank. Die Balken zeigen die im Grobterminplan eingetragenen Ausführungswochen.</p>
+      </div>
+      <div class="term-kpis" id="termKpis"></div>
+    </div>
+  </div>
+  <div class="term-toolbar">
+    <button class="term-filter active" data-term-filter="all" onclick="termSetFilter('all')">Alle</button>
+    <button class="term-filter" data-term-filter="unit1" onclick="termSetFilter('unit1')">Unit 1</button>
+    <button class="term-filter" data-term-filter="unit2" onclick="termSetFilter('unit2')">Unit 2</button>
+    <button class="term-filter" data-term-filter="unit3" onclick="termSetFilter('unit3')">Unit 3</button>
+    <button class="term-filter" data-term-filter="global" onclick="termSetFilter('global')">SPZ + Tank</button>
+    <div class="term-legend"><span><i style="background:#f97316"></i>Rohbau/Hülle</span><span><i style="background:#06b6d4"></i>Innenausbau</span><span><i style="background:#d946ef"></i>Finish</span><span><i style="background:#22c55e"></i>Abnahme</span></div>
+  </div>
+  <div class="term-board"><div class="term-board-scroll" id="termBoardScroll"><div class="term-grid" id="termGrid"></div></div></div>
+  <div class="term-summary-grid" id="termSummary"></div>
+  <div class="term-source-note">Grundlage: „290726 LD0104 DHL Apolda Grobterminplan“. Kalenderwochen wurden aus den im Plan eingetragenen Terminblöcken übernommen. Bei Widersprüchen gilt der freigegebene Originalterminplan.</div>
 </div>
 
 <!-- ═══════════ PAGE: SETTINGS ═══════════ -->
@@ -9227,6 +9318,45 @@ async function delPhoto(id){
     setTimeout(renderProjectAdmin, 80);
   });
 })();
+
+
+
+// ═══════════════════════════════════════════════════
+// GROBTERMINPLAN — VISUALISIERUNG
+// ═══════════════════════════════════════════════════
+const TERM_WEEKS = Array.from({length:19},(_,i)=>({year:2026,week:34+i})).concat(Array.from({length:8},(_,i)=>({year:2027,week:1+i})));
+const TERM_DATA = [
+  {id:'global',label:'SPZ + Tank',sub:'Sprinklerzentrale / Tank',tasks:[
+    ['Sauberkeitsschichten',37,38,'shell'],['BFT Montage',41,41,'shell'],['Dacheindeckung',45,45,'shell'],['Dachentwässerung + Sprinkler',45,45,'shell'],['Restarbeiten',105,106,'finish'],['SV-Abnahme',107,108,'accept']
+  ]},
+  {id:'unit1',label:'Unit 1',sub:'frühester Bauabschnitt',tasks:[
+    ['Sauberkeitsschichten',34,34,'shell'],['BFT Montage',35,36,'shell'],['Stahlmontage',37,38,'shell'],['UK Fassade',38,38,'shell'],['Dachblech',38,39,'shell'],['Fassade',39,40,'shell'],['Dacheindeckung',39,40,'shell'],['Dachentwässerung + Sprinkler',39,40,'shell'],['Fensterband + TRH',39,39,'shell'],['Kabelgräben',40,41,'shell'],['Fundamente Hallenbüro',41,41,'shell'],['Beginn Trockenbau MEZ',41,41,'interior'],['Betonnage Mezzanine',42,42,'shell'],['Montage MEZ-Geländer',42,42,'shell'],['Montage Ü-Brücken + Tore',42,42,'shell'],['Beginn Trockenbau EG',42,42,'interior'],['Rohinstallation HKLS / ELT / Sprinkler',42,43,'interior'],['Wände schließen / spachteln',44,45,'interior'],['Estrich einbauen',46,46,'interior'],['Wändeschleifen',47,47,'finish'],['Malerarbeiten',48,49,'finish'],['Fliesenarbeiten',49,50,'finish'],['Komplettierung Deckennetz',48,49,'finish'],['Komplettierung Beleuchtung',49,50,'finish'],['Abhangdecke',51,102,'finish'],['Fußbodenverlegung',102,103,'finish'],['Restarbeiten',50,51,'finish'],['Komplettierung HKLS / ELT / Sprinkler',104,105,'finish'],['SV-Abnahmen',107,108,'accept']
+  ]},
+  {id:'unit2',label:'Unit 2',sub:'mittlerer Bauabschnitt',tasks:[
+    ['Sauberkeitsschichten',35,35,'shell'],['BFT Montage',37,38,'shell'],['Stahlmontage',39,40,'shell'],['UK Fassade',40,40,'shell'],['Dachblech',40,41,'shell'],['Fassade',41,42,'shell'],['Dacheindeckung',41,42,'shell'],['Dachentwässerung + Sprinkler',41,42,'shell'],['Fensterband + TRH',41,41,'shell'],['Kabelgräben',42,43,'shell'],['Fundamente Hallenbüro',43,43,'shell'],['Beginn Trockenbau MEZ',43,43,'interior'],['Betonnage Mezzanine',44,44,'shell'],['Montage Ü-Brücken + Tore',44,44,'shell'],['Beginn Trockenbau EG',44,44,'interior'],['Rohinstallation HKLS / ELT / Sprinkler',44,45,'interior'],['Wände schließen / spachteln',46,47,'interior'],['Estrich einbauen',48,48,'interior'],['Wändeschleifen',49,49,'finish'],['Malerarbeiten',49,50,'finish'],['Fliesenarbeiten',51,52,'finish'],['Komplettierung Deckennetz',50,51,'finish'],['Komplettierung Beleuchtung',52,102,'finish'],['Abhangdecke',103,104,'finish'],['Restarbeiten',102,103,'finish'],['Komplettierung HKLS / ELT / Sprinkler',106,107,'finish'],['SV-Abnahmen',107,108,'accept']
+  ]},
+  {id:'unit3',label:'Unit 3',sub:'spätester Bauabschnitt',tasks:[
+    ['Sauberkeitsschichten',36,36,'shell'],['BFT Montage',39,40,'shell'],['Stahlmontage',41,42,'shell'],['UK Fassade',42,42,'shell'],['Dachblech',42,43,'shell'],['Fassade',43,44,'shell'],['Dacheindeckung',43,44,'shell'],['Dachentwässerung + Sprinkler',43,44,'shell'],['Fensterband + TRH',43,43,'shell'],['Kabelgräben',44,45,'shell'],['Fundamente Hallenbüro',45,45,'shell'],['Beginn Trockenbau MEZ',45,45,'interior'],['Betonnage Mezzanine',46,46,'shell'],['Montage MEZ-Geländer',45,45,'shell'],['Montage Ü-Brücken + Tore',46,46,'shell'],['Beginn Trockenbau EG',46,46,'interior'],['Rohinstallation HKLS / ELT / Sprinkler',46,47,'interior'],['Wände schließen / spachteln',48,49,'interior'],['Estrich einbauen',50,50,'interior'],['Wändeschleifen',51,51,'finish'],['Malerarbeiten',51,52,'finish'],['Fliesenarbeiten',102,103,'finish'],['Komplettierung Deckennetz',102,103,'finish'],['Komplettierung Beleuchtung',104,105,'finish'],['Abhangdecke',104,105,'finish'],['Fußbodenverlegung',105,106,'finish'],['Restarbeiten',106,107,'finish'],['Komplettierung HKLS / ELT / Sprinkler',107,108,'finish'],['SV-Abnahmen',107,108,'accept']
+  ]}
+];
+function termCodeToYW(v){return v>=100?{year:2027,week:v-100}:{year:2026,week:v}}
+function termIndex(v){const x=termCodeToYW(v);return TERM_WEEKS.findIndex(w=>w.year===x.year&&w.week===x.week)}
+function termCurrentYW(){const d=new Date(),t=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()));t.setUTCDate(t.getUTCDate()+4-(t.getUTCDay()||7));const y=new Date(Date.UTC(t.getUTCFullYear(),0,1));return {year:t.getUTCFullYear(),week:Math.ceil((((t-y)/86400000)+1)/7)}}
+function termRangeLabel(a,b){const A=termCodeToYW(a),B=termCodeToYW(b);return A.week===B.week?'KW'+String(A.week).padStart(2,'0'):'KW'+String(A.week).padStart(2,'0')+'–'+String(B.week).padStart(2,'0')}
+function renderTerminplan(filter='all'){
+ const grid=document.getElementById('termGrid');if(!grid)return;const cur=termCurrentYW();
+ let h='<div class="term-week-head"><div class="term-week-label">Leistung / Meilenstein</div>';
+ TERM_WEEKS.forEach((w,i)=>{const cls=(w.week===1?' year-start':'')+(w.year===cur.year&&w.week===cur.week?' current':'');h+=`<div class="term-week${cls}" data-term-week="${w.year}-${w.week}">${w.week===1?'2027 · ':''}KW${String(w.week).padStart(2,'0')}</div>`});h+='</div>';
+ const groups=TERM_DATA.filter(g=>filter==='all'||g.id===filter);
+ groups.forEach(g=>{h+=`<div class="term-group-title"><span>${g.label}</span><small>${g.sub} · ${g.tasks.length} Termine</small></div>`;g.tasks.forEach(t=>{const [name,a,b,type]=t,si=termIndex(a),ei=termIndex(b);h+=`<div class="term-row"><div class="term-task-name">${name}<small>${termRangeLabel(a,b)}</small></div>`;TERM_WEEKS.forEach((w,i)=>{const current=w.year===cur.year&&w.week===cur.week?' current':'';if(i===si){h+=`<div class="term-cell${current}" style="grid-column:span ${Math.max(1,ei-si+1)}"><div class="term-bar ${type}" title="${name} · ${termRangeLabel(a,b)}">${termRangeLabel(a,b)}</div></div>`}else if(i<si||i>ei)h+=`<div class="term-cell${current}"></div>`});h+='</div>'});});grid.innerHTML=h;
+ const all=groups.flatMap(g=>g.tasks);document.getElementById('termKpis').innerHTML=`<div class="term-kpi"><strong>${groups.length}</strong><span>Bereiche</span></div><div class="term-kpi"><strong>${all.length}</strong><span>Terminblöcke</span></div><div class="term-kpi"><strong>KW34</strong><span>Start 2026</span></div><div class="term-kpi"><strong>KW08</strong><span>Abnahme 2027</span></div>`;
+ renderTermSummary(groups);
+}
+function renderTermSummary(groups){const box=document.getElementById('termSummary');if(!box)return;box.innerHTML=groups.map(g=>{const key=g.tasks.filter(t=>['BFT Montage','Dacheindeckung','Estrich einbauen','SV-Abnahmen','SV-Abnahme'].includes(t[0])).slice(0,5);return `<div class="term-summary-card"><h4>${g.label} · Schlüsseltermine</h4>${key.map(t=>`<div class="term-milestone"><span class="term-dot" style="background:${t[3]==='accept'?'#22c55e':t[3]==='interior'?'#06b6d4':'#f97316'}"></span><div class="term-ms-text"><strong>${t[0]}</strong>${termRangeLabel(t[1],t[2])}</div></div>`).join('')}</div>`}).join('')}
+function termSetFilter(filter){document.querySelectorAll('.term-filter').forEach(b=>b.classList.toggle('active',b.dataset.termFilter===filter));renderTerminplan(filter)}
+function termScrollToday(){const cur=termCurrentYW();const el=document.querySelector(`[data-term-week="${cur.year}-${cur.week}"]`);if(el)el.scrollIntoView({behavior:'smooth',inline:'center',block:'nearest'});else showToast('Aktuelle KW liegt vor dem dargestellten Terminfenster','warn')}
+const _oldGoPage=goPage;goPage=function(btn){_oldGoPage(btn);if(btn&&btn.dataset&&btn.dataset.page==='pg-termine')renderTerminplan(document.querySelector('.term-filter.active')?.dataset.termFilter||'all')}
+document.addEventListener('DOMContentLoaded',()=>renderTerminplan('all'));
 
 </script>
 
