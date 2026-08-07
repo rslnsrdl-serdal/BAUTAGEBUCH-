@@ -2900,6 +2900,13 @@ body{
         <span class="pdf-zoom-info" id="pdfZoomInfo">100%</span>
         <button type="button" class="pdf-tool-btn" onclick="pdfZoomIn()" title="Vergrößern">＋</button>
         <button type="button" class="pdf-tool-btn" onclick="pdfFitWidth()" title="Breite anpassen">↔ Fit</button>
+        <button type="button" class="pdf-tool-btn" onclick="pdfRotate()" title="Drehen / Döndür">↻</button>
+      </div>
+      <div class="pdf-toolbar-group">
+        <input id="pdfSearchInput" class="fi" style="width:150px;padding:7px 9px" placeholder="Suchen / Ara" onkeydown="if(event.key==='Enter')pdfSearch()">
+        <button type="button" class="pdf-tool-btn" onclick="pdfSearch()" title="Suchen">🔎</button>
+        <button type="button" class="pdf-tool-btn" id="pdfThumbBtn" onclick="pdfToggleThumbnails()" title="Miniaturen / Küçük sayfalar">▦</button>
+        <button type="button" class="pdf-tool-btn" id="pdfFavoriteBtn" onclick="pdfToggleFavorite()" title="Favorit / Favori">☆</button>
       </div>
       <div class="pdf-toolbar-group">
         <button type="button" class="pdf-tool-btn" onclick="pdfToggleFullscreen()" title="Vollbild">⛶</button>
@@ -2908,7 +2915,8 @@ body{
         <button type="button" class="pdf-tool-btn" onclick="openCurrentViewerExternal()" title="Extern öffnen">📱</button>
       </div>
     </div>
-    <div id="pdfCanvasWrap">
+    <div id="pdfCanvasWrap" style="position:relative">
+      <aside id="pdfThumbPanel" style="display:none;position:absolute;z-index:5;left:0;top:0;bottom:0;width:150px;overflow:auto;padding:8px;background:rgba(15,23,42,.94);box-shadow:8px 0 20px rgba(0,0,0,.2)"></aside>
       <div id="pdfCanvasStage">
         <canvas id="pdfViewerCanvas"></canvas>
         <div id="pdfViewerLoading">PDF wird geladen…</div>
@@ -3533,7 +3541,7 @@ function loadArchiveIntoCurrent(id) {
   const _ae2 = document.activeElement;
   const _isWaTyping2 = _ae2 && _ae2.id && String(_ae2.id).startsWith('wa-note-input-');
   if(!_isWaTyping2) renderWorkAreas();
-  renderWeeklyReports();
+  if(typeof renderWeeklyReports==='function') renderWeeklyReports();
   renderMaengel();
   updateBadges();
   refreshDash();
@@ -3689,10 +3697,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   refreshDash();
   renderProgressLive();
   updateWorkSummary();
-  runConverters();
+  if(typeof runConverters==='function') runConverters();
   renderTimeline();
   renderWorkAreas();
-  renderWeeklyReports();
+  if(typeof renderWeeklyReports==='function') renderWeeklyReports();
   renderMaengel();
   updateBadges();
   refreshDash();
@@ -3740,7 +3748,7 @@ function setTheme(t) {
     renderArchive();
     renderTimeline();
     renderWorkAreas();
-    renderWeeklyReports();
+    if(typeof renderWeeklyReports==='function') renderWeeklyReports();
     renderMaengel();
     refreshDash();
   }, 0);
@@ -4041,7 +4049,7 @@ function setProgressActionToday(val){
 }
 
 
-let pdfViewerState = {docMeta:null, pdfDoc:null, page:1, scale:1.15, renderTask:null, dataUrl:'', blobUrl:''};
+let pdfViewerState = {docMeta:null, pdfDoc:null, page:1, scale:1.15, rotation:0, renderTask:null, dataUrl:'', blobUrl:'', searchQuery:''};
 
 function closePdfViewer(){
   const modal = document.getElementById('pdfViewerModal');
@@ -4050,7 +4058,8 @@ function closePdfViewer(){
   if(pdfViewerState.renderTask){ try{ pdfViewerState.renderTask.cancel(); }catch(e){} }
   if(pdfViewerState.pdfDoc){ try{ pdfViewerState.pdfDoc.destroy(); }catch(e){} }
   if(pdfViewerState.blobUrl){ try{ URL.revokeObjectURL(pdfViewerState.blobUrl); }catch(e){} }
-  pdfViewerState = {docMeta:null, pdfDoc:null, page:1, scale:1.15, renderTask:null, dataUrl:'', blobUrl:''};
+  pdfViewerState = {docMeta:null, pdfDoc:null, page:1, scale:1.15, rotation:0, renderTask:null, dataUrl:'', blobUrl:'', searchQuery:''};
+  const thumbs=document.getElementById('pdfThumbPanel'); if(thumbs){thumbs.style.display='none';thumbs.innerHTML='';}
   if(modal){ modal.classList.remove('open'); modal.classList.remove('viewer-full'); }
 }
 
@@ -4087,6 +4096,8 @@ async function openPdfViewerDoc(doc,data){
   pdfViewerState.dataUrl=data;
   pdfViewerState.page=1;
   pdfViewerState.scale=1.15;
+  pdfViewerState.rotation=0;
+  const fav=document.getElementById('pdfFavoriteBtn'); if(fav) fav.textContent=doc.favorite?'★':'☆';
   try{
     const blob=dataUrlToBlob(data);
     pdfViewerState.blobUrl=URL.createObjectURL(blob);
@@ -4120,7 +4131,7 @@ async function renderCurrentPdfPage(){
   if(loading) loading.classList.add('show');
   try{
     const page=await pdfViewerState.pdfDoc.getPage(pdfViewerState.page);
-    const viewport=page.getViewport({scale:pdfViewerState.scale});
+    const viewport=page.getViewport({scale:pdfViewerState.scale,rotation:pdfViewerState.rotation});
     const dpr=Math.min(window.devicePixelRatio||1,2);
     canvas.width=Math.floor(viewport.width*dpr);
     canvas.height=Math.floor(viewport.height*dpr);
@@ -4141,6 +4152,34 @@ function pdfPrevPage(){ if(pdfViewerState.pdfDoc&&pdfViewerState.page>1){pdfView
 function pdfNextPage(){ if(pdfViewerState.pdfDoc&&pdfViewerState.page<pdfViewerState.pdfDoc.numPages){pdfViewerState.page++;renderCurrentPdfPage();} }
 function pdfZoomIn(){ if(pdfViewerState.pdfDoc){pdfViewerState.scale=Math.min(4,pdfViewerState.scale+0.2);renderCurrentPdfPage();} }
 function pdfZoomOut(){ if(pdfViewerState.pdfDoc){pdfViewerState.scale=Math.max(0.4,pdfViewerState.scale-0.2);renderCurrentPdfPage();} }
+function pdfRotate(){ if(pdfViewerState.pdfDoc){pdfViewerState.rotation=(pdfViewerState.rotation+90)%360;renderCurrentPdfPage();} }
+async function pdfSearch(){
+  const q=(document.getElementById('pdfSearchInput')?.value||'').trim().toLocaleLowerCase('de');
+  if(!q||!pdfViewerState.pdfDoc)return;
+  const start=pdfViewerState.searchQuery===q?pdfViewerState.page:0; pdfViewerState.searchQuery=q;
+  for(let offset=1;offset<=pdfViewerState.pdfDoc.numPages;offset++){
+    const n=((start+offset-1)%pdfViewerState.pdfDoc.numPages)+1;
+    const page=await pdfViewerState.pdfDoc.getPage(n),content=await page.getTextContent();
+    if(content.items.map(x=>x.str||'').join(' ').toLocaleLowerCase('de').includes(q)){
+      pdfViewerState.page=n; await renderCurrentPdfPage(); showToast(`Treffer auf Seite ${n} / Sonuç: sayfa ${n}`,'ok'); return;
+    }
+  }
+  showToast('Kein Treffer / Sonuç bulunamadı','warn');
+}
+async function pdfToggleThumbnails(){
+  const panel=document.getElementById('pdfThumbPanel'); if(!panel||!pdfViewerState.pdfDoc)return;
+  if(panel.style.display!=='none'){panel.style.display='none';return;} panel.style.display='block';
+  if(panel.childElementCount)return;
+  for(let n=1;n<=pdfViewerState.pdfDoc.numPages;n++){
+    const btn=document.createElement('button');btn.type='button';btn.className='pdf-tool-btn';btn.style.cssText='display:block;width:100%;height:auto;margin-bottom:8px;padding:5px;background:#fff;color:#111827';
+    const cv=document.createElement('canvas'),pg=await pdfViewerState.pdfDoc.getPage(n),vp=pg.getViewport({scale:.18});cv.width=vp.width;cv.height=vp.height;
+    await pg.render({canvasContext:cv.getContext('2d'),viewport:vp}).promise;btn.append(cv,document.createTextNode(' '+n));btn.onclick=()=>{pdfViewerState.page=n;renderCurrentPdfPage();};panel.appendChild(btn);
+  }
+}
+function pdfToggleFavorite(){
+  const d=pdfViewerState.docMeta;if(!d)return;d.favorite=!d.favorite;const src=(S.docs||[]).find(x=>x.id===d.id);if(src)src.favorite=d.favorite;
+  const b=document.getElementById('pdfFavoriteBtn');if(b)b.textContent=d.favorite?'★':'☆';autoSave();showToast(d.favorite?'Favorit gespeichert / Favoriye eklendi':'Favorit entfernt / Favoriden çıkarıldı','ok');
+}
 async function pdfFitWidth(){
   if(!pdfViewerState.pdfDoc) return;
   try{
@@ -7008,6 +7047,17 @@ async function exportPDF() {
     if (containerRows.length) drawTable(['ID','Typ','Status','Standort / Notiz'], containerRows, [24, 38, 32, 88]);
     else addKV([['Container','Keine Container']]);
 
+    const perfPdf = typeof PERF !== 'undefined' ? PERF : {deliveries:[],acceptances:[],changes:[]};
+    addSectionTitle('Lieferungen');
+    const deliveryRows=(perfPdf.deliveries||[]).map(x=>[x.title||'',(S.contractors||[]).find(f=>f.id===x.firmId)?.name||'',x.deliveryDate||'',x.status||'',x.note||'']);
+    if(deliveryRows.length) drawTable(['Lieferung','Firma','Termin','Status','Notiz'],deliveryRows,[44,38,28,26,46]); else addKV([['Lieferungen','Keine Einträge']]);
+    addSectionTitle('Abnahmen');
+    const acceptanceRows=(perfPdf.acceptances||[]).map(x=>[x.title||'',(S.contractors||[]).find(f=>f.id===x.firmId)?.name||'',x.date||'',x.status||'',x.note||'']);
+    if(acceptanceRows.length) drawTable(['Abnahme','Firma','Termin','Status','Notiz'],acceptanceRows,[44,38,28,26,46]); else addKV([['Abnahmen','Keine Einträge']]);
+    addSectionTitle('Nachträge');
+    const changeRows=(perfPdf.changes||[]).map(x=>[x.title||'',(S.contractors||[]).find(f=>f.id===x.firmId)?.name||'',x.date||'',x.amount?`${x.amount} EUR`:'',x.status||'',x.note||'']);
+    if(changeRows.length) drawTable(['Nachtrag','Firma','Datum','Betrag','Status','Notiz'],changeRows,[38,32,24,24,26,38]); else addKV([['Nachträge','Keine Einträge']]);
+
     addSectionTitle('Besprechungen');
     const reportDate = S.reportDate || todayStr();
     const meetingRows = (S.meetings || [])
@@ -7042,6 +7092,9 @@ async function exportPDF() {
     } else {
       addKV([['Fotos','Keine Fotos']]);
     }
+
+    addSectionTitle('Exportinformationen');
+    addKV([['Erstellt am',new Date().toLocaleString('de-DE')],['Anwendung','SERO Bautagebuch v2.0'],['Projekt',S.projectName||'-'],['Berichtsdatum',S.reportDate||'-']]);
 
     doc.save(`BAUTAGEBUCH_${pdfSafe(S.projectNr||'Projekt')}_${pdfSafe(S.reportDate||'')}.pdf`);
   } catch (e) {
@@ -8349,6 +8402,43 @@ function exportExcel() {
       todo.push([t.title || '', t.desc || '', firmName, t.category || '', t.priority || '', t.status || '', t.due || '', t.comment || '', hist]);
     });
     XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(todo), 'ToDo');
+
+    const dashboard = [
+      ['SERO Bautagebuch v2.0 – Dashboard',''],
+      ['Kennzahl / Gösterge','Wert / Değer'],
+      ['Aktive Firmen',(S.contractors||[]).filter(f=>f.status==='active').length],
+      ['Personal gesamt',(S.personnelTypes||[]).reduce((a,p)=>a+(parseInt((S.personnelCounts||{})[p.key]||0,10)||0),0)],
+      ['Fotos',(S.photos||[]).length],
+      ['Offene Mängel',(S.maengel||[]).filter(m=>m.status!=='erledigt').length],
+      ['Offene To-dos',(S.todos||[]).filter(t=>!['Erledigt','Entfällt'].includes(t.status)).length],
+      ['Lieferungen',typeof PERF!=='undefined'?(PERF.deliveries||[]).length:0],
+      ['Fortschritt',`${S.progress||0}%`]
+    ];
+    XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(dashboard),'Dashboard');
+
+    const tagesbericht=[['Feld / Alan','Inhalt / İçerik'],['Berichtsnummer',S.reportNr||''],['Datum',S.reportDate||''],['Projekt',S.projectName||''],['Bauleiter',S.bauleiter||''],['Wetter',S.weather||S.autoWeather?.weather||''],['Fortschritt',`${S.progress||0}%`],['Bemerkungen',S.remarks||'']];
+    XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(tagesbericht),'Tagesbericht');
+
+    const perf=typeof PERF!=='undefined'?PERF:{deliveries:[],acceptances:[],changes:[]};
+    const lieferungen=[['Titel','Firma','Gewerk','Bestellt','Liefertermin','Status','Notiz']];
+    (perf.deliveries||[]).forEach(x=>lieferungen.push([x.title||'',(S.contractors||[]).find(f=>f.id===x.firmId)?.name||'',x.trade||'',x.orderDate||'',x.deliveryDate||'',x.status||'',x.note||'']));
+    XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(lieferungen),'Lieferungen');
+    const abnahmen=[['Titel','Firma','Gewerk','Termin','Status','Art','Notiz']];
+    (perf.acceptances||[]).forEach(x=>abnahmen.push([x.title||'',(S.contractors||[]).find(f=>f.id===x.firmId)?.name||'',x.trade||'',x.date||'',x.status||'',x.type||'',x.note||'']));
+    XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(abnahmen),'Abnahmen');
+    const nachtraege=[['Titel','Firma','Gewerk','Datum','Betrag EUR','Status','Notiz']];
+    (perf.changes||[]).forEach(x=>nachtraege.push([x.title||'',(S.contractors||[]).find(f=>f.id===x.firmId)?.name||'',x.trade||'',x.date||'',Number(String(x.amount||'').replace(',','.'))||0,x.status||'',x.note||'']));
+    XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(nachtraege),'Nachtraege');
+
+    const terminplan=[['Bereich','Vorgang','Start KW','Ende KW','Phase']];
+    if(typeof TERM_DATA!=='undefined')(TERM_DATA||[]).forEach(g=>(g.tasks||[]).forEach(t=>terminplan.push([g.label||'',t[0]||'',t[1]||'',t[2]||'',t[3]||''])));
+    XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(terminplan),'Terminplan');
+    const archiv=[['Datum','Berichtsnummer','Projekt','Personal','Fotos','Fortschritt']];
+    const archiveRows=typeof ARCHIVE!=='undefined'?ARCHIVE:[];
+    (archiveRows||[]).forEach(a=>{const x=a.state||a;archiv.push([a.reportDate||x.reportDate||'',x.reportNr||'',x.projectName||'',Object.values(x.personnelCounts||{}).reduce((n,v)=>n+(parseInt(v,10)||0),0),(x.photos||[]).length,`${x.progress||0}%`]);});
+    XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(archiv),'Archivuebersicht');
+
+    wb.SheetNames.forEach(name=>{const ws=wb.Sheets[name];if(!ws['!cols'])ws['!cols']=Array.from({length:12},(_,i)=>({wch:i===0?26:20}));if(ws['!ref'])ws['!autofilter']={ref:ws['!ref']};});
 
     XLSX.writeFile(wb, `BAUTAGEBUCH_${S.projectNr || 'Projekt'}_${S.reportDate || ''}.xlsx`);
     showToast('Excel exportiert','ok');
