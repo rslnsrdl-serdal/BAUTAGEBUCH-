@@ -885,6 +885,35 @@ body{
   display:none;align-items:center;justify-content:center;padding:16px;
 }
 .modal-ov.open{display:flex;animation:fadeIn .2s ease;}
+/* Gewerk 360 editor uses these explicit names; keep them equivalent to the
+   application's standard modal classes so the dynamically-created dialog is visible. */
+.modal-overlay.show{
+  position:fixed;
+  inset:0;
+  z-index:99999;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:18px;
+  background:rgba(15,23,42,.58);
+  backdrop-filter:blur(3px);
+  animation:fadeIn .2s ease;
+}
+.modal-x{
+  width:34px;
+  height:34px;
+  flex:0 0 34px;
+  display:grid;
+  place-items:center;
+  border:1px solid var(--border);
+  border-radius:9px;
+  background:var(--surface);
+  color:var(--text2);
+  font-size:20px;
+  line-height:1;
+  cursor:pointer;
+}
+.modal-x:hover,.modal-x:active{background:var(--red);color:#fff;border-color:transparent;}
 .modal{
   background:var(--bg2);border:1px solid var(--border2);
   border-radius:var(--radius);width:100%;max-width:540px;
@@ -7173,7 +7202,155 @@ function showToast(msg,type='ok'){
 
 <script id="sero-patch-v2">
 (function(){
-  const GEWERK_PRESETS = [];
+  // Vollstaendiger Gewerk-Katalog aus der Projektablage LD0104 DHL Apolda.
+  // Hauptgewerke bleiben immer sichtbar; sinnvoll benannte Untergewerke werden
+  // darunter einsortiert. Reine leere Platzhalterordner (z. B. 903.02) werden
+  // bewusst nicht als Arbeitspaket angezeigt.
+  const GEWERK_PRESETS = [
+    {code:'1',name:'TGA-allgemein'},
+    {code:'810',name:'(Ab-) Wasser / Sanitär'},
+    {code:'810.01',name:'Sanitär'},
+    {code:'810.04',name:'TW Rohrleitung'},
+    {code:'811',name:'Dachentwässerung'},
+    {code:'811.01',name:'Brassco'},
+    {code:'820',name:'HKL'},
+    {code:'820.01',name:'Wärmeversorgung'},
+    {code:'830.01',name:'Lüftung'},
+    {code:'834.01',name:'Kälteanlagen'},
+    {code:'840',name:'Starkstromanlagen'},
+    {code:'840.01',name:'Elektro Hauptvergabe'},
+    {code:'840.19',name:'E-Mobilität'},
+    {code:'840.28',name:'E-Bike Ladestationen'},
+    {code:'840.31',name:'Hallenbeleuchtung'},
+    {code:'841',name:'MSHV / Trafo'},
+    {code:'841.01',name:'Vieweg'},
+    {code:'846',name:'Blitzschutz'},
+    {code:'846.01',name:'Liepert'},
+    {code:'848',name:'PV-Anlagen'},
+    {code:'850',name:'Schwachstrom'},
+    {code:'850.08',name:'BOS'},
+    {code:'875',name:'Feuerlöschanlagen'},
+    {code:'875.01',name:'Sprinkleranlage / Calanbau'},
+    {code:'875.13',name:'Feuerlöscher'},
+    {code:'880',name:'GLT'},
+    {code:'901',name:'Tiefbau'},
+    {code:'901.01',name:'Koalick'},
+    {code:'901.02',name:'Agrarservice Gemeinhardt'},
+    {code:'902',name:'Rohbau'},
+    {code:'902.01',name:'Stahlbetonarbeiten'},
+    {code:'902.02',name:'Mauerwerk'},
+    {code:'902.07',name:'Vergussbeton'},
+    {code:'902.08',name:'Bewehrung'},
+    {code:'903',name:'Betonsohle'},
+    {code:'904',name:'WHG'},
+    {code:'904.01',name:'WHG-Folie unter Bodenplatte'},
+    {code:'905',name:'Estricharbeiten'},
+    {code:'905.01',name:'Estrich'},
+    {code:'906',name:'Fassaden – Sonderausführung'},
+    {code:'906.01',name:'Verblendmauerwerk'},
+    {code:'907',name:'Porenbeton'},
+    {code:'908',name:'BFT Fremd'},
+    {code:'908.01',name:'BWB – Externe BFT'},
+    {code:'908.02',name:'Hohlkammerdecken'},
+    {code:'908.03',name:'Pi-Decken'},
+    {code:'908.04',name:'BFT- und Stahlmontage'},
+    {code:'908.20',name:'PU-Fugen'},
+    {code:'908.21',name:'Betonkosmetik'},
+    {code:'908.22',name:'Schalungsholz'},
+    {code:'908.23',name:'Betec / Pagel'},
+    {code:'908.25',name:'Ringankerbewehrung'},
+    {code:'908.26',name:'Betonpumpe'},
+    {code:'908.28',name:'Unterlegplatten'},
+    {code:'908.29',name:'Schrägstützen'},
+    {code:'908.30',name:'Absturzsicherung'},
+    {code:'908.31',name:'Verfugung'},
+    {code:'908.32',name:'ÜK2 Überwachung'},
+    {code:'910',name:'Tore, Türen, Verladetechnik'},
+    {code:'910.01',name:'Stahltüren'},
+    {code:'910.05',name:'Schnelllauftore'},
+    {code:'910.06',name:'Überladebrücken'},
+    {code:'910.07',name:'Torabdichtung'},
+    {code:'911',name:'Fenster'},
+    {code:'911.01',name:'Fensterarbeiten'},
+    {code:'912',name:'Dachdecker'},
+    {code:'912.01',name:'Dacheindeckung'},
+    {code:'913',name:'Lichtkuppeln, Lichtbänder'},
+    {code:'916',name:'Innenausbau'},
+    {code:'916.01',name:'Trockenbau'},
+    {code:'916.04',name:'Sanitär-Trennwände'},
+    {code:'917',name:'Sonnenschutz'},
+    {code:'917.01',name:'Sonnenschutz außen'},
+    {code:'917.02',name:'Sonnenschutz innen'},
+    {code:'918',name:'Malerarbeiten'},
+    {code:'918.01',name:'Maler- und Tapezierarbeiten'},
+    {code:'919',name:'Fliesenarbeiten'},
+    {code:'919.01',name:'Fliesenleger'},
+    {code:'920',name:'Bodenbelagsarbeiten'},
+    {code:'920.01',name:'Bodenleger'},
+    {code:'920.09',name:'Sauberlaufzonen / Matten'},
+    {code:'925',name:'Ingenieurleistungen'},
+    {code:'1870.01',name:'Schallschutz'},
+    {code:'1870.02',name:'Wärmeschutz / GEG / Bauphysik'},
+    {code:'1870.03',name:'Vermessungsarbeiten'},
+    {code:'1870.04',name:'Brandschutz'},
+    {code:'1870.05',name:'Bodengutachter'},
+    {code:'1870.06',name:'Sachverständigenprüfungen'},
+    {code:'1870.07',name:'SiGeKo'},
+    {code:'1870.11',name:'Gebäudezertifizierung DGNB / BREEAM'},
+    {code:'1870.12',name:'Architektur'},
+    {code:'1870.13',name:'Baugrundkonzept'},
+    {code:'1870.14',name:'Außenanlagen / Entwässerung'},
+    {code:'1870.15',name:'Außenanlagen / Begrünung'},
+    {code:'1870.16',name:'Cut & Fill'},
+    {code:'1870.17',name:'KMT'},
+    {code:'1870.18',name:'Blower Door'},
+    {code:'1870.19',name:'Ebenheitsmessung'},
+    {code:'1870.20',name:'ÜK2 Überwachung'},
+    {code:'1870.21',name:'LAK'},
+    {code:'927',name:'Schlosserarbeiten'},
+    {code:'927.01',name:'Schlosser allgemein'},
+    {code:'928',name:'Baustelleneinrichtung'},
+    {code:'928.01',name:'Unterkünfte, Toiletten, Reinigung'},
+    {code:'928.02',name:'Pacht / Miete Grundstücke'},
+    {code:'928.03',name:'Verkehrssicherung'},
+    {code:'928.04',name:'Baustrom / Bauwasser'},
+    {code:'928.07',name:'Bauzaun'},
+    {code:'928.08',name:'Wachschutz'},
+    {code:'928.11',name:'Bauschild / Baustellenwerbung'},
+    {code:'928.12',name:'Webcam / Baustellenkamera'},
+    {code:'928.14',name:'Gerüste'},
+    {code:'928.16',name:'Mobilkran'},
+    {code:'928.17',name:'Hebebühnen'},
+    {code:'928.18',name:'Baustellenreinigung / Müllentsorgung'},
+    {code:'928.19',name:'Rohr-, Kanal- und Straßenreinigung'},
+    {code:'928.20',name:'Bauendreinigung'},
+    {code:'928.23',name:'Betriebsstoffe / Diesel'},
+    {code:'928.25',name:'Kernbohrungen / Betonschneiden'},
+    {code:'928.26',name:'Stundenlohnarbeiten'},
+    {code:'928.27',name:'Bauheizung'},
+    {code:'928.28',name:'Hotel- und Reisekosten'},
+    {code:'928.30',name:'Büro-Verbrauchsmaterial / Repro'},
+    {code:'928.32',name:'Behörden / Gebühren'},
+    {code:'928.36',name:'Würth'},
+    {code:'928.37',name:'Boels'},
+    {code:'928.38',name:'Containerreinigung Plumeria Service'},
+    {code:'928.39',name:'Müllentsorgung'},
+    {code:'928.40',name:'Getränke'},
+    {code:'928.41',name:'Bauhelfer'},
+    {code:'928.60',name:'Bewirtung'},
+    {code:'930',name:'Aufzugsanlage'},
+    {code:'934',name:'Begrünung, Außenanlagen'},
+    {code:'935',name:'Zaun, Tore, Ausstattung'},
+    {code:'935.01',name:'Zaunanlage'},
+    {code:'936',name:'Blechverlegearbeiten'},
+    {code:'936.01',name:'Blechverleger'},
+    {code:'936.02',name:'Absturzsicherung / Netze'},
+    {code:'965',name:'Abbrucharbeiten'},
+    {code:'965.09',name:'Abbruch komplett'},
+    {code:'966',name:'Betonschneiden, Kernbohrung'},
+    {code:'966.01',name:'Betonschneiden'},
+    {code:'993',name:'Gewährleistung / MHM'}
+  ];
   window.currentFirmId = window.currentFirmId || '';
   window.currentNUCode = window.currentNUCode || '';
 
@@ -7290,10 +7467,19 @@ function showToast(msg,type='ok'){
   function h(s){ return String(s||'').replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
 
   function ensurePatchState(){
-    if (!window.S) return;
-    if (!Array.isArray(S.gewerkePresets) || !S.gewerkePresets.length) {
-      S.gewerkePresets = GEWERK_PRESETS.map(x=>({code:x.code,name:x.name}));
-    }
+    // S is declared with top-level `let`, so it is available in this script
+    // but intentionally is not exposed as window.S. Testing window.S here
+    // prevented the complete Gewerk catalog from ever being installed.
+    if (typeof S === 'undefined' || !S) return;
+    if (!Array.isArray(S.gewerkePresets)) S.gewerkePresets = [];
+    // Bestehende Benutzerdaten bewahren und fehlende Apolda-Gewerke ergaenzen.
+    // Dadurch wird der Katalog auch bei bereits benutzten Installationen
+    // vollstaendig, ohne manuell angelegte Gewerke zu ueberschreiben.
+    GEWERK_PRESETS.forEach(preset => {
+      const existing = S.gewerkePresets.find(g => String(g.code).trim() === preset.code);
+      if (!existing) S.gewerkePresets.push({code:preset.code,name:preset.name});
+      else if (!String(existing.name || '').trim()) existing.name = preset.name;
+    });
     if (!Array.isArray(S.contractors)) S.contractors = [];
     S.contractors.forEach((c, idx) => {
       if (!c.gewerkCode) {
@@ -9668,7 +9854,7 @@ document.addEventListener('DOMContentLoaded',()=>renderTerminplan('all'));
 <script id="sero-performance-pack-script">
 (function(){
   const PERF_KEY='sero_performance_pack_v1';
-  let PERF={deliveries:[],acceptances:[],changes:[],tradeProgress:{}};
+  let PERF={deliveries:[],acceptances:[],changes:[],tradeProgress:{},tradeEdits:{}};
   function pUid(p){return p+'_'+Date.now()+'_'+Math.random().toString(36).slice(2,7)}
   function pEsc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
   function pToday(){return new Date().toISOString().slice(0,10)}
@@ -9700,10 +9886,32 @@ document.addEventListener('DOMContentLoaded',()=>renderTerminplan('all'));
     return alerts.slice(0,16)
   }
   function tradeKeys(){
-    const map=new Map();(S?.contractors||[]).forEach(f=>{const key=(f.trade||f.gewerkName||f.gewerkCode||'Allgemein').trim()||'Allgemein';if(!map.has(key))map.set(key,[]);map.get(key).push(f)});return map
+    const map=new Map(), firms=S?.contractors||[], presets=S?.gewerkePresets||[];
+    const sorted=presets.slice().sort((a,b)=>String(a.code||'').localeCompare(String(b.code||''),undefined,{numeric:true,sensitivity:'base'}));
+    // Gewerk 360 must show the complete project catalog, including work packages
+    // which do not yet have an awarded contractor.
+    sorted.forEach(g=>{
+      const code=String(g.code||'').trim();
+      if(!code)return;
+      const key=`${code} ${String(g.name||'').trim()||code}`;
+      map.set(key,firms.filter(f=>String(f.gewerkCode||'').trim()===code));
+    });
+    // Keep manually entered/legacy trades visible as well.
+    firms.forEach(f=>{
+      const code=String(f.gewerkCode||'').trim();
+      const known=presets.some(g=>String(g.code||'').trim()===code);
+      if(known)return;
+      const key=(f.trade||f.gewerkName||code||'Allgemein').trim()||'Allgemein';
+      if(!map.has(key))map.set(key,[]);
+      map.get(key).push(f);
+    });
+    return map
   }
-  function renderTrade360(){const box=document.getElementById('perfTradeGrid');if(!box)return;const mp=tradeKeys();if(!mp.size){box.innerHTML='<div class="empty-state"><div class="ei">🏗️</div><h4>Keine Gewerke/Firmen</h4><p>Firmenbereich üzerinden firmaları ekleyebilirsin.</p></div>';return}box.innerHTML=[...mp.entries()].map(([trade,firms])=>{const ids=new Set(firms.map(f=>String(f.id)));const todo=(S?.todos||[]).filter(x=>ids.has(String(x.firmId))&&!['Erledigt','Entfällt'].includes(x.status)).length;const mg=(S?.maengel||[]).filter(x=>ids.has(String(x.firmId))&&x.status!=='erledigt').length;const ph=(S?.photos||[]).filter(x=>ids.has(String(x.firmId))).length;const tl=(S?.timeline||[]).filter(x=>ids.has(String(x.firmId))).length;const pr=Math.max(0,Math.min(100,Number(PERF.tradeProgress[trade]||0)));return `<div class="perf-trade"><h4>${pEsc(trade)}</h4><div class="perf-meta">${firms.map(f=>pEsc(f.name||'')).join(' · ')}</div><div class="perf-trade-stats"><div class="perf-mini"><strong>${todo}</strong><span>To-do</span></div><div class="perf-mini"><strong>${mg}</strong><span>Mängel</span></div><div class="perf-mini"><strong>${ph}</strong><span>Fotos</span></div><div class="perf-mini"><strong>${tl}</strong><span>Einträge</span></div></div><div class="perf-progress"><div style="width:${pr}%"></div></div><div style="display:flex;align-items:center;gap:8px;margin-top:8px"><input class="fi" type="number" min="0" max="100" value="${pr}" style="width:88px;padding:6px 8px" onchange="perfSetTradeProgress('${pEsc(trade).replace(/'/g,'&#39;')}',this.value)"><span style="font-size:11px;color:var(--text3)">Fortschritt %</span></div></div>`}).join('')}
+  function renderTrade360(){const box=document.getElementById('perfTradeGrid');if(!box)return;const mp=tradeKeys();if(!mp.size){box.innerHTML='<div class="empty-state"><div class="ei">🏗️</div><h4>Keine Gewerke/Firmen</h4><p>Firmenbereich üzerinden firmaları ekleyebilirsin.</p></div>';return}box.innerHTML=[...mp.entries()].map(([trade,firms],tradeIndex)=>{const ids=new Set(firms.map(f=>String(f.id)));const todo=(S?.todos||[]).filter(x=>ids.has(String(x.firmId))&&!['Erledigt','Entfällt'].includes(x.status)).length;const mg=(S?.maengel||[]).filter(x=>ids.has(String(x.firmId))&&x.status!=='erledigt').length;const ph=(S?.photos||[]).filter(x=>ids.has(String(x.firmId))).length;const tl=(S?.timeline||[]).filter(x=>ids.has(String(x.firmId))).length;const edit=PERF.tradeEdits?.[trade]||{};const pr=Math.max(0,Math.min(100,Number(edit.progress??PERF.tradeProgress[trade]??0)));const title=edit.name||trade;const automaticFirm=firms.length?firms.map(f=>`${pEsc(f.name||'')}${f.contact?' · '+pEsc(f.contact):''}`).join('<br>'):'Noch keine Firma <span class="tr-inline">Henüz firma yok</span>';const firmMeta=edit.firm?pEsc(edit.firm)+(edit.contact?' · '+pEsc(edit.contact):''):automaticFirm;const details=[edit.status&&`Status: ${pEsc(edit.status)}`,edit.start&&`Start: ${pFmtDate(edit.start)}`,edit.end&&`Ende: ${pFmtDate(edit.end)}`,edit.note&&pEsc(edit.note)].filter(Boolean).join(' · ');return `<div class="perf-trade" data-trade-index="${tradeIndex}"><div style="display:flex;justify-content:space-between;gap:8px;align-items:flex-start"><h4>${pEsc(title)}</h4><button class="btn btn-ghost btn-xs perf-edit-trade" type="button" data-trade-index="${tradeIndex}">✎ Bearbeiten</button></div><div class="perf-meta">${firmMeta}</div>${details?`<div class="perf-note" style="margin-top:7px">${details}</div>`:''}<div class="perf-trade-stats"><div class="perf-mini"><strong>${todo}</strong><span>To-do</span></div><div class="perf-mini"><strong>${mg}</strong><span>Mängel</span></div><div class="perf-mini"><strong>${ph}</strong><span>Fotos</span></div><div class="perf-mini"><strong>${tl}</strong><span>Einträge</span></div></div><div class="perf-progress"><div style="width:${pr}%"></div></div><div style="display:flex;align-items:center;gap:8px;margin-top:8px"><input class="fi perf-trade-progress" data-trade-index="${tradeIndex}" type="number" min="0" max="100" value="${pr}" style="width:88px;padding:6px 8px"><span style="font-size:11px;color:var(--text3)">Fortschritt %</span></div></div>`}).join('')}
   window.perfSetTradeProgress=function(trade,v){PERF.tradeProgress[trade]=Math.max(0,Math.min(100,Number(v)||0));pSave()}
+  window.perfEditTrade=function(trade){try{document.getElementById('perfTradeEditModal')?.remove();const old=PERF.tradeEdits?.[trade]||{};const modal=document.createElement('div');modal.id='perfTradeEditModal';modal.className='modal-ov open';modal.style.cssText='display:flex!important;z-index:99999!important';modal.innerHTML=`<div class="modal" role="dialog" aria-modal="true" aria-labelledby="perfTradeEditTitle" style="max-width:620px"><div class="modal-hd"><h3 id="perfTradeEditTitle">Gewerk bearbeiten <small>İş kalemini düzenle</small></h3><button class="modal-close" type="button" data-close aria-label="Schließen">×</button></div><div class="modal-body"><div class="perf-form"><label class="wide fl">Bezeichnung <small>Adı</small><input class="fi" data-f="name" value="${pEsc(old.name||trade)}"></label><label class="fl">Firma <small>Firma</small><input class="fi" data-f="firm" value="${pEsc(old.firm||'')}"></label><label class="fl">Ansprechpartner <small>İlgili kişi</small><input class="fi" data-f="contact" value="${pEsc(old.contact||'')}"></label><label class="fl">Status <small>Durum</small><select class="fs" data-f="status"><option></option>${['Offen','In Arbeit','Wartet','Beauftragt','Abgeschlossen'].map(x=>`<option ${old.status===x?'selected':''}>${x}</option>`).join('')}</select></label><label class="fl">Fortschritt % <small>İlerleme</small><input class="fi" data-f="progress" type="number" min="0" max="100" value="${pEsc(old.progress??PERF.tradeProgress[trade]??0)}"></label><label class="fl">Starttermin <small>Başlangıç tarihi</small><input class="fi" data-f="start" type="date" value="${pEsc(old.start||'')}"></label><label class="fl">Endtermin <small>Bitiş tarihi</small><input class="fi" data-f="end" type="date" value="${pEsc(old.end||'')}"></label><label class="wide fl">Notiz <small>Not</small><textarea class="fta" data-f="note">${pEsc(old.note||'')}</textarea></label></div></div><div class="modal-ft"><button class="btn btn-ghost" type="button" data-reset>Zurücksetzen</button><button class="btn btn-ghost" type="button" data-close>Abbrechen</button><button class="btn btn-primary" type="button" data-save>Speichern</button></div></div>`;document.body.appendChild(modal);const close=()=>modal.remove();modal.querySelectorAll('[data-close]').forEach(b=>b.addEventListener('click',close));modal.addEventListener('click',e=>{if(e.target===modal)close()});modal.querySelector('[data-reset]').addEventListener('click',()=>{if(!confirm('Manuelle Änderungen für dieses Gewerk zurücksetzen?'))return;delete PERF.tradeEdits[trade];delete PERF.tradeProgress[trade];close();pSave()});modal.querySelector('[data-save]').addEventListener('click',()=>{const get=f=>modal.querySelector(`[data-f="${f}"]`)?.value?.trim()||'';PERF.tradeEdits=PERF.tradeEdits||{};PERF.tradeEdits[trade]={name:get('name'),firm:get('firm'),contact:get('contact'),status:get('status'),progress:Math.max(0,Math.min(100,Number(get('progress'))||0)),start:get('start'),end:get('end'),note:get('note')};PERF.tradeProgress[trade]=PERF.tradeEdits[trade].progress;close();pSave();showToast('Gewerk gespeichert','ok')});setTimeout(()=>modal.querySelector('[data-f="name"]')?.focus(),0)}catch(err){console.error('Gewerk editor',err);showToast('Gewerk düzenleme penceresi açılamadı','err')}}
+  document.addEventListener('click',e=>{const target=e.target&&e.target.nodeType===1?e.target:e.target?.parentElement;const b=target&&target.closest('.perf-edit-trade');if(!b)return;e.preventDefault();e.stopPropagation();const trades=[...tradeKeys().keys()];const trade=trades[Number(b.dataset.tradeIndex)];if(trade)window.perfEditTrade(trade)},true);
+  document.addEventListener('change',e=>{const inp=e.target.closest?.('.perf-trade-progress');if(!inp)return;const trades=[...tradeKeys().keys()];const trade=trades[Number(inp.dataset.tradeIndex)];if(trade)window.perfSetTradeProgress(trade,inp.value)});
 
   function renderAlerts(){const box=document.getElementById('perfAlerts');if(!box)return;const a=derivedAlerts();box.innerHTML=a.length?a.map(x=>`<div class="perf-alert"><div class="ico">${x.icon}</div><div><strong>${pEsc(x.title)}</strong><div>${pEsc(x.text)}</div></div></div>`).join(''):'<div class="empty-state" style="padding:22px"><div class="ei">✅</div><h4>Keine kritischen Hinweise</h4><p>Aktuell kein automatisch erkannter Handlungsbedarf.</p></div>'}
   function listCRUD(type){const cfg={deliveries:{box:'perfDeliveryList',empty:'Keine Lieferungen',date:'deliveryDate'},acceptances:{box:'perfAcceptanceList',empty:'Keine Abnahmen',date:'date'},changes:{box:'perfChangeList',empty:'Keine Nachträge',date:'date'}}[type],box=document.getElementById(cfg.box);if(!box)return;const arr=PERF[type]||[];if(!arr.length){box.innerHTML=`<div class="empty-state" style="padding:22px"><div class="ei">—</div><h4>${cfg.empty}</h4><p>Yeni kayıt ekleyebilirsin.</p></div>`;return}box.innerHTML=arr.slice().sort((a,b)=>String(a[cfg.date]||'9999').localeCompare(String(b[cfg.date]||'9999'))).map(x=>`<div class="perf-item"><div class="perf-item-hd"><div><div class="perf-title">${pEsc(x.title)}</div><div class="perf-meta">${pFirmName(x.firmId)?pEsc(pFirmName(x.firmId))+' · ':''}${x.trade?pEsc(x.trade)+' · ':''}${pFmtDate(x[cfg.date])}</div></div><span class="perf-chip ${pStatusClass(x.status)}">${pEsc(x.status||'Offen')}</span></div>${type==='changes'&&x.amount?`<div class="perf-note"><strong>${pEsc(x.amount)} €</strong></div>`:''}${x.note?`<div class="perf-note">${pEsc(x.note)}</div>`:''}<div class="perf-actions"><button class="btn btn-ghost btn-xs" onclick="perfEdit('${type}','${x.id}')">Bearbeiten</button><button class="btn btn-ghost btn-xs" onclick="perfDelete('${type}','${x.id}')">Löschen</button></div></div>`).join('')}
@@ -9716,7 +9924,7 @@ document.addEventListener('DOMContentLoaded',()=>renderTerminplan('all'));
   window.perfDelete=function(type,id){if(!confirm('Eintrag wirklich löschen?'))return;PERF[type]=PERF[type].filter(x=>x.id!==id);pSave()}
   window.perfEdit=function(type,id){const x=PERF[type].find(a=>a.id===id);if(!x)return;const map=type==='deliveries'?{perfDelId:x.id,perfDelTitle:x.title,perfDelFirm:x.firmId,perfDelTrade:x.trade,perfDelOrder:x.orderDate,perfDelDate:x.deliveryDate,perfDelStatus:x.status,perfDelNote:x.note}:type==='acceptances'?{perfAccId:x.id,perfAccTitle:x.title,perfAccFirm:x.firmId,perfAccTrade:x.trade,perfAccDate:x.date,perfAccStatus:x.status,perfAccType:x.type,perfAccNote:x.note}:{perfChgId:x.id,perfChgTitle:x.title,perfChgFirm:x.firmId,perfChgTrade:x.trade,perfChgDate:x.date,perfChgAmount:x.amount,perfChgStatus:x.status,perfChgNote:x.note};Object.entries(map).forEach(([id,v])=>{const e=document.getElementById(id);if(e)e.value=v||''});pTab(type==='deliveries'?'lieferungen':type==='acceptances'?'abnahmen':'nachtraege');document.getElementById(Object.keys(map)[1])?.scrollIntoView({behavior:'smooth',block:'center'})}
   window.perfExport=function(){const blob=new Blob([JSON.stringify(PERF,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='SERO_ProjectManagement_'+pToday()+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),500)}
-  window.perfImport=function(inp){const f=inp.files?.[0];if(!f)return;const r=new FileReader();r.onload=e=>{try{const d=JSON.parse(e.target.result);PERF=Object.assign({deliveries:[],acceptances:[],changes:[],tradeProgress:{}},d||{});pSave();showToast('Projektsteuerung importiert','ok')}catch(err){showToast('Import ungültig','err')}};r.readAsText(f);inp.value=''}
+  window.perfImport=function(inp){const f=inp.files?.[0];if(!f)return;const r=new FileReader();r.onload=e=>{try{const d=JSON.parse(e.target.result);PERF=Object.assign({deliveries:[],acceptances:[],changes:[],tradeProgress:{},tradeEdits:{}},d||{});pSave();showToast('Projektsteuerung importiert','ok')}catch(err){showToast('Import ungültig','err')}};r.readAsText(f);inp.value=''}
 
   function kpis(){const openTodo=(S?.todos||[]).filter(t=>!['Erledigt','Entfällt'].includes(t.status)).length,openMg=(S?.maengel||[]).filter(m=>m.status!=='erledigt').length,upDel=PERF.deliveries.filter(x=>!['Geliefert','Erledigt'].includes(x.status)).length,openChg=PERF.changes.filter(x=>!['Beauftragt','Abgelehnt','Erledigt'].includes(x.status)).length,pendingAcc=PERF.acceptances.filter(x=>!['Abgenommen','Erledigt'].includes(x.status)).length,alerts=derivedAlerts().filter(a=>a.level==='bad').length;return{openTodo,openMg,upDel,openChg,pendingAcc,alerts}}
   function renderPerformance(){const page=document.getElementById('pg-performance');if(!page)return;const k=kpis();document.getElementById('perfKpis').innerHTML=`<div class="perf-kpi" onclick="perfTab('cockpit')"><div class="n">${k.alerts}</div><div class="l">Kritisch</div><div class="s">automatische Warnungen</div></div><div class="perf-kpi" onclick="perfTab('lieferungen')"><div class="n">${k.upDel}</div><div class="l">Lieferungen</div><div class="s">offen / erwartet</div></div><div class="perf-kpi" onclick="perfTab('abnahmen')"><div class="n">${k.pendingAcc}</div><div class="l">Abnahmen</div><div class="s">offen</div></div><div class="perf-kpi" onclick="perfTab('nachtraege')"><div class="n">${k.openChg}</div><div class="l">Nachträge</div><div class="s">offen</div></div>`;renderAlerts();renderTrade360();listCRUD('deliveries');listCRUD('acceptances');listCRUD('changes');['perfDelFirm','perfAccFirm','perfChgFirm'].forEach(id=>{const e=document.getElementById(id);if(e){const v=e.value;e.innerHTML=pFirmOptions(v);if(v)e.value=v}})}
@@ -9957,5 +10165,78 @@ document.addEventListener('DOMContentLoaded',()=>renderTerminplan('all'));
 })();
 </script>
 
+<style id="sero-bilingual-ui-style">
+  .sero-tr-inline{font-size:.72em!important;font-weight:500!important;color:var(--text3,#7b8794)!important;margin-left:5px;white-space:normal;letter-spacing:0!important;text-transform:none!important;line-height:1.15;}
+  button .sero-tr-inline,.btn .sero-tr-inline,.side-link .sero-tr-inline{display:inline-block;vertical-align:baseline;}
+  .nav-btn .sero-tr-inline,.side-link .sero-tr-inline{font-size:9px!important;}
+  .fl .sero-tr-inline,.term-group-title .sero-tr-inline{display:inline-block;}
+  @media(max-width:680px){.sero-tr-inline{font-size:.68em!important;margin-left:3px}.nav-btn .sero-tr-inline{display:block;margin:1px 0 0}}
+</style>
+<script id="sero-bilingual-ui-script">
+(()=>{
+  const TR={
+    'Projekt-Nr.':'Proje No','Bauvorhaben':'Proje adı','Bauleiter':'Şantiye şefi','Standort':'Konum',
+    'Dashboard':'Kontrol paneli','Kanban':'Görev panosu','Tagesbericht':'Günlük rapor','Firmen':'Firmalar','Kontakte':'Kişiler','Container':'Konteyner','Besprechungen':'Toplantılar','Dateien':'Dosyalar','Mängel':'Eksikler / kusurlar','Archiv':'Arşiv','To-do':'Yapılacaklar','Terminplan':'İş programı','Einstellungen':'Ayarlar',
+    'Navigation':'Gezinme','Hauptbereich':'Ana bölüm','Organisation':'Organizasyon','Dokumentation':'Dokümantasyon','Export':'Dışa aktarma','System':'Sistem',
+    'PDF exportieren':'PDF dışa aktar','Excel exportieren':'Excel dışa aktar','Bericht speichern':'Raporu kaydet','Aktualisieren':'Güncelle','Alle':'Tümü','Alle →':'Tümü →',
+    'Container Status':'Konteyner durumu','Heute wichtig':'Bugün önemli','Offene Punkte':'Açık konular','Warten auf':'Beklenenler','Überfällig':'Süresi geçmiş',
+    'Kanban Board':'Görev panosu','Aufgabe hinzufügen':'Görev ekle','Aufgabe':'Görev','Offen / In Arbeit':'Açık / devam ediyor','Wartet':'Bekliyor','Erledigt':'Tamamlandı',
+    'Speichern & Archivieren':'Kaydet ve arşivle','Speichern':'Kaydet','Datum':'Tarih','Berichtstag':'Rapor günü','Bericht-Nr.':'Rapor No','Projektinfo':'Proje bilgileri',
+    'Noch nicht geladen':'Henüz yüklenmedi','Automatisch nach Projekt-Ort. Regen und Wind inklusive.':'Proje konumuna göre otomatik; yağmur ve rüzgâr dahil.',
+    'Personal':'Personel','Hinzufügen':'Ekle','aktiv':'aktif','Personal anzeigen':'Personeli göster','Geräte':'Ekipmanlar','Geräte anzeigen':'Ekipmanları göster',
+    'Fortschritt':'İlerleme','Monatlich nach Terminplan':'İş programına göre aylık','Monat':'Ay','Ist-Fortschritt':'Gerçekleşen ilerleme','Terminplan-Basis':'İş programı temeli','Baustelle':'Şantiye','Abweichung':'Sapma','Monat übernehmen':'Ayı aktar','Terminplan übernehmen':'İş programını aktar','Bemerkung':'Not','Monatsnotiz':'Aylık not','Bauphasen-Karte':'İnşaat aşamaları kartı','Aktuelle Phase':'Güncel aşama','Maßnahme heute':'Bugünkü faaliyet',
+    'Bauarbeiten':'İnşaat işleri','Keine Einträge':'Kayıt yok','Bauarbeiten anzeigen':'İnşaat işlerini göster','Arbeitsbereiche':'Çalışma alanları','Bereich':'Alan','Tageschronologie':'Günlük kronoloji','Eintrag':'Kayıt','Firma wählen':'Firma seç','Keine Tagesereignisse':'Günlük olay yok','Allgemeine Bemerkungen':'Genel notlar','Unterschriften':'İmzalar',
+    'Nachunternehmer':'Alt yükleniciler','Gewerk-Code':'İş kalemi kodu','Firma hinzufügen':'Firma ekle','Keine Firmen':'Firma yok','Kontakt hinzufügen':'Kişi ekle','Telefon-Rehber':'Telefon rehberi','CSV importieren':'CSV içe aktar','VCF importieren':'VCF içe aktar','CSV exportieren':'CSV dışa aktar','Alle Kategorien':'Tüm kategoriler','Bauleitung':'Şantiye yönetimi','Polier':'Ustabaşı','Sicherheit':'Güvenlik','Sonstige':'Diğer','Alle Firmen':'Tüm firmalar','Keine Kontakte':'Kişi yok',
+    'Müllcontainer':'Atık konteynerleri','Container hinzufügen':'Konteyner ekle','Keine Container':'Konteyner yok','Besprechungsprotokoll':'Toplantı tutanağı','Protokoll erstellen':'Tutanak oluştur','Keine Protokolle':'Tutanak yok',
+    'Projektdateien':'Proje dosyaları','Dateien hochladen':'Dosya yükle','Fotos':'Fotoğraflar','Dokumente & Pläne':'Belgeler ve planlar','Mängelmanagement':'Eksik / kusur yönetimi','Mangel hinzufügen':'Eksik / kusur ekle','Alle Status':'Tüm durumlar','Offen':'Açık','In Bearbeitung':'İşlemde','Keine Mängel':'Eksik / kusur yok',
+    'Heute speichern':'Bugünü kaydet','Archiv leeren':'Arşivi temizle','Dieser Monat':'Bu ay','Letzter Monat':'Geçen ay','Dieses Jahr':'Bu yıl','Kein Archiv':'Arşiv yok',
+    'To-do / Maßnahmen':'Yapılacaklar / önlemler','Neu':'Yeni','Punkt erfassen':'Madde ekle','Titel':'Başlık','Beschreibung':'Açıklama','Firma':'Firma','Kategorie':'Kategori','Allgemein':'Genel','Mangel':'Eksik / kusur','Freigabe':'Onay','Material':'Malzeme','Planung':'Planlama','Priorität':'Öncelik','Hoch':'Yüksek','Mittel':'Orta','Niedrig':'Düşük','Status':'Durum','In Arbeit':'Devam ediyor','Wartet auf Firma':'Firma bekleniyor','Wartet auf Freigabe':'Onay bekleniyor','Verschoben':'Ertelendi','Entfällt':'İptal / gereksiz','Fällig':'Son tarih','Kommentar':'Yorum','Filter':'Filtre','Suche':'Ara','Liste':'Liste',
+    'Grobterminplan':'Kaba iş programı','Alle Bereiche':'Tüm alanlar','Aktuelle KW':'Güncel hafta','Bauzeiten · Kalenderwochen 2026 / 2027':'İnşaat süreleri · 2026 / 2027 takvim haftaları','Vom Rohbau bis zur SV-Abnahme':'Kaba yapıdan uzman kabulüne kadar','Rohbau/Hülle':'Kaba yapı / kabuk','Innenausbau':'İç imalatlar','Finish':'Son işler','Abnahme':'Kabul',
+    'Backup & Wiederherstellung':'Yedekleme ve geri yükleme','Komplett-Backup exportieren':'Tam yedeği dışa aktar','JSON Backup exportieren':'JSON yedeğini dışa aktar','Backup importieren':'Yedeği içe aktar','JSON Backup importieren':'JSON yedeğini içe aktar','Tagesauswahl':'Gün seçimi','Bericht nach Datum laden':'Tarihe göre rapor yükle','Tag laden':'Günü yükle','Neuen Tag beginnen':'Yeni güne başla',
+    'Projekt-Stammdaten':'Proje ana bilgileri','Header übernehmen':'Üst bilgiyi aktar','Baustellenadresse':'Şantiye adresi','Lieferadresse':'Teslimat adresi','Notfall / Sicherheit':'Acil durum / güvenlik','Besonderheiten':'Özel durumlar','Dokumentenregister':'Belge kayıt listesi','Dokument speichern':'Belgeyi kaydet','Dokument':'Belge','Typ':'Tür','Ablageort':'Kayıt yeri','Datum / Version':'Tarih / sürüm','Notiz':'Not','Tagesabschluss-Checkliste':'Gün sonu kontrol listesi','Heute zurücksetzen':'Bugünü sıfırla','Punkt':'Madde','Standard laden':'Standardı yükle','Projekt-Setup JSON importieren':'Proje kurulum JSON’unu içe aktar','Beispiel laden':'Örneği yükle','Nur ergänzen':'Yalnızca eksikleri ekle','Überschreiben':'Üzerine yaz','Speicherstatus':'Kayıt durumu',
+    'Spalte':'Sütun','Uhrzeit':'Saat','Gewerk':'İş kalemi','Abbrechen':'İptal','Personal hinzufügen':'Personel ekle','Funktion / Gewerk':'Görev / iş kalemi','Anzahl':'Sayı','Name':'İsim','Gerät hinzufügen':'Ekipman ekle','Gerät / Maschine':'Ekipman / makine','Betriebsstunden':'Çalışma saati','Marke':'Marka','Modell':'Model','Nutzende Firma':'Kullanan firma',
+    'Firma erfassen':'Firma ekle','Firmenname':'Firma adı','Ansprechpartner':'İlgili kişi','Telefon':'Telefon','Aktiv':'Aktif','Pause':'Beklemede','Abgeschlossen':'Tamamlandı','Farbe':'Renk','Orange':'Turuncu','Blau':'Mavi','Grün':'Yeşil','Gold':'Altın','Rot':'Kırmızı','Lila':'Mor','Cyan':'Camgöbeği','Pink':'Pembe','Erste Notiz':'İlk not',
+    'Notiz hinzufügen':'Not ekle','Notiz / Tagesbeobachtung':'Not / günlük gözlem','Notiz speichern':'Notu kaydet','Container-ID':'Konteyner kimliği','Größe':'Boyut','Abholung bestellt':'Alım siparişi verildi','Titel / Thema':'Başlık / konu','Art':'Tür','Baubesprechung':'Şantiye toplantısı','Übergabe':'Teslim','Sonstiges':'Diğer','Ort':'Yer','Teilnehmer':'Katılımcılar','kommagetrennt':'virgülle ayrılmış','Tagesordnung':'Gündem','Beschlüsse':'Kararlar','Nächster Termin':'Sonraki tarih','Protokoll speichern':'Tutanağı kaydet',
+    'Mangel erfassen':'Eksik / kusur ekle','Deadline':'Son tarih','Verantwortlich':'Sorumlu','Ort / Bereich':'Yer / alan','Foto verknüpfen':'Fotoğraf bağla','Kein Foto':'Fotoğraf yok','Kontakt erfassen':'Kişi ekle','Funktion':'Görev','E-Mail':'E-posta','Archivierter Bericht':'Arşivlenmiş rapor','Schließen':'Kapat','Foto':'Fotoğraf','Timeline':'Zaman çizelgesi','PDF wird geladen…':'PDF yükleniyor…','Firmen im Projekt':'Projedeki firmalar','offene To-dos':'açık görevler','Beschaffung / Lieferungen':'Satın alma / teslimatlar','Dokumentreferenzen':'Belge referansları','Fehlende Daten ergänzen':'Eksik verileri tamamla'
+  };
+  const strip=s=>s.replace(/^[\s↻＋+💾📄📊📩🗑⬇⬆🔵🟡✅🔴🟢🟠🟣🩵🩷⚠🛠✓—]+/u,'').trim();
+  function lookup(raw){const clean=strip(raw);return TR[raw.trim()]||TR[clean]||'';}
+  function addTranslation(el,tr){
+    if(!tr||el.dataset.seroTrDone==='1'||el.querySelector(':scope > .tr,:scope > small:not(.sero-tr-inline),:scope > .sero-tr-inline'))return;
+    if(el.tagName==='OPTION'){el.textContent=`${el.textContent.trim()} — ${tr}`;el.dataset.seroTrDone='1';return;}
+    const span=document.createElement('small');span.className='sero-tr-inline';span.lang='tr';span.textContent=tr;el.appendChild(span);el.dataset.seroTrDone='1';
+  }
+  function translate(root=document){
+    root.querySelectorAll?.('button,a,label,h1,h2,h3,h4,h5,th,td,legend,p,div,span,small,option').forEach(el=>{
+      if(el.closest('#sero-bilingual-ui-script')||el.classList.contains('sero-tr-inline'))return;
+      const own=[...el.childNodes].filter(n=>n.nodeType===3).map(n=>n.textContent).join(' ').replace(/\s+/g,' ').trim();
+      // A wrapper such as a navigation button often contains a dedicated
+      // icon span and a text span. Translate only that inner text element;
+      // otherwise both wrapper and child receive the same Turkish caption.
+      if(!own && el.children.length)return;
+      addTranslation(el,lookup(own));
+    });
+    root.querySelectorAll?.('input[placeholder],textarea[placeholder]').forEach(el=>{const tr=lookup(el.placeholder);if(tr&&!el.placeholder.includes(tr))el.placeholder+=` / ${tr}`;});
+    root.querySelectorAll?.('[title]').forEach(el=>{const tr=lookup(el.title);if(tr&&!el.title.includes(tr))el.title+=` / ${tr}`;});
+    // Export buttons existed in older saved versions with translations on
+    // both wrapper and inner spans. Remove every old copy and append exactly
+    // one Turkish caption to the actual text span.
+    root.querySelectorAll?.('button[onclick*="exportPDF"],button[onclick*="exportExcel"]').forEach(btn=>{
+      const label=[...btn.querySelectorAll('span')].find(s=>/^(PDF|Excel) exportieren(?:\s|$)/.test(s.textContent.trim()));
+      if(!label)return;
+      const wanted=label.textContent.trim().startsWith('PDF')?'PDF dışa aktar':'Excel dışa aktar';
+      const copies=[...btn.querySelectorAll('.sero-tr-inline,.tr-inline,.tr')];
+      const correct=copies.length===1&&copies[0].parentElement===label&&copies[0].textContent.trim()===wanted;
+      if(correct){btn.dataset.seroTrDone='1';return;}
+      copies.forEach(n=>n.remove());
+      delete label.dataset.seroTrDone;
+      addTranslation(label,wanted);
+      btn.dataset.seroTrDone='1';
+    });
+  }
+  let queued=false;const run=()=>{queued=false;translate(document)};
+  document.addEventListener('DOMContentLoaded',()=>{run();new MutationObserver(()=>{if(!queued){queued=true;requestAnimationFrame(run)}}).observe(document.body,{childList:true,subtree:true});});
+})();
+</script>
 </body>
 </html>
