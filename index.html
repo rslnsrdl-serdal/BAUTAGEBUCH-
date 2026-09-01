@@ -1797,6 +1797,17 @@ body{
   .doc-action-btn{padding:6px 7px;font-size:9px;}
 }
 
+
+/* Bauleiter Cockpit removed by request */
+[data-page="cockpit"], [data-page="performance"], #cockpit, #performancePack,
+.cockpit-page, .performance-pack-page { display:none !important; }
+
+
+/* Terminplan removed by request */
+[data-page="terminplan"], #terminplan, #page-terminplan, .terminplan-page {
+  display:none !important;
+}
+
 </style>
 <!-- ═══════════ HTML BODY ═══════════ -->
 <body>
@@ -2099,7 +2110,6 @@ body{
             </div>
           </div>
           <div style="background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:10px 12px;margin-bottom:10px;">
-            <div style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text3);margin-bottom:4px;">Terminplan-Basis</div>
             <div id="progPlanPhase" style="font-size:12px;color:var(--text);line-height:1.6;">—</div>
           </div>
           <div class="fr2">
@@ -2108,7 +2118,7 @@ body{
           </div>
           <div class="fr2">
             <div class="fg"><div class="fl">Abweichung</div><input type="text" class="fi" id="progDiffInput" readonly></div>
-            <div class="fg"><div class="fl">Monat übernehmen</div><button class="btn btn-ghost" style="width:100%;justify-content:center;" onclick="applySuggestedMonthlyProgress()">Terminplan übernehmen</button></div>
+            <div class="fg"><div class="fl">Monat übernehmen</div></div>
           </div>
           <div class="fg"><div class="fl">Bemerkung <span class="tr">Monatsnotiz</span></div><textarea class="fta" id="progNote" style="min-height:58px;" placeholder="z. B. leichter Verzug wegen Wetter / Vorlauf / Lieferung" oninput="setProgressField('note',this.value)"></textarea></div>
           
@@ -2464,8 +2474,7 @@ body{
   </div>
   <div class="term-board"><div class="term-board-scroll" id="termBoardScroll"><div class="term-grid" id="termGrid"></div></div></div>
   <div class="term-summary-grid" id="termSummary"></div>
-  <div class="term-source-note">Keine projektspezifischen Terminplandaten im öffentlichen Grundsystem hinterlegt.</div>
-</div>
+  </div>
 
 <!-- ═══════════ PAGE: SETTINGS ═══════════ -->
 <div class="page" id="pg-settings">
@@ -9474,11 +9483,11 @@ document.addEventListener('DOMContentLoaded',()=>renderTerminplan('all'));
   window.perfImport=function(inp){const f=inp.files?.[0];if(!f)return;const r=new FileReader();r.onload=e=>{try{const d=JSON.parse(e.target.result);PERF=Object.assign({deliveries:[],acceptances:[],changes:[],tradeProgress:{}},d||{});pSave();showToast('Projektsteuerung importiert','ok')}catch(err){showToast('Import ungültig','err')}};r.readAsText(f);inp.value=''}
 
   function kpis(){const openTodo=(S?.todos||[]).filter(t=>!['Erledigt','Entfällt'].includes(t.status)).length,openMg=(S?.maengel||[]).filter(m=>m.status!=='erledigt').length,upDel=PERF.deliveries.filter(x=>!['Geliefert','Erledigt'].includes(x.status)).length,openChg=PERF.changes.filter(x=>!['Beauftragt','Abgelehnt','Erledigt'].includes(x.status)).length,pendingAcc=PERF.acceptances.filter(x=>!['Abgenommen','Erledigt'].includes(x.status)).length,alerts=derivedAlerts().filter(a=>a.level==='bad').length;return{openTodo,openMg,upDel,openChg,pendingAcc,alerts}}
-  function renderPerformance(){const page=document.getElementById('pg-performance');if(!page)return;const k=kpis();document.getElementById('perfKpis').innerHTML=`<div class="perf-kpi" onclick="perfTab('cockpit')"><div class="n">${k.alerts}</div><div class="l">Kritisch</div><div class="s">automatische Warnungen</div></div><div class="perf-kpi" onclick="perfTab('lieferungen')"><div class="n">${k.upDel}</div><div class="l">Lieferungen</div><div class="s">offen / erwartet</div></div><div class="perf-kpi" onclick="perfTab('abnahmen')"><div class="n">${k.pendingAcc}</div><div class="l">Abnahmen</div><div class="s">offen</div></div><div class="perf-kpi" onclick="perfTab('nachtraege')"><div class="n">${k.openChg}</div><div class="l">Nachträge</div><div class="s">offen</div></div>`;renderAlerts();renderTrade360();listCRUD('deliveries');listCRUD('acceptances');listCRUD('changes');['perfDelFirm','perfAccFirm','perfChgFirm'].forEach(id=>{const e=document.getElementById(id);if(e){const v=e.value;e.innerHTML=pFirmOptions(v);if(v)e.value=v}})}
+  function renderPerformance(){const page=document.getElementById('pg-performance');if(!page)return;const k=kpis();document.getElementById('perfKpis').innerHTML=`<div class="l">Kritisch</div><div class="s">automatische Warnungen</div></div><div class="perf-kpi" onclick="perfTab('lieferungen')"><div class="n">${k.upDel}</div><div class="l">Lieferungen</div><div class="s">offen / erwartet</div></div><div class="perf-kpi" onclick="perfTab('abnahmen')"><div class="n">${k.pendingAcc}</div><div class="l">Abnahmen</div><div class="s">offen</div></div><div class="perf-kpi" onclick="perfTab('nachtraege')"><div class="n">${k.openChg}</div><div class="l">Nachträge</div><div class="s">offen</div></div>`;renderAlerts();renderTrade360();listCRUD('deliveries');listCRUD('acceptances');listCRUD('changes');['perfDelFirm','perfAccFirm','perfChgFirm'].forEach(id=>{const e=document.getElementById(id);if(e){const v=e.value;e.innerHTML=pFirmOptions(v);if(v)e.value=v}})}
   function renderPerfDashStrip(){const host=document.getElementById('perfDashStrip');if(!host)return;const k=kpis();host.innerHTML=`<div class="perf-dash-card" onclick="perfOpenPage()"><strong>${k.alerts}</strong><span>Kritische Hinweise</span></div><div class="perf-dash-card" onclick="perfOpenPage()"><strong>${k.upDel}</strong><span>Lieferungen offen</span></div><div class="perf-dash-card" onclick="perfOpenPage()"><strong>${k.pendingAcc}</strong><span>Abnahmen offen</span></div><div class="perf-dash-card" onclick="perfOpenPage()"><strong>${k.openChg}</strong><span>Nachträge offen</span></div>`}
 
-  function pageHtml(){return `<div class="page" id="pg-performance"><div class="sh"><h2>Bauleiter Cockpit <span class="sub">Projektsteuerung</span></h2><div class="sh-act"><button class="btn btn-ghost btn-sm" onclick="perfExport()">⬇ Backup</button><button class="btn btn-ghost btn-sm" onclick="document.getElementById('perfImportIn').click()">⬆ Import</button><input id="perfImportIn" type="file" accept=".json,application/json" style="display:none" onchange="perfImport(this)"><button class="btn btn-primary btn-sm" onclick="renderPerformance()">↻ Aktualisieren</button></div></div><div class="perf-grid" id="perfKpis"></div><div class="perf-tabs"><button class="perf-tab active" data-perf-tab="cockpit" onclick="perfTab('cockpit')">🚨 Cockpit</button><button class="perf-tab" data-perf-tab="gewerk" onclick="perfTab('gewerk')">🏗 Gewerk 360°</button><button class="perf-tab" data-perf-tab="lieferungen" onclick="perfTab('lieferungen')">📦 Lieferungen</button><button class="perf-tab" data-perf-tab="abnahmen" onclick="perfTab('abnahmen')">✅ Abnahmen</button><button class="perf-tab" data-perf-tab="nachtraege" onclick="perfTab('nachtraege')">💶 Nachträge</button></div>
-  <div class="perf-pane active" data-perf-pane="cockpit"><div class="perf-two"><div class="card"><div class="card-hd"><div class="card-hd-l"><div class="ci ci-r">🚨</div><h3>Kritische Hinweise <small>otomatik</small></h3></div></div><div class="card-body" id="perfAlerts"></div></div><div class="card"><div class="card-hd"><div class="card-hd-l"><div class="ci ci-b">🎯</div><h3>Steuerungslogik</h3></div></div><div class="card-body"><div class="perf-note">Bu ekran; Terminplan başlangıçlarını, gecikmiş To-do/Mängel, teslimat ve Abnahme tarihlerini birlikte kontrol eder. Kırmızı uyarılar doğrudan aksiyon gerektirir.</div><div class="divider"></div><button class="btn btn-ghost btn-sm" onclick="goPageById('pg-termine')">Terminplan öffnen →</button></div></div></div></div>
+  function pageHtml(){return `</div><div class="perf-grid" id="perfKpis"></div><div class="perf-tabs"><button class="perf-tab" data-perf-tab="gewerk" onclick="perfTab('gewerk')">🏗 Gewerk 360°</button><button class="perf-tab" data-perf-tab="lieferungen" onclick="perfTab('lieferungen')">📦 Lieferungen</button><button class="perf-tab" data-perf-tab="abnahmen" onclick="perfTab('abnahmen')">✅ Abnahmen</button><button class="perf-tab" data-perf-tab="nachtraege" onclick="perfTab('nachtraege')">💶 Nachträge</button></div>
+  <div class="perf-pane active" data-perf-pane="cockpit"><div class="perf-two"><div class="card"><div class="card-hd"><div class="card-hd-l"><div class="ci ci-r">🚨</div><h3>Kritische Hinweise <small>otomatik</small></h3></div></div><div class="card-body" id="perfAlerts"></div></div><div class="card"><div class="card-hd"><div class="card-hd-l"><div class="ci ci-b">🎯</div><h3>Steuerungslogik</h3></div></div><div class="card-body"><div class="divider"></div></div></div></div></div>
   <div class="perf-pane" data-perf-pane="gewerk"><div class="card"><div class="card-hd"><div class="card-hd-l"><div class="ci ci-c">🏗</div><h3>Gewerk 360°</h3></div></div><div class="card-body"><div class="perf-trade-grid" id="perfTradeGrid"></div></div></div></div>
   <div class="perf-pane" data-perf-pane="lieferungen"><div class="perf-two"><div class="card"><div class="card-hd"><div class="card-hd-l"><div class="ci ci-o">📦</div><h3>Lieferung erfassen</h3></div></div><div class="card-body"><input type="hidden" id="perfDelId"><div class="perf-form"><input class="fi wide" id="perfDelTitle" placeholder="Lieferung / Material"><select class="fs" id="perfDelFirm"></select><input class="fi" id="perfDelTrade" placeholder="Gewerk"><input class="fi" id="perfDelOrder" type="date" title="Bestelldatum"><input class="fi" id="perfDelDate" type="date" title="Liefertermin"><select class="fs" id="perfDelStatus"><option>Offen</option><option>Bestellt</option><option>Bestätigt</option><option>Geliefert</option><option>Erledigt</option></select><textarea class="fta wide" id="perfDelNote" placeholder="Notiz" style="min-height:64px"></textarea></div><button class="btn btn-primary" onclick="perfSaveDelivery()">Speichern</button></div></div><div class="card"><div class="card-hd"><div class="card-hd-l"><div class="ci ci-b">📋</div><h3>Lieferübersicht</h3></div></div><div class="card-body perf-list" id="perfDeliveryList"></div></div></div></div>
   <div class="perf-pane" data-perf-pane="abnahmen"><div class="perf-two"><div class="card"><div class="card-hd"><div class="card-hd-l"><div class="ci ci-g">✅</div><h3>Abnahme erfassen</h3></div></div><div class="card-body"><input type="hidden" id="perfAccId"><div class="perf-form"><input class="fi wide" id="perfAccTitle" placeholder="Abnahme / Prüfung"><select class="fs" id="perfAccFirm"></select><input class="fi" id="perfAccTrade" placeholder="Gewerk"><input class="fi" id="perfAccDate" type="date"><input class="fi" id="perfAccType" placeholder="z. B. SV, Bauamt, intern"><select class="fs" id="perfAccStatus"><option>Offen</option><option>Terminiert</option><option>In Prüfung</option><option>Abgenommen</option><option>Erledigt</option></select><textarea class="fta wide" id="perfAccNote" placeholder="Notiz / Restpunkte" style="min-height:64px"></textarea></div><button class="btn btn-primary" onclick="perfSaveAcceptance()">Speichern</button></div></div><div class="card"><div class="card-hd"><div class="card-hd-l"><div class="ci ci-b">📋</div><h3>Abnahmeübersicht</h3></div></div><div class="card-body perf-list" id="perfAcceptanceList"></div></div></div></div>
