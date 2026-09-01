@@ -1808,6 +1808,26 @@ body{
   display:none !important;
 }
 
+
+/* Removed modules: no tabs / navigation remnants */
+[data-tab*="cockpit" i],
+[data-tab*="performance" i],
+[data-tab*="terminplan" i],
+[role="tab"][href*="cockpit" i],
+[role="tab"][href*="performance" i],
+[role="tab"][href*="terminplan" i],
+a[href*="#cockpit" i],
+a[href*="#performance" i],
+a[href*="#terminplan" i],
+button[id*="cockpit" i],
+button[id*="performance" i],
+button[id*="terminplan" i],
+.tab[id*="cockpit" i],
+.tab[id*="performance" i],
+.tab[id*="terminplan" i] {
+  display:none !important;
+}
+
 </style>
 <!-- ═══════════ HTML BODY ═══════════ -->
 <body>
