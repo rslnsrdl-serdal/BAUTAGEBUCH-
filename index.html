@@ -2680,7 +2680,7 @@ body{
       <input type="hidden" id="af-edit-id">
       <div class="fr2">
         <div class="fg"><div class="fl">Firmenname <span class="tr">Firma Adı</span></div><input type="text" class="fi" id="af-name" placeholder="GmbH, AG…"></div>
-        <div class="fg"><div class="fl">Gewerk <span class="tr">İş Türü</span></div><input type="text" class="fi" id="af-trade" placeholder="Elektro, Rohbau…"></div>
+        <div class="fg"><div class="fl">Gewerk <span class="tr">İş Türü</span></div><input type="text" class="fi" id="af-trade" placeholder="Manuell eingeben…"></div>
       </div>
       <div class="fr2">
         <div class="fg"><div class="fl">Ansprechpartner <span class="tr">İletişim</span></div><input type="text" class="fi" id="af-contact" placeholder="Name…"></div>
@@ -2942,9 +2942,9 @@ body{
 // ═══════════════════════════════════════════════════
 // CONSTANTS & STATE
 // ═══════════════════════════════════════════════════
-const STORAGE_KEY = 'sero_bau_v4';
-const EVERNOTE_EMAIL = ''; // Persönliche Adresse nicht im öffentlichen HTML speichern
-const ARCHIVE_KEY = 'sero_bau_archive_v4';
+const STORAGE_KEY = 'sero_bau_blank_public_v1';
+const EVERNOTE_EMAIL = ''; // Kullanıcı tarafından sonradan girilebilir
+const ARCHIVE_KEY = 'sero_bau_blank_public_archive_v1';
 const COLORS = ['#f97316','#3b82f6','#10b981','#f59e0b','#ef4444','#a855f7','#06b6d4','#ec4899'];
 const CT_CFG = {
   leer:     {label:'Leer / Boş',    cls:'ct-s-leer',   fill:'#10b981', pct:5},
@@ -2956,34 +2956,9 @@ const CT_ICONS = {Bauschutt:'🪨',Holz:'🪵',Metall:'⚙️',Restmuell:'🗑',
 const MONTHS_DE = ['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'];
 const DAYS_DE = ['Sonntag','Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag'];
 
-// DEFAULT PERSONNEL TYPES
-const DEFAULT_PERS = [
-  {key:'polier',de:'Polier',tr:'Formen'},
-  {key:'maurer',de:'Maurer',tr:'Duvar Ustası'},
-  {key:'zimmermann',de:'Zimmermann',tr:'Marangoz'},
-  {key:'eisenbinder',de:'Eisenbinder',tr:'Demirbükücü'},
-  {key:'elektriker',de:'Elektriker',tr:'Elektrikçi'},
-  {key:'sanitaer',de:'Sanitärinstall.',tr:'Tesisatçı'},
-  {key:'hilfskraft',de:'Hilfskraft',tr:'Yardımcı'},
-];
-const DEFAULT_GERAETE = [
-  {key:'kran',de:'Kran',tr:'Vinç',icon:'🏗',count:0,hours:0,brand:'',model:'',firmId:'',note:''},
-  {key:'bagger',de:'Bagger',tr:'Ekskavatör',icon:'🚜',count:0,hours:0,brand:'',model:'',firmId:'',note:''},
-  {key:'radlader',de:'Radlader',tr:'Yükleyici',icon:'🚛',count:0,hours:0,brand:'',model:'',firmId:'',note:''},
-  {key:'dumper',de:'Dumper',tr:'Damper',icon:'🚚',count:0,hours:0,brand:'',model:'',firmId:'',note:''},
-  {key:'kranmobil',de:'Mobilkran',tr:'Mobil Vinç',icon:'🏗️',count:0,hours:0,brand:'',model:'',firmId:'',note:''},
-  {key:'betonmischer',de:'Betonmischer',tr:'Beton Mikseri',icon:'🔄',count:0,hours:0,brand:'',model:'',firmId:'',note:''},
-  {key:'betonpumpe',de:'Betonpumpe',tr:'Beton Pompası',icon:'💧',count:0,hours:0,brand:'',model:'',firmId:'',note:''},
-  {key:'ruettelplatte',de:'Rüttelplatte',tr:'Kompaktör',icon:'🧰',count:0,hours:0,brand:'',model:'',firmId:'',note:''},
-  {key:'walze',de:'Walze',tr:'Silindir',icon:'🛞',count:0,hours:0,brand:'',model:'',firmId:'',note:''},
-  {key:'stapler',de:'Stapler',tr:'Forklift',icon:'🏭',count:0,hours:0,brand:'',model:'',firmId:'',note:''},
-  {key:'hebebuehne',de:'Hebebühne',tr:'Platform',icon:'⬆️',count:0,hours:0,brand:'',model:'',firmId:'',note:''},
-  {key:'generator',de:'Generator',tr:'Jeneratör',icon:'🔌',count:0,hours:0,brand:'',model:'',firmId:'',note:''},
-  {key:'kompressor',de:'Kompressor',tr:'Kompresör',icon:'🌀',count:0,hours:0,brand:'',model:'',firmId:'',note:''},
-  {key:'schweissgeraet',de:'Schweißgerät',tr:'Kaynak Makinesi',icon:'⚡',count:0,hours:0,brand:'',model:'',firmId:'',note:''},
-  {key:'bautrockner',de:'Bautrockner',tr:'Kurutucu',icon:'🌬️',count:0,hours:0,brand:'',model:'',firmId:'',note:''},
-  {key:'pumpe',de:'Pumpe',tr:'Pompa',icon:'🚿',count:0,hours:0,brand:'',model:'',firmId:'',note:''},
-];
+// DEFAULT PERSONNEL TYPES — boş başlangıç
+const DEFAULT_PERS = [];
+const DEFAULT_GERAETE = [];
 
 let S = newState();   // current working state
 let archive = [];     // array of saved reports
@@ -2993,7 +2968,7 @@ let ctEditId = null;
 
 let currentTheme = 'light';
 let photoDB = null;
-const PHOTO_DB_NAME = 'sero_bau_photo_db_v1';
+const PHOTO_DB_NAME = 'sero_bau_blank_public_db_v1';
 const PHOTO_STORE = 'photos';
 const DOC_STORE = 'docs';
 
@@ -3125,7 +3100,7 @@ function newState() {
     wind:'', boden:'', progress:0, progressPlan:{month:'',soll:'',ist:'',phase:'',note:''}, remarks:'', sig1:'', sig2:'', sig3:'',
     sig1Firm:'', sig2Firm:'', sig3Firm:'',
     personnelTypes: JSON.parse(JSON.stringify(DEFAULT_PERS)),
-    personnelCounts: {polier:0,maurer:0,zimmermann:0,eisenbinder:0,elektriker:0,sanitaer:0,hilfskraft:0},
+    personnelCounts: {},
     personnelNames: {},
     personnelFirms: {},
     geraete: JSON.parse(JSON.stringify(DEFAULT_GERAETE)),
@@ -3846,7 +3821,7 @@ function setProgressField(field, value) {
 
 function getSuggestedMonthlyProgress(dateStr) {
   const key = String(dateStr || todayStr()).slice(0,7);
-  return { key, soll:'', phase:'Keine projektspezifische Terminplan-Basis hinterlegt' };
+  return { key, soll:'', phase:'' };
 }
 
 function syncMonthlyProgressFromDate(dateStr, overwriteIst=false) {
@@ -7106,108 +7081,7 @@ function showToast(msg,type='ok'){
   window.currentFirmId = window.currentFirmId || '';
   window.currentNUCode = window.currentNUCode || '';
 
-  const GEWERK_TR = {
-    'TGA-allgemein':'Genel mekanik tesisat',
-    '(Ab-) Wasser_Sanitär':'Temiz ve atık su tesisatı',
-    'Sanitär':'Sıhhi tesisat',
-    'TW Rohrleitung':'İçme suyu borulama',
-    'Dachentwässerung':'Çatı yağmur suyu drenajı',
-    'HKL':'Isıtma-Klima-Havalandırma',
-    'Wärmeversorgung':'Isı temini sistemi',
-    'Lüftung':'Havalandırma',
-    'Kälteanlagen':'Soğutma sistemleri',
-    'Starkstromanlagen':'Kuvvetli akım tesisatı',
-    'Elektro Hauptvergabe':'Ana elektrik işleri',
-    'E-Mobilität':'Elektrikli araç altyapısı',
-    'E-Bike Ladestationen':'E-bike şarj istasyonları',
-    'Hallenbeleuchtung':'Salon aydınlatması',
-    'Blitzschutz':'Yıldırımdan korunma',
-    'PV-Anlagen':'Güneş enerjisi sistemi',
-    'Feuerlöschanlagen':'Yangın söndürme sistemleri',
-    'Sprinkleranlage':'Sprinkler sistemi',
-    'Feuerlöscher':'Yangın tüpleri',
-    'GLT':'Bina otomasyon sistemi',
-    'Tiefbau':'Altyapı kazı işleri',
-    'Erdbauer':'Toprak işleri',
-    'Rohbau':'Kaba inşaat',
-    'Stahlbetonarbeiten':'Betonarme işleri',
-    'Mauerwerk':'Duvar imalatı',
-    'Vergussbeton':'Grout betonu',
-    'Bewehrung':'Donatı işleri',
-    'Betonsohle':'Beton zemin plakası',
-    'Bauwerksabdichtung':'Yapı su yalıtımı',
-    'WHG_Folie unter Bodenplatte':'Radye altı membran',
-    'Estricharbeiten':'Şap işleri',
-    'Zementestriche':'Çimento şapı',
-    'Porenbeton':'Gazbeton',
-    'PU-Fugen':'PU derz',
-    'Betonkosmetik':'Beton yüzey düzeltme',
-    'Schalungsholz':'Kalıp kerestesi',
-    'Betonpumpe':'Beton pompası',
-    'Ringankerbewehrung':'Hatıl donatısı',
-    'Unterlegplatten':'Altlık plakalar',
-    'Schrägstützen':'Geçici destekler',
-    'Absturzsicherung':'Düşme koruma',
-    'vertikale Verfugung':'Dikey derz',
-    'Krananlagen':'Vinç sistemleri',
-    'Tore, Türen, Verladetechnik':'Kapılar ve yükleme rampaları',
-    'Stahltüren':'Çelik kapılar',
-    'Schnelllauftore':'Hızlı kapılar',
-    'Überladebrücken':'Yükleme köprüleri',
-    'Torabdichtung':'Kapı sızdırmazlık',
-    'Bauelemente Fassaden':'Cephe doğrama elemanları',
-    'Kunststofffenster':'PVC pencereler',
-    'Aluminiumfenster':'Alüminyum pencereler',
-    'Dachdecker':'Çatı kaplama işleri',
-    'Lichtkuppeln, Dachlichtbänder':'Çatı ışıklıkları',
-    'Innenausbau':'İç imalatlar',
-    'Trockenbau gesamt':'Alçıpan işleri',
-    'Innentüren':'İç kapılar',
-    'Sanitär Trennwände':'WC bölme panelleri',
-    'Sonnenschutz':'Güneş kırıcı sistemler',
-    'Sonnenschutz außen':'Dış güneş kırıcı',
-    'Sonnenschutz innen':'İç güneş kırıcı',
-    'Malerarbeiten, Tapezierarbeiten':'Boya işleri',
-    'Malerarbeiten':'Boya işleri',
-    'Fliesenarbeiten':'Seramik işleri',
-    'Fliesenleger':'Seramik ustası',
-    'Bodenbelagsarbeiten':'Zemin kaplamaları',
-    'Bodenleger':'Zemin kaplama ustası',
-    'Sauberlaufzonen Matten':'Paspas bölgeleri',
-    'Schlosserarbeiten':'Demir doğrama',
-    'Schlosser allgemein':'Genel demir doğrama',
-    'Baustelleneinrichtung':'Şantiye kurulumu',
-    'Unterkünfte, Toiletten, Reinigung':'Konteyner, tuvalet, temizlik',
-    'Pacht Miete (Grundstücke)':'Arsa kira bedeli',
-    'Verkehrssicherung':'Trafik güvenliği',
-    'Baustrom':'Şantiye elektriği',
-    'Bauwasser':'Şantiye suyu',
-    'Telekommunikation':'Telekomünikasyon',
-    'Bauzaun':'Şantiye çiti',
-    'Wachschutz':'Güvenlik hizmeti',
-    'Bauschild, Baustellenwerbung':'Şantiye tabelası',
-    'Webcam':'Web kamera',
-    'Fotos, Videos':'Fotoğraf, videolar',
-    'Gerüste, Aufzüge':'İskele ve asansörler',
-    'Turmdrehkran':'Kule vinç',
-    'Mobilkran':'Mobil vinç',
-    'Hebebühnen':'Yükseltici platformlar',
-    'Baustellenreinigung, Müllentsorgung':'Şantiye temizliği, atık bertarafı',
-    'Rohr, Kanal, Straßenreinigung':'Boru, kanal, yol temizliği',
-    'Bauendreinigung':'İnşaat sonu temizlik',
-    'Baustoffe':'İnşaat malzemeleri',
-    'Hotel-Reisekosten':'Otel-seyahat masrafları',
-    'Aufzugsanlage':'Asansör',
-    'Spezialtiefbau':'Özel temel mühendisliği',
-    'Blechverlegearbeiten':'Sac kaplama işleri',
-    'Blechverleger':'Sac kaplama ustası',
-    'Abbrucharbeiten':'Yıkım işleri',
-    'Abbruch komplett':'Komple yıkım',
-    'Betonschneiden, Kernbohrung':'Beton kesme ve karot',
-    'Betonschneiden':'Beton kesme',
-    'Kernbohrung':'Karot delme',
-    'Kühlhallenausbau':'Soğuk depo iç işleri'
-  };
+  const GEWERK_TR = {};
 
   function gewerkDisplay(name){
     const key = String(name || '').trim();
@@ -7224,12 +7098,10 @@ function showToast(msg,type='ok'){
       S.gewerkePresets = GEWERK_PRESETS.map(x=>({code:x.code,name:x.name}));
     }
     if (!Array.isArray(S.contractors)) S.contractors = [];
-    S.contractors.forEach((c, idx) => {
-      if (!c.gewerkCode) {
-        const found = (S.gewerkePresets||[]).find(g => (c.trade||'').toLowerCase().includes((g.name||'').toLowerCase()));
-        c.gewerkCode = found ? found.code : (S.gewerkePresets[0]?.code || '902');
-      }
-      if (!c.nuCode) c.nuCode = nextNUCode(c.gewerkCode, c.id);
+    S.contractors.forEach((c) => {
+      // Gewerk yalnızca kullanıcı tarafından manuel atanır.
+      if (!c.gewerkCode) c.gewerkCode = '';
+      if (!c.nuCode && c.gewerkCode) c.nuCode = nextNUCode(c.gewerkCode, c.id);
     });
     if (!Array.isArray(S.workAreas)) S.workAreas = [];
     if (!Array.isArray(S.timeline)) S.timeline = [];
@@ -7296,7 +7168,7 @@ function showToast(msg,type='ok'){
     row.innerHTML = `
       <div class="fg">
         <div class="fl">Gewerk-Code <span class="tr">Manuell oder Liste</span></div>
-        <input class="fi" id="af-gewerkCode" list="af-gewerkCodeList" placeholder="902">
+        <input class="fi" id="af-gewerkCode" list="af-gewerkCodeList" placeholder="Manuell eingeben">
         <datalist id="af-gewerkCodeList"></datalist>
       </div>
       <div class="fg">
@@ -7304,7 +7176,7 @@ function showToast(msg,type='ok'){
           <span>NU-Code <span class="tr">Manuell editierbar</span></span>
           <button type="button" class="btn btn-ghost btn-xs" onclick="regenerateNUCode()">Auto</button>
         </div>
-        <input type="text" class="fi" id="af-nuCode" placeholder="902.01">
+        <input type="text" class="fi" id="af-nuCode" placeholder="Manuell oder automatisch nach Gewerk">
       </div>`;
     const tradeRow = nameInput.closest('.fr2');
     if (tradeRow && tradeRow.parentNode) tradeRow.parentNode.insertBefore(row, tradeRow.nextSibling);
@@ -7345,7 +7217,7 @@ function showToast(msg,type='ok'){
     sel.oninput = () => {
       const code = (sel.value||'').trim();
       if (nu && (!nu.value || nu.dataset.autoFill === '1')) {
-        nu.value = nextNUCode(code || (S.gewerkePresets[0]?.code || '902'), editId || undefined);
+        nu.value = nextNUCode(code || (S.gewerkePresets[0]?.code || ''), editId || undefined);
         nu.dataset.autoFill = '1';
       }
       applyTradeFromCode();
@@ -7363,7 +7235,7 @@ function showToast(msg,type='ok'){
   }
 
   window.regenerateNUCode = function regenerateNUCode(){
-    const code = (e('af-gewerkCode')?.value || '').trim() || (S.gewerkePresets[0]?.code || '902');
+    const code = (e('af-gewerkCode')?.value || '').trim() || (S.gewerkePresets[0]?.code || '');
     const editId = e('af-edit-id')?.value || undefined;
     const nu = e('af-nuCode');
     if (!nu) return;
@@ -7395,8 +7267,8 @@ function showToast(msg,type='ok'){
     ['af-name','af-trade','af-contact','af-phone','af-note'].forEach(id => { if (e(id)) e(id).value = ''; });
     if (e('af-status')) e('af-status').value = 'active';
     if (e('af-color')) e('af-color').value = (window.COLORS ? COLORS[(S.contractors||[]).length % COLORS.length] : '#3b82f6');
-    if (e('af-gewerkCode')) e('af-gewerkCode').value = defaultCode || (S.gewerkePresets[0]?.code || '902');
-    if (e('af-nuCode')) { e('af-nuCode').value = nextNUCode(e('af-gewerkCode')?.value || defaultCode || (S.gewerkePresets[0]?.code || '902')); e('af-nuCode').dataset.autoFill = '1'; }
+    if (e('af-gewerkCode')) e('af-gewerkCode').value = defaultCode || (S.gewerkePresets[0]?.code || '');
+    if (e('af-nuCode')) { e('af-nuCode').value = nextNUCode(e('af-gewerkCode')?.value || defaultCode || (S.gewerkePresets[0]?.code || '')); e('af-nuCode').dataset.autoFill = '1'; }
     if (e('af-trade')) delete e('af-trade').dataset.autoFill;
   }
 
@@ -7415,8 +7287,8 @@ function showToast(msg,type='ok'){
     if (e('af-status')) e('af-status').value = c.status || 'active';
     if (e('af-color')) e('af-color').value = c.color || '#3b82f6';
     if (e('af-note')) e('af-note').value = '';
-    populateAddFirmGewerkSelect(c.gewerkCode || (S.gewerkePresets[0]?.code || '902'));
-    if (e('af-nuCode')) e('af-nuCode').value = c.nuCode || nextNUCode(c.gewerkCode || (S.gewerkePresets[0]?.code || '902'), c.id);
+    populateAddFirmGewerkSelect(c.gewerkCode || (S.gewerkePresets[0]?.code || ''));
+    if (e('af-nuCode')) e('af-nuCode').value = c.nuCode || nextNUCode(c.gewerkCode || (S.gewerkePresets[0]?.code || ''), c.id);
   };
 
   function upsertGewerk(code, name, oldCode){
@@ -7444,7 +7316,7 @@ function showToast(msg,type='ok'){
     ensurePatchState();
     const code = prompt('Neuer Gewerk-Code');
     if (code === null) return;
-    const name = prompt('Gewerk-Bezeichnung', 'Neues Gewerk');
+    const name = prompt('Gewerk-Bezeichnung', '');
     if (name === null) return;
     const result = upsertGewerk(code, name);
     if (!result.ok) { if (window.showToast) showToast(result.message,'warn'); return; }
@@ -7478,13 +7350,13 @@ function showToast(msg,type='ok'){
     setTimeout(() => {
       injectAddFirmFields();
       renderGewerkCodeDataList();
-      resetFirmModalForCreate(defaultCode || (S.gewerkePresets[0]?.code || '902'));
-      populateAddFirmGewerkSelect(defaultCode || (S.gewerkePresets[0]?.code || '902'));
+      resetFirmModalForCreate(defaultCode || (S.gewerkePresets[0]?.code || ''));
+      populateAddFirmGewerkSelect(defaultCode || (S.gewerkePresets[0]?.code || ''));
       const codeEl = e('af-gewerkCode');
       const nuEl = e('af-nuCode');
-      if (codeEl) codeEl.value = (defaultCode || codeEl.value || (S.gewerkePresets[0]?.code || '902')).trim();
+      if (codeEl) codeEl.value = (defaultCode || codeEl.value || (S.gewerkePresets[0]?.code || '')).trim();
       if (nuEl) {
-        nuEl.value = nextNUCode(codeEl?.value || defaultCode || (S.gewerkePresets[0]?.code || '902'));
+        nuEl.value = nextNUCode(codeEl?.value || defaultCode || (S.gewerkePresets[0]?.code || ''));
         nuEl.dataset.autoFill = '1';
       }
     }, 30);
@@ -7497,7 +7369,7 @@ function showToast(msg,type='ok'){
     if (code === null) return;
     const cleanCode = String(code).trim();
     if (!cleanCode) { if (window.showToast) showToast('Gewerk-Code eingeben','warn'); return; }
-    const suggested = 'Neues Gewerk';
+    const suggested = '';
     const name = prompt('Gewerk-Bezeichnung', suggested);
     if (name === null) return;
     const cleanName = String(name).trim() || cleanCode;
@@ -7516,7 +7388,7 @@ window.saveFirm = function saveFirmPatched() {
     const name = (window.gv ? gv('af-name') : e('af-name')?.value || '').trim();
     if (!name) { if (window.showToast) showToast('Firmenname eingeben!','warn'); return; }
 
-    const gewerkCode = (e('af-gewerkCode')?.value || existing?.gewerkCode || (S.gewerkePresets[0]?.code || '902')).trim();
+    const gewerkCode = (e('af-gewerkCode')?.value || existing?.gewerkCode || (S.gewerkePresets[0]?.code || '')).trim();
     const nuCode = (e('af-nuCode')?.value || existing?.nuCode || nextNUCode(gewerkCode, editId || undefined)).trim();
     const tradeValue = ((window.gv ? gv('af-trade') : e('af-trade')?.value || '') || getGewerkName(gewerkCode) || gewerkCode).trim();
     const firstNote = (window.gv ? gv('af-note') : e('af-note')?.value || '').trim();
@@ -7527,13 +7399,13 @@ window.saveFirm = function saveFirmPatched() {
     const dup = (S.contractors||[]).find(c => String(c.nuCode||'').trim()===nuCode && c.id!==editId);
     if (dup) { if (window.showToast) showToast('NU-Code existiert bereits','warn'); return; }
 
-    // Important: existing Gewerk code must be allowed when adding a firm.
-    const gewerkExists = (S.gewerkePresets||[]).find(g => String(g.code).trim() === String(gewerkCode).trim());
+    // Gewerk must already have been created manually via "+ Gewerk-Code".
+    const gewerkExists = (S.gewerkePresets||[]).find(
+      g => String(g.code).trim() === String(gewerkCode).trim()
+    );
     if (!gewerkExists) {
-      const upsert = upsertGewerk(gewerkCode, tradeValue);
-      if (!upsert.ok) { if (window.showToast) showToast(upsert.message,'warn'); return; }
-    } else if (tradeValue && !gewerkExists.name) {
-      gewerkExists.name = tradeValue;
+      if (window.showToast) showToast('Gewerk zuerst manuell mit + Gewerk-Code anlegen','warn');
+      return;
     }
 
     if (existing) {
@@ -8096,7 +7968,7 @@ window.renderFirms = function renderFirmsPatched() {
           </div>
           <div style="display:flex;gap:8px;flex-wrap:wrap;">
             <button class="btn btn-primary" onclick="saveGewerkPresets()">Speichern</button>
-            <button class="btn btn-ghost" onclick="loadDefaultGewerkPresets()">Standard laden</button>
+            
           </div>
         </div>
       </div>
@@ -8134,8 +8006,8 @@ window.renderFirms = function renderFirmsPatched() {
         </div>
       </div>`;
     grid.appendChild(wrap);
-    if (!Array.isArray(S.gewerkePresets) || !S.gewerkePresets.length) {
-      loadDefaultGewerkPresets(false);
+    if (!Array.isArray(S.gewerkePresets)) {
+      S.gewerkePresets = [];
     } else {
       syncSettingsFields();
     }
@@ -8157,10 +8029,10 @@ window.renderFirms = function renderFirmsPatched() {
   }
 
   window.loadDefaultGewerkPresets = function(showMsg=true){
-    ensurePatchState();
-    S.gewerkePresets = GEWERK_PRESETS.map(x=>({code:x.code,name:x.name}));
-    syncSettingsFields();
-    if (showMsg && typeof showToast === 'function') showToast('Standard-Gewerke geladen','ok');
+    S.gewerkePresets = [];
+    if (typeof autoSave === 'function') autoSave();
+    if (typeof renderFirms === 'function') renderFirms();
+    if (showMsg && typeof showToast === 'function') showToast('Keine Standard-Gewerke vorhanden','ok');
   };
 
   window.saveGewerkPresets = function(){
