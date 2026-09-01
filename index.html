@@ -10,6 +10,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Epilogue:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
 /* ═══════════════════════════════════════════════════
@@ -1699,6 +1700,103 @@ body{
 @media(max-width:400px){
   .fr2{grid-template-columns:1fr;}
 }
+
+
+/* PROJECT STAMMDATEN / REGISTER PATCH */
+.ps-register-card{padding:10px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:12px;margin-bottom:8px;}
+.ps-register-title{font-size:13px;font-weight:700;color:var(--text);line-height:1.4;}
+.ps-register-meta{font-size:11px;color:var(--text3);line-height:1.6;margin-top:3px;}
+.ps-register-note{font-size:12px;color:var(--text2);line-height:1.6;margin-top:6px;white-space:pre-wrap;}
+.ps-check-row{display:flex;align-items:flex-start;gap:9px;padding:9px 10px;border:1px solid var(--border);background:var(--bg3);border-radius:10px;margin-bottom:7px;}
+.ps-check-row input{margin-top:2px;}
+.ps-check-text{flex:1;font-size:12px;line-height:1.5;color:var(--text);}
+
+
+
+/* ═══════════════════════════════════════════════════
+   GROBTERMINPLAN VISUALISIERUNG
+═══════════════════════════════════════════════════ */
+.term-hero{
+  position:relative;overflow:hidden;border-radius:22px;padding:22px;
+  background:linear-gradient(135deg,#0f172a 0%,#172554 52%,#0c4a6e 100%);
+  color:#fff;box-shadow:0 18px 50px rgba(15,23,42,.22);margin-bottom:16px;
+}
+.term-hero::before{content:'';position:absolute;width:280px;height:280px;border-radius:50%;right:-90px;top:-130px;background:rgba(56,189,248,.20);filter:blur(2px)}
+.term-hero::after{content:'';position:absolute;width:210px;height:210px;border-radius:50%;left:38%;bottom:-170px;background:rgba(99,102,241,.28)}
+.term-hero-inner{position:relative;z-index:1;display:flex;justify-content:space-between;align-items:flex-end;gap:18px;flex-wrap:wrap}
+.term-eyebrow{font-size:10px;font-weight:800;letter-spacing:1.6px;text-transform:uppercase;color:#7dd3fc;margin-bottom:8px}
+.term-hero h3{font-size:25px;letter-spacing:-.04em;line-height:1.12;margin:0 0 7px;font-weight:800}
+.term-hero p{font-size:12px;color:#cbd5e1;line-height:1.65;max-width:760px}
+.term-kpis{display:flex;gap:8px;flex-wrap:wrap}
+.term-kpi{min-width:92px;padding:10px 12px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.08);border-radius:14px;backdrop-filter:blur(8px)}
+.term-kpi strong{display:block;font-size:19px;line-height:1.1;color:#fff}.term-kpi span{display:block;font-size:9px;color:#bae6fd;margin-top:4px;text-transform:uppercase;letter-spacing:.8px}
+.term-toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+.term-filter{border:1px solid var(--border);background:var(--bg2);color:var(--text2);padding:8px 12px;border-radius:999px;font-size:11px;font-weight:700;cursor:pointer}
+.term-filter.active{background:var(--accent2);color:#fff;border-color:transparent;box-shadow:0 6px 16px rgba(10,132,255,.22)}
+.term-legend{margin-left:auto;display:flex;gap:10px;flex-wrap:wrap;font-size:10px;color:var(--text3)}
+.term-legend span{display:flex;align-items:center;gap:5px}.term-legend i{width:9px;height:9px;border-radius:50%;display:block}
+.term-board{background:var(--bg2);border:1px solid var(--border);border-radius:18px;box-shadow:var(--shadow);overflow:hidden}
+.term-board-scroll{overflow-x:auto;padding-bottom:4px}
+.term-grid{min-width:1320px}
+.term-week-head,.term-row{display:grid;grid-template-columns:230px repeat(27,1fr);align-items:stretch}
+.term-week-head{position:sticky;top:0;z-index:5;background:var(--bg2);border-bottom:1px solid var(--border)}
+.term-week-label{padding:12px 14px;font-size:10px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--text3);border-right:1px solid var(--border)}
+.term-week{padding:9px 2px;text-align:center;font-size:9px;font-weight:700;color:var(--text3);border-right:1px solid var(--border);position:relative}
+.term-week.year-start{border-left:2px solid var(--accent2)}
+.term-week.current{background:rgba(255,159,10,.13);color:#b45309}
+.term-group-title{padding:13px 14px;background:linear-gradient(90deg,var(--bg3),var(--bg2));border-top:1px solid var(--border);border-bottom:1px solid var(--border);font-size:12px;font-weight:800;color:var(--text);display:flex;justify-content:space-between;align-items:center;gap:8px}
+.term-group-title small{font-size:10px;font-weight:500;color:var(--text3)}
+.term-row{min-height:42px;border-bottom:1px solid var(--border)}
+.term-task-name{padding:9px 12px;border-right:1px solid var(--border);font-size:11px;color:var(--text);display:flex;flex-direction:column;justify-content:center;line-height:1.35}
+.term-task-name small{font-size:9px;color:var(--text3);margin-top:2px}
+.term-cell{border-right:1px solid var(--border);position:relative;background:linear-gradient(180deg,transparent,rgba(148,163,184,.025))}
+.term-cell.current{background:rgba(255,159,10,.07)}
+.term-bar{height:22px;margin-top:9px;border-radius:7px;position:relative;z-index:2;box-shadow:0 4px 10px rgba(15,23,42,.10);display:flex;align-items:center;padding:0 7px;font-size:9px;font-weight:800;white-space:nowrap;overflow:visible;color:#fff}
+.term-bar.shell{background:linear-gradient(90deg,#ef4444,#f97316)}
+.term-bar.interior{background:linear-gradient(90deg,#2563eb,#06b6d4)}
+.term-bar.finish{background:linear-gradient(90deg,#8b5cf6,#d946ef)}
+.term-bar.accept{background:linear-gradient(90deg,#059669,#22c55e)}
+.term-bar.global{background:linear-gradient(90deg,#334155,#0f172a)}
+.term-summary-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-top:14px}
+.term-summary-card{padding:15px;background:var(--bg2);border:1px solid var(--border);border-radius:16px;box-shadow:var(--shadow)}
+.term-summary-card h4{font-size:12px;margin:0 0 10px;color:var(--text)}
+.term-milestone{display:flex;gap:9px;align-items:flex-start;padding:7px 0;border-bottom:1px dashed var(--border)}
+.term-milestone:last-child{border-bottom:none}.term-dot{width:9px;height:9px;border-radius:50%;margin-top:4px;flex-shrink:0}.term-ms-text{font-size:10px;line-height:1.5;color:var(--text2)}.term-ms-text strong{color:var(--text);display:block;font-size:11px}
+.term-source-note{margin-top:12px;padding:10px 12px;border-radius:12px;background:var(--bg3);border:1px solid var(--border);font-size:10px;color:var(--text3);line-height:1.6}
+@media(max-width:900px){.term-summary-grid{grid-template-columns:1fr 1fr}.term-legend{margin-left:0;width:100%}}
+@media(max-width:600px){.term-summary-grid{grid-template-columns:1fr}.term-hero{padding:18px}.term-hero h3{font-size:21px}.term-week-head,.term-row{grid-template-columns:180px repeat(27,36px)}.term-grid{min-width:1152px}}
+[data-theme="dark"] .term-board,[data-theme="dark"] .term-week-head,[data-theme="dark"] .term-summary-card{background:var(--bg2)!important}
+
+
+/* DOCUMENT VIEWER ENHANCEMENT */
+.doc-actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;width:100%;}
+.doc-action-btn{border:1px solid var(--border);background:var(--bg2);color:var(--text2);border-radius:9px;padding:6px 8px;font-size:10px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:5px;}
+.doc-action-btn:hover,.doc-action-btn:active{border-color:var(--accent2);color:var(--accent2);background:var(--bg4);}
+.doc-action-btn.danger:hover{border-color:var(--red);color:var(--red);}
+.pdf-toolbar{display:flex;align-items:center;gap:7px;flex-wrap:wrap;padding:9px 10px;border-bottom:1px solid var(--border);background:var(--bg2);position:sticky;top:0;z-index:5;}
+.pdf-toolbar-group{display:flex;align-items:center;gap:5px;padding-right:8px;border-right:1px solid var(--border);}
+.pdf-toolbar-group:last-child{border-right:none;padding-right:0;}
+.pdf-tool-btn{min-width:34px;height:34px;border:1px solid var(--border);border-radius:9px;background:var(--bg3);color:var(--text);font-size:12px;font-weight:700;cursor:pointer;padding:0 9px;display:inline-flex;align-items:center;justify-content:center;gap:5px;}
+.pdf-tool-btn:hover,.pdf-tool-btn:active{background:var(--bg4);border-color:var(--accent2);color:var(--accent2);}
+.pdf-page-info,.pdf-zoom-info{font-size:11px;font-weight:700;color:var(--text2);white-space:nowrap;min-width:58px;text-align:center;}
+#pdfCanvasWrap{flex:1;overflow:auto;background:#667085;padding:18px;display:flex;align-items:flex-start;justify-content:center;min-height:0;-webkit-overflow-scrolling:touch;touch-action:pan-x pan-y;}
+#pdfCanvasStage{position:relative;display:inline-block;box-shadow:0 8px 30px rgba(0,0,0,.28);background:#fff;}
+#pdfViewerCanvas{display:block;background:#fff;max-width:none;}
+#pdfViewerLoading{position:absolute;inset:0;display:none;align-items:center;justify-content:center;background:rgba(255,255,255,.85);color:#111;font-size:13px;font-weight:700;z-index:2;}
+#pdfViewerLoading.show{display:flex;}
+#pdfViewerFallback{display:none;width:100%;height:100%;border:0;background:#fff;}
+#pdfViewerModal.viewer-full .modal{max-width:none!important;width:100vw!important;height:100vh!important;max-height:none!important;border-radius:0!important;}
+@media(max-width:700px){
+  #pdfViewerModal .modal{width:100vw!important;height:100vh!important;max-width:none!important;max-height:none!important;border-radius:0!important;}
+  #pdfViewerModal .modal-hd{padding:10px 12px;}
+  .pdf-toolbar{padding:7px;gap:5px;}
+  .pdf-toolbar-group{padding-right:5px;gap:4px;}
+  .pdf-tool-btn{height:32px;min-width:32px;padding:0 7px;font-size:11px;}
+  #pdfCanvasWrap{padding:10px;justify-content:flex-start;}
+  .doc-actions{gap:5px;}
+  .doc-action-btn{padding:6px 7px;font-size:9px;}
+}
+
 </style>
 <!-- ═══════════ HTML BODY ═══════════ -->
 <body>
@@ -1754,6 +1852,7 @@ body{
       <button class="nav-tab" data-page="pg-mangel" onclick="goPage(this)"><span class="ti">⚠️</span>Mängel <span class="nav-badge" id="nb-mangel">0</span></button>
       <button class="nav-tab" data-page="pg-archive" onclick="goPage(this)"><span class="ti">🗃</span>Archiv <span class="nav-badge" id="nb-archive">0</span></button>
       <button class="nav-tab" data-page="pg-todos" onclick="goPage(this)"><span class="ti">🗂️</span>To-do <span class="nav-badge" id="nb-todos">0</span></button>
+      <button class="nav-tab" data-page="pg-termine" onclick="goPage(this)"><span class="ti">🗓️</span>Terminplan</button>
       <button class="nav-tab" data-page="pg-settings" onclick="goPage(this)"><span class="ti">⚙️</span>Einstellungen</button>
     </div>
   </div>
@@ -1771,6 +1870,7 @@ body{
       <div class="side-group-label">Hauptbereich</div>
       <button class="side-link active" data-side-page="pg-dash" onclick="sideGo('pg-dash')"><span class="side-link-main"><span class="ti">🏠</span><span>Dashboard</span></span></button>
       <button class="side-link" data-side-page="pg-tb" onclick="sideGo('pg-tb')"><span class="side-link-main"><span class="ti">📝</span><span>Tagesbericht</span></span></button>
+      <button class="side-link" data-side-page="pg-termine" onclick="sideGo('pg-termine')"><span class="side-link-main"><span class="ti">🗓️</span><span>Terminplan</span></span></button>
       <button class="side-link" data-side-page="pg-todos" onclick="sideGo('pg-todos')"><span class="side-link-main"><span class="ti">🗂️</span><span>To-do</span></span><span class="nav-badge" id="side-nb-todos">0</span></button>
       <button class="side-link" data-side-page="pg-kanban" onclick="sideGo('pg-kanban')"><span class="side-link-main"><span class="ti">📋</span><span>Kanban</span></span><span class="nav-badge" id="side-nb-kanban">0</span></button>
     </div>
@@ -2337,6 +2437,36 @@ body{
   </div>
 </div>
 
+
+<!-- ═══════════ PAGE: TERMINPLAN ═══════════ -->
+<div class="page" id="pg-termine">
+  <div class="sh">
+    <h2>Grobterminplan <span class="sub">Terminplan</span></h2>
+    <div class="sh-act">
+      <button class="btn btn-ghost btn-sm" onclick="termSetFilter('all')">Alle Bereiche</button>
+      <button class="btn btn-primary btn-sm" onclick="termScrollToday()">Aktuelle KW</button>
+    </div>
+  </div>
+  <div class="term-hero">
+    <div class="term-hero-inner">
+      <div>
+        <div class="term-eyebrow">Bauzeiten · Kalenderwochen</div>
+        <h3>Projektterminplan</h3>
+        <p>Hier kann ein projektspezifischer Terminplan dargestellt werden. Im öffentlichen Grundsystem sind keine Projektdaten vorbefüllt.</p>
+      </div>
+      <div class="term-kpis" id="termKpis"></div>
+    </div>
+  </div>
+  <div class="term-toolbar">
+    <button class="term-filter active" data-term-filter="all" onclick="termSetFilter('all')">Alle</button>
+    
+    <div class="term-legend"><span><i style="background:#f97316"></i>Rohbau/Hülle</span><span><i style="background:#06b6d4"></i>Innenausbau</span><span><i style="background:#d946ef"></i>Finish</span><span><i style="background:#22c55e"></i>Abnahme</span></div>
+  </div>
+  <div class="term-board"><div class="term-board-scroll" id="termBoardScroll"><div class="term-grid" id="termGrid"></div></div></div>
+  <div class="term-summary-grid" id="termSummary"></div>
+  <div class="term-source-note">Keine projektspezifischen Terminplandaten im öffentlichen Grundsystem hinterlegt.</div>
+</div>
+
 <!-- ═══════════ PAGE: SETTINGS ═══════════ -->
 <div class="page" id="pg-settings">
   <div class="sh">
@@ -2376,6 +2506,80 @@ body{
         <p style="font-size:12px;color:var(--text3);margin-top:10px;">
           Belirli bir günü arşivden açabilir veya yeni güne geçebilirsin.
         </p>
+      </div>
+    </div>
+
+
+    <div class="card" style="grid-column:1/-1;">
+      <div class="card-hd">
+        <div class="card-hd-l"><div class="ci ci-c">🏗️</div><h3>Projekt-Stammdaten <small>Proje sabit bilgileri</small></h3></div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;">
+          <button class="btn btn-primary btn-xs" type="button" onclick="psSaveProjectStammdaten()">Speichern</button>
+          <button class="btn btn-ghost btn-xs" type="button" onclick="psApplyProjectToHeader()">Header übernehmen</button>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="fr2">
+          <div class="fg"><div class="fl">Projekt-Nr.</div><input class="fi" id="psProjectNr" placeholder="z. B. PROJ-001"></div>
+          <div class="fg"><div class="fl">Bauvorhaben</div><input class="fi" id="psProjectName" placeholder="Projektname"></div>
+          <div class="fg"><div class="fl">Standort</div><input class="fi" id="psStandort" placeholder="Ort / Adresse"></div>
+          <div class="fg"><div class="fl">Bauleiter</div><input class="fi" id="psBauleiter" placeholder="Name"></div>
+          <div class="fg"><div class="fl">Baustellenadresse</div><input class="fi" id="psBaustellenadresse" placeholder="Liefer-/Navigationsadresse"></div>
+          <div class="fg"><div class="fl">Lieferadresse</div><input class="fi" id="psLieferadresse" placeholder="exakte Lieferadresse"></div>
+          <div class="fg"><div class="fl">Notfall / Sicherheit</div><input class="fi" id="psNotfall" placeholder="z. B. Ersthelfer, SiGeKo, Rettungspunkt"></div>
+          <div class="fg"><div class="fl">Besonderheiten</div><input class="fi" id="psBesonderheiten" placeholder="Zufahrt, Anmeldung, Bauherr-Vorgaben…"></div>
+        </div>
+        <p style="font-size:12px;color:var(--text3);line-height:1.6;margin-top:6px;">Bu alan Wiki değildir. Sadece proje boyunca sık lazım olan sabit bilgileri tutar.</p>
+      </div>
+    </div>
+
+    <div class="card" style="grid-column:1/-1;">
+      <div class="card-hd">
+        <div class="card-hd-l"><div class="ci ci-b">📑</div><h3>Dokumentenregister <small>Belge referans listesi</small></h3></div>
+        <button class="btn btn-primary btn-xs" type="button" onclick="psSaveDocRegisterItem()">+ Dokument speichern</button>
+      </div>
+      <div class="card-body">
+        <input type="hidden" id="psDocEditId">
+        <div class="fr2">
+          <div class="fg"><div class="fl">Dokument</div><input class="fi" id="psDocTitle" placeholder="z. B. Anlage 01 – GU-Vertragsleistungen"></div>
+          <div class="fg"><div class="fl">Typ</div><input class="fi" id="psDocType" placeholder="Plan, Vertrag, Statik, Brandschutz…"></div>
+          <div class="fg"><div class="fl">Ablageort</div><input class="fi" id="psDocLocation" placeholder="Serverpfad / SharePoint / Ordner"></div>
+          <div class="fg"><div class="fl">Datum / Version</div><input class="fi" id="psDocDate" placeholder="z. B. 20.03.2026 / Rev.03"></div>
+        </div>
+        <div class="fg"><div class="fl">Notiz</div><textarea class="fta" id="psDocNote" style="min-height:58px;" placeholder="Kurze Bedeutung / worauf achten?"></textarea></div>
+        <div id="psDocRegisterList" style="margin-top:10px;"></div>
+      </div>
+    </div>
+
+    <div class="card" style="grid-column:1/-1;">
+      <div class="card-hd">
+        <div class="card-hd-l"><div class="ci ci-g">✅</div><h3>Tagesabschluss-Checkliste <small>Gün sonu kontrolü</small></h3></div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;">
+          <button class="btn btn-ghost btn-xs" type="button" onclick="psResetDailyChecklist()">Heute zurücksetzen</button>
+          <button class="btn btn-primary btn-xs" type="button" onclick="psAddChecklistItem()">+ Punkt</button>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="fr2">
+          <input class="fi" id="psChecklistNew" placeholder="z. B. PDF kontrolliert?">
+          <button class="btn btn-ghost" type="button" onclick="psLoadDefaultChecklist()">Standard laden</button>
+        </div>
+        <div id="psChecklistList" style="margin-top:12px;"></div>
+      </div>
+    </div>
+
+    <div class="card" style="grid-column:1/-1;">
+      <div class="card-hd">
+        <div class="card-hd-l"><div class="ci ci-p">📥</div><h3>Projekt-Setup JSON importieren <small>Opsiyonel otomatik doldurma</small></h3></div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;">
+          <button class="btn btn-ghost btn-xs" type="button" onclick="psFillExampleSetupJson()">Beispiel laden</button>
+          <button class="btn btn-primary btn-xs" type="button" onclick="psImportSetupJson(false)">Nur ergänzen</button>
+          <button class="btn btn-ghost btn-xs" type="button" onclick="psImportSetupJson(true)">Überschreiben</button>
+        </div>
+      </div>
+      <div class="card-body">
+        <textarea class="fta" id="psSetupJson" style="min-height:150px;font-family:'JetBrains Mono',monospace;font-size:11px;" placeholder='{"project":{"projectNr":"PROJ-001"},"documentRegister":[],"checklists":{"tagesabschluss":[]}}'></textarea>
+        <p style="font-size:12px;color:var(--text3);line-height:1.6;margin-top:8px;">Bu import günlük raporları, arşivi, fotoğrafları ve gewerkleri silmez. Sadece Stammdaten, Dokumentenregister, Checkliste, Kontakte, Arbeitsbereiche ve isteğe bağlı başlangıç To-do bilgilerini ekler.</p>
       </div>
     </div>
 
@@ -2676,17 +2880,37 @@ body{
 
 
 <div class="modal-ov" id="pdfViewerModal">
-  <button type="button" id="pdfViewerCloseFloating" onclick="closePdfViewer()" style="position:fixed;top:14px;right:14px;z-index:1200;width:46px;height:46px;border:none;border-radius:999px;background:rgba(15,23,42,.88);color:#fff;font-size:22px;line-height:1;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 24px rgba(0,0,0,.35);cursor:pointer;">✕</button>
-  <div class="modal" style="max-width:1100px;height:88vh;display:flex;flex-direction:column;">
-    <div class="modal-hd">
+  <button type="button" id="pdfViewerCloseFloating" onclick="closePdfViewer()" style="position:fixed;top:14px;right:14px;z-index:1204;width:46px;height:46px;border:none;border-radius:999px;background:rgba(15,23,42,.88);color:#fff;font-size:22px;line-height:1;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 24px rgba(0,0,0,.35);cursor:pointer;">✕</button>
+  <div class="modal" style="max-width:1180px;height:92vh;display:flex;flex-direction:column;overflow:hidden;">
+    <div class="modal-hd" style="flex-shrink:0;">
       <h3 id="pdfViewerTitle">PDF</h3>
       <button type="button" class="modal-close" onclick="closePdfViewer()">✕</button>
     </div>
-    <div class="modal-body" style="padding:0;flex:1;display:flex;">
-      <iframe id="pdfViewerFrame" style="border:none;width:100%;height:100%;background:#fff;"></iframe>
+    <div class="pdf-toolbar">
+      <div class="pdf-toolbar-group">
+        <button type="button" class="pdf-tool-btn" onclick="pdfPrevPage()" title="Vorherige Seite">◀</button>
+        <span class="pdf-page-info"><span id="pdfPageNum">1</span> / <span id="pdfPageCount">1</span></span>
+        <button type="button" class="pdf-tool-btn" onclick="pdfNextPage()" title="Nächste Seite">▶</button>
+      </div>
+      <div class="pdf-toolbar-group">
+        <button type="button" class="pdf-tool-btn" onclick="pdfZoomOut()" title="Verkleinern">−</button>
+        <span class="pdf-zoom-info" id="pdfZoomInfo">100%</span>
+        <button type="button" class="pdf-tool-btn" onclick="pdfZoomIn()" title="Vergrößern">＋</button>
+        <button type="button" class="pdf-tool-btn" onclick="pdfFitWidth()" title="Breite anpassen">↔ Fit</button>
+      </div>
+      <div class="pdf-toolbar-group">
+        <button type="button" class="pdf-tool-btn" onclick="pdfToggleFullscreen()" title="Vollbild">⛶</button>
+        <button type="button" class="pdf-tool-btn" onclick="downloadCurrentViewerDoc()" title="Herunterladen">⬇</button>
+        <button type="button" class="pdf-tool-btn" onclick="shareCurrentViewerDoc()" title="Teilen">📤</button>
+        <button type="button" class="pdf-tool-btn" onclick="openCurrentViewerExternal()" title="Extern öffnen">📱</button>
+      </div>
     </div>
-    <div class="modal-ft">
-      <button type="button" class="btn btn-ghost" onclick="closePdfViewer()">Schließen</button>
+    <div id="pdfCanvasWrap">
+      <div id="pdfCanvasStage">
+        <canvas id="pdfViewerCanvas"></canvas>
+        <div id="pdfViewerLoading">PDF wird geladen…</div>
+      </div>
+      <iframe id="pdfViewerFallback"></iframe>
     </div>
   </div>
 </div>
@@ -2719,7 +2943,7 @@ body{
 // CONSTANTS & STATE
 // ═══════════════════════════════════════════════════
 const STORAGE_KEY = 'sero_bau_v4';
-const EVERNOTE_EMAIL = 'seroseroserosero.d6af7df@m.evernote.com';
+const EVERNOTE_EMAIL = ''; // Persönliche Adresse nicht im öffentlichen HTML speichern
 const ARCHIVE_KEY = 'sero_bau_archive_v4';
 const COLORS = ['#f97316','#3b82f6','#10b981','#f59e0b','#ef4444','#a855f7','#06b6d4','#ec4899'];
 const CT_CFG = {
@@ -3282,6 +3506,9 @@ function loadArchiveIntoCurrent(id) {
   const ar = archive.find(a => a.id === id);
   if (!ar || !ar.snap) return;
   S = deepMerge(newState(), ar.snap);
+  if (Array.isArray(ar.archivePhotos) && ar.archivePhotos.length) {
+    S.photos = JSON.parse(JSON.stringify(ar.archivePhotos));
+  }
   persistState();
   applyStateToForm();
   if (typeof syncProjectInfoToTB === 'function') syncProjectInfoToTB();
@@ -3324,37 +3551,103 @@ function loadReportByDate() {
 // ═══════════════════════════════════════════════════
 // SAVE REPORT TO ARCHIVE
 // ═══════════════════════════════════════════════════
-function saveReport() {
-  collectFormToState();
-  const now = new Date();
-  const snap = makeStateSafeForStorage(S);
-  const id = 'ar_' + now.getTime();
-  const entry = {
-    id,
-    savedAt: now.toISOString(),
-    savedAtDisplay: formatDateTimeDisplay(now),
-    reportDate: S.reportDate || todayStr(),
-    reportNr: S.reportNr || '—',
-    projectName: S.projectName || '—',
-    projectNr: S.projectNr || '—',
-    bauleiter: S.bauleiter || '—',
-    weather: S.weather || '—',
-    progress: S.progress || 0,
-    totalPersonnel: Object.values(S.personnelCounts || {}).reduce((a,b)=>a+b,0),
-    workCount: (S.workEntries || []).length,
-    snap,
-  };
-  const existIdx = archive.findIndex(a => a.reportDate === entry.reportDate);
-  if (existIdx >= 0) {
-    archive[existIdx] = entry;
-    showToast('Bericht für den Tag aktualisiert: '+entry.reportDate, 'ok');
-  } else {
-    archive.unshift(entry);
-    showToast('Neuer Tagesbericht gespeichert: '+entry.reportDate, 'ok');
+async function prepareArchivePhotos() {
+  await hydratePhotosFromIDB();
+  const photos = Array.isArray(S.photos) ? S.photos : [];
+  const result = [];
+
+  async function shrinkImageData(data) {
+    if (!data) return '';
+    try {
+      const img = new Image();
+      img.src = data;
+      if (typeof img.decode === 'function') {
+        await img.decode();
+      } else {
+        await new Promise((resolve, reject) => {
+          img.onload = resolve;
+          img.onerror = reject;
+        });
+      }
+      const iw = img.naturalWidth || img.width || 1;
+      const ih = img.naturalHeight || img.height || 1;
+      const maxW = 1200;
+      const scale = iw > maxW ? maxW / iw : 1;
+      const cw = Math.max(1, Math.round(iw * scale));
+      const ch = Math.max(1, Math.round(ih * scale));
+      const canvas = document.createElement('canvas');
+      canvas.width = cw;
+      canvas.height = ch;
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, cw, ch);
+      ctx.drawImage(img, 0, 0, cw, ch);
+      return canvas.toDataURL('image/jpeg', 0.78);
+    } catch (err) {
+      console.warn('Archive photo shrink warning:', err);
+      return data;
+    }
   }
-  persistState();
-  updateBadges();
-  renderArchive();
+
+  for (const p of photos) {
+    const q = JSON.parse(JSON.stringify(p || {}));
+    if (!q.data && q.id) {
+      try {
+        const saved = await idbGetPhoto(q.id);
+        if (saved && saved.data) q.data = saved.data;
+      } catch (err) {
+        console.warn('Archive photo hydrate warning:', err);
+      }
+    }
+    if (q.data) q.data = await shrinkImageData(q.data);
+    result.push(q);
+  }
+  return result;
+}
+
+async function saveReport() {
+  try {
+    collectFormToState();
+    const now = new Date();
+    const archivePhotos = await prepareArchivePhotos();
+    const snap = makeStateSafeForStorage(S);
+    snap.photos = (archivePhotos || []).map(p => {
+      const q = { ...p };
+      delete q.data;
+      return q;
+    });
+    const id = 'ar_' + now.getTime();
+    const entry = {
+      id,
+      savedAt: now.toISOString(),
+      savedAtDisplay: formatDateTimeDisplay(now),
+      reportDate: S.reportDate || todayStr(),
+      reportNr: S.reportNr || '—',
+      projectName: S.projectName || '—',
+      projectNr: S.projectNr || '—',
+      bauleiter: S.bauleiter || '—',
+      weather: S.weather || '—',
+      progress: S.progress || 0,
+      totalPersonnel: Object.values(S.personnelCounts || {}).reduce((a,b)=>a+b,0),
+      workCount: (S.workEntries || []).length,
+      archivePhotos,
+      snap,
+    };
+    const existIdx = archive.findIndex(a => a.reportDate === entry.reportDate);
+    if (existIdx >= 0) {
+      archive[existIdx] = entry;
+      showToast('Bericht für den Tag aktualisiert: '+entry.reportDate, 'ok');
+    } else {
+      archive.unshift(entry);
+      showToast('Neuer Tagesbericht gespeichert: '+entry.reportDate, 'ok');
+    }
+    persistState();
+    updateBadges();
+    renderArchive();
+  } catch (err) {
+    console.error('Archiv speichern Fehler:', err);
+    showToast('Archiv speichern Fehler: ' + (err && err.message ? err.message : 'unbekannt'), 'err');
+  }
 }
 
 function formatDateTimeDisplay(d) {
@@ -3552,23 +3845,8 @@ function setProgressField(field, value) {
 }
 
 function getSuggestedMonthlyProgress(dateStr) {
-  const map = {
-    '2025-01': { soll: 8,  phase: 'Baustelleneinrichtung / Baubeginn und Mutterbodenabtrag' },
-    '2025-02': { soll: 15, phase: 'Geländenivellierung / Bodenverbesserung' },
-    '2025-03': { soll: 24, phase: 'Bodenverbesserung sowie Beginn Erd- und Entwässerungsarbeiten' },
-    '2025-04': { soll: 35, phase: 'Erd- und Entwässerungsarbeiten, Fundamente, Beginn Montage BFT-Tragwerk' },
-    '2025-05': { soll: 48, phase: 'Fundamente, Brandwände, Stahldachtragwerk, Mezzanine / Büroanbau' },
-    '2025-06': { soll: 60, phase: 'Dacheindeckung + Fassade, TGA-Installationen, CO2-Tank' },
-    '2025-07': { soll: 68, phase: 'TGA, WHG-Abdichtung, Aussenanlagen + Verkehrsflächen' },
-    '2025-08': { soll: 76, phase: 'WHG-Abdichtung, Hallensohle, TGA-Installationen' },
-    '2025-09': { soll: 84, phase: 'Hallensohle, Early Access, Regalmontage, Einbau Probenahmekabine' },
-    '2025-10': { soll: 90, phase: 'Regalmontage, Regalsprinkler, Finishes' },
-    '2025-11': { soll: 95, phase: 'Regalmontage, Beschichtung Regalgassen, Finishes, TGA-Endphase' },
-    '2025-12': { soll: 98, phase: 'Sachverständigen- und Bauamtsabnahme, Finishes, Regalsprinkler' },
-    '2026-01': { soll: 100, phase: 'Abnahme und Übergabe an DHL' }
-  };
   const key = String(dateStr || todayStr()).slice(0,7);
-  return Object.assign({ key }, map[key] || { soll: '', phase: 'Keine Terminplan-Basis für diesen Monat hinterlegt' });
+  return { key, soll:'', phase:'Keine projektspezifische Terminplan-Basis hinterlegt' };
 }
 
 function syncMonthlyProgressFromDate(dateStr, overwriteIst=false) {
@@ -3745,12 +4023,157 @@ function setProgressActionToday(val){
 }
 
 
+let pdfViewerState = {docMeta:null, pdfDoc:null, page:1, scale:1.15, renderTask:null, dataUrl:'', blobUrl:''};
+
 function closePdfViewer(){
   const modal = document.getElementById('pdfViewerModal');
-  const frame = document.getElementById('pdfViewerFrame');
-  if(frame) frame.src = '';
-  if(modal) modal.classList.remove('open');
+  const fallback = document.getElementById('pdfViewerFallback');
+  if(fallback) fallback.src = 'about:blank';
+  if(pdfViewerState.renderTask){ try{ pdfViewerState.renderTask.cancel(); }catch(e){} }
+  if(pdfViewerState.pdfDoc){ try{ pdfViewerState.pdfDoc.destroy(); }catch(e){} }
+  if(pdfViewerState.blobUrl){ try{ URL.revokeObjectURL(pdfViewerState.blobUrl); }catch(e){} }
+  pdfViewerState = {docMeta:null, pdfDoc:null, page:1, scale:1.15, renderTask:null, dataUrl:'', blobUrl:''};
+  if(modal){ modal.classList.remove('open'); modal.classList.remove('viewer-full'); }
 }
+
+function dataUrlToBlob(dataUrl){
+  const parts=String(dataUrl||'').split(',');
+  if(parts.length<2) return new Blob([]);
+  const mime=(parts[0].match(/data:([^;]+)/)||[])[1]||'application/octet-stream';
+  const binary=atob(parts[1]);
+  const bytes=new Uint8Array(binary.length);
+  for(let i=0;i<binary.length;i++) bytes[i]=binary.charCodeAt(i);
+  return new Blob([bytes],{type:mime});
+}
+
+async function getDocDataById(id){
+  const doc=(S.docs||[]).find(d=>d.id===id);
+  if(!doc) return null;
+  let data=doc.data||'';
+  if(!data){
+    try{ const saved=await idbGetDoc(id); if(saved&&saved.data) data=saved.data; }catch(e){}
+  }
+  return data ? {doc,data} : null;
+}
+
+async function openPdfViewerDoc(doc,data){
+  const modal=document.getElementById('pdfViewerModal');
+  const title=document.getElementById('pdfViewerTitle');
+  const loading=document.getElementById('pdfViewerLoading');
+  const fallback=document.getElementById('pdfViewerFallback');
+  const stage=document.getElementById('pdfCanvasStage');
+  if(title) title.textContent=doc.name||'PDF';
+  if(modal) modal.classList.add('open');
+  if(loading) loading.classList.add('show');
+  pdfViewerState.docMeta=doc;
+  pdfViewerState.dataUrl=data;
+  pdfViewerState.page=1;
+  pdfViewerState.scale=1.15;
+  try{
+    const blob=dataUrlToBlob(data);
+    pdfViewerState.blobUrl=URL.createObjectURL(blob);
+    if(window.pdfjsLib){
+      pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+      const buf=await blob.arrayBuffer();
+      pdfViewerState.pdfDoc=await pdfjsLib.getDocument({data:new Uint8Array(buf)}).promise;
+      if(fallback) fallback.style.display='none';
+      if(stage) stage.style.display='inline-block';
+      document.getElementById('pdfPageCount').textContent=pdfViewerState.pdfDoc.numPages||1;
+      await renderCurrentPdfPage();
+      setTimeout(()=>pdfFitWidth(),60);
+    }else{
+      throw new Error('PDF.js nicht geladen');
+    }
+  }catch(err){
+    console.warn('PDF.js viewer fallback:',err);
+    if(stage) stage.style.display='none';
+    if(fallback){ fallback.style.display='block'; fallback.src=pdfViewerState.blobUrl||data; }
+    showToast('PDF-Viewer Fallback aktiv','warn');
+  }finally{
+    if(loading) loading.classList.remove('show');
+  }
+}
+
+async function renderCurrentPdfPage(){
+  if(!pdfViewerState.pdfDoc) return;
+  const canvas=document.getElementById('pdfViewerCanvas');
+  const loading=document.getElementById('pdfViewerLoading');
+  if(!canvas) return;
+  if(loading) loading.classList.add('show');
+  try{
+    const page=await pdfViewerState.pdfDoc.getPage(pdfViewerState.page);
+    const viewport=page.getViewport({scale:pdfViewerState.scale});
+    const dpr=Math.min(window.devicePixelRatio||1,2);
+    canvas.width=Math.floor(viewport.width*dpr);
+    canvas.height=Math.floor(viewport.height*dpr);
+    canvas.style.width=Math.floor(viewport.width)+'px';
+    canvas.style.height=Math.floor(viewport.height)+'px';
+    const ctx=canvas.getContext('2d',{alpha:false});
+    const transform=dpr!==1?[dpr,0,0,dpr,0,0]:null;
+    if(pdfViewerState.renderTask){ try{ pdfViewerState.renderTask.cancel(); }catch(e){} }
+    pdfViewerState.renderTask=page.render({canvasContext:ctx,viewport,transform});
+    await pdfViewerState.renderTask.promise;
+    document.getElementById('pdfPageNum').textContent=pdfViewerState.page;
+    document.getElementById('pdfPageCount').textContent=pdfViewerState.pdfDoc.numPages||1;
+    document.getElementById('pdfZoomInfo').textContent=Math.round(pdfViewerState.scale*100)+'%';
+  }catch(err){ if(err&&err.name!=='RenderingCancelledException') console.warn(err); }
+  finally{ if(loading) loading.classList.remove('show'); }
+}
+function pdfPrevPage(){ if(pdfViewerState.pdfDoc&&pdfViewerState.page>1){pdfViewerState.page--;renderCurrentPdfPage();} }
+function pdfNextPage(){ if(pdfViewerState.pdfDoc&&pdfViewerState.page<pdfViewerState.pdfDoc.numPages){pdfViewerState.page++;renderCurrentPdfPage();} }
+function pdfZoomIn(){ if(pdfViewerState.pdfDoc){pdfViewerState.scale=Math.min(4,pdfViewerState.scale+0.2);renderCurrentPdfPage();} }
+function pdfZoomOut(){ if(pdfViewerState.pdfDoc){pdfViewerState.scale=Math.max(0.4,pdfViewerState.scale-0.2);renderCurrentPdfPage();} }
+async function pdfFitWidth(){
+  if(!pdfViewerState.pdfDoc) return;
+  try{
+    const wrap=document.getElementById('pdfCanvasWrap');
+    const page=await pdfViewerState.pdfDoc.getPage(pdfViewerState.page);
+    const v=page.getViewport({scale:1});
+    const available=Math.max(280,(wrap?.clientWidth||800)-32);
+    pdfViewerState.scale=Math.max(0.4,Math.min(3,available/v.width));
+    await renderCurrentPdfPage();
+  }catch(e){}
+}
+function pdfToggleFullscreen(){
+  const modal=document.querySelector('#pdfViewerModal .modal');
+  const host=document.getElementById('pdfViewerModal');
+  if(document.fullscreenElement){ document.exitFullscreen?.(); return; }
+  if(modal?.requestFullscreen){ modal.requestFullscreen().catch(()=>host?.classList.toggle('viewer-full')); }
+  else host?.classList.toggle('viewer-full');
+}
+
+async function downloadDocById(id){
+  const hit=await getDocDataById(id); if(!hit){showToast('Datei nicht verfügbar','warn');return;}
+  const blob=dataUrlToBlob(hit.data); const url=URL.createObjectURL(blob);
+  const a=document.createElement('a'); a.href=url; a.download=hit.doc.name||'Datei'; document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),1500);
+}
+async function shareDocById(id){
+  const hit=await getDocDataById(id); if(!hit){showToast('Datei nicht verfügbar','warn');return;}
+  try{
+    const blob=dataUrlToBlob(hit.data); const file=new File([blob],hit.doc.name||'Datei',{type:blob.type||hit.doc.type||'application/octet-stream'});
+    if(navigator.share && (!navigator.canShare || navigator.canShare({files:[file]}))){ await navigator.share({title:hit.doc.name||'Datei',files:[file]}); }
+    else{ await downloadDocById(id); showToast('Direktes Teilen nicht unterstützt – Datei wurde heruntergeladen','warn'); }
+  }catch(err){ if(err?.name!=='AbortError') showToast('Teilen nicht möglich','warn'); }
+}
+async function openExternalDocById(id){
+  const hit=await getDocDataById(id); if(!hit){showToast('Datei nicht verfügbar','warn');return;}
+  try{
+    const blob=dataUrlToBlob(hit.data); const file=new File([blob],hit.doc.name||'Datei',{type:blob.type||hit.doc.type||'application/octet-stream'});
+    if(navigator.share && (!navigator.canShare || navigator.canShare({files:[file]}))){
+      await navigator.share({title:'Extern öffnen: '+(hit.doc.name||'Datei'),files:[file]});
+      return;
+    }
+  }catch(err){ if(err?.name==='AbortError') return; }
+  const blob=dataUrlToBlob(hit.data); const url=URL.createObjectURL(blob);
+  const w=window.open(url,'_blank','noopener');
+  if(!w){ showToast('Popup blockiert – bitte Download/Teilen verwenden','warn'); }
+  setTimeout(()=>URL.revokeObjectURL(url),60000);
+}
+function downloadCurrentViewerDoc(){ const id=pdfViewerState.docMeta?.id; if(id) downloadDocById(id); }
+function shareCurrentViewerDoc(){ const id=pdfViewerState.docMeta?.id; if(id) shareDocById(id); }
+function openCurrentViewerExternal(){ const id=pdfViewerState.docMeta?.id; if(id) openExternalDocById(id); }
+
 
 
 function ensureTodoState(){
@@ -5256,33 +5679,16 @@ function renderPhotos() {
 
 async function openDocFile(doc){
   if(!doc) return;
-  let data = doc.data || null;
-  if(!data && doc.id){
-    try{
-      const saved = await idbGetDoc(doc.id);
-      if(saved && saved.data) data = saved.data;
-    }catch(e){}
+  let data=doc.data||null;
+  if(!data&&doc.id){
+    try{ const saved=await idbGetDoc(doc.id); if(saved&&saved.data)data=saved.data; }catch(e){}
   }
-  if(!data){
-    showToast('Dateiinhalt nicht verfügbar. Bitte Datei erneut hochladen.','warn');
-    return;
-  }
-  const isPdf = String(doc.type||'').includes('pdf') || String(doc.name||'').toLowerCase().endsWith('.pdf');
-  if(isPdf){
-    const modal = document.getElementById('pdfViewerModal');
-    const frame = document.getElementById('pdfViewerFrame');
-    const title = document.getElementById('pdfViewerTitle');
-    if(title) title.textContent = doc.name || 'PDF';
-    if(frame) frame.src = data;
-    if(modal) modal.classList.add('open');
-  } else {
-    const a=document.createElement('a');
-    a.href=data;
-    a.download=doc.name||'Datei';
-    a.click();
-  }
+  if(!data){showToast('Dateiinhalt nicht verfügbar. Bitte Datei erneut hochladen.','warn');return;}
+  const isPdf=String(doc.type||'').includes('pdf')||String(doc.name||'').toLowerCase().endsWith('.pdf');
+  if(isPdf){ await openPdfViewerDoc(doc,data); }
+  else{ await openExternalDocById(doc.id); }
 }
-function renderDocs() {
+function renderDocs(){
   const grid=document.getElementById('docGrid');
   const cnt=document.getElementById('docCount');
   if(!grid)return;
@@ -5291,10 +5697,20 @@ function renderDocs() {
   const dIcons={pdf:'📕','msword':'📘','wordprocessingml':'📘','ms-excel':'📗','spreadsheetml':'📗'};
   (S.docs||[]).forEach(doc=>{
     const icon=Object.entries(dIcons).find(([k])=>String(doc.type||'').includes(k))?.[1]||'📄';
-    const t=document.createElement('div'); 
+    const isPdf=String(doc.type||'').includes('pdf')||String(doc.name||'').toLowerCase().endsWith('.pdf');
+    const t=document.createElement('div');
     t.className='doc-thumb';
-    t.innerHTML=`<span class="doc-icon">${icon}</span><div class="doc-name">${esc(doc.name)}</div><div class="doc-size">${doc.size||''}</div>
-      <button class="ph-del" style="opacity:1;" onclick="event.stopPropagation();delDoc('${doc.id}')">✕</button>`;
+    t.innerHTML=`
+      <span class="doc-icon">${icon}</span>
+      <div class="doc-name">${esc(doc.name)}</div>
+      <div class="doc-size">${doc.size||''}</div>
+      <div class="doc-actions">
+        <button type="button" class="doc-action-btn" onclick="event.stopPropagation();openDocFile((S.docs||[]).find(d=>d.id==='${doc.id}'))">${isPdf?'👁 Öffnen':'📱 Öffnen'}</button>
+        <button type="button" class="doc-action-btn" onclick="event.stopPropagation();downloadDocById('${doc.id}')">⬇ Laden</button>
+        <button type="button" class="doc-action-btn" onclick="event.stopPropagation();shareDocById('${doc.id}')">📤 Teilen</button>
+        <button type="button" class="doc-action-btn" onclick="event.stopPropagation();openExternalDocById('${doc.id}')">📱 Extern</button>
+        <button type="button" class="doc-action-btn danger" onclick="event.stopPropagation();delDoc('${doc.id}')">🗑</button>
+      </div>`;
     t.onclick=()=>openDocFile(doc);
     grid.appendChild(t);
   });
@@ -5574,7 +5990,25 @@ function delArchive(id){ archive=archive.filter(a=>a.id!==id); persistState(); r
 function clearArchiveConfirm(){ if(confirm('Archiv wirklich löschen? / Arşivi silmek istediğinizden emin misiniz?')){archive=[];persistState();renderArchive();showToast('Archiv geleert','ok');} }
 
 function exportArchiveExcel(id){const ar=archive.find(a=>a.id===id);if(!ar)return;const tmp=JSON.parse(JSON.stringify(S));Object.assign(S,ar.snap);exportExcel(ar.snap.reportDate||ar.reportDate);Object.assign(S,tmp);}
-function exportArchivePDF(id){const ar=archive.find(a=>a.id===id);if(!ar)return;const tmp=JSON.parse(JSON.stringify(S));Object.assign(S,ar.snap);exportPDF();Object.assign(S,tmp);}
+async function exportArchivePDF(id){
+  const ar = archive.find(a => a.id === id);
+  if (!ar || !ar.snap) return;
+  const tmp = JSON.parse(JSON.stringify(S));
+  try {
+    S = deepMerge(newState(), ar.snap);
+    if (Array.isArray(ar.archivePhotos) && ar.archivePhotos.length) {
+      S.photos = JSON.parse(JSON.stringify(ar.archivePhotos));
+    } else {
+      await hydratePhotosFromIDB();
+    }
+    await exportPDF();
+  } catch (err) {
+    console.error('Archiv PDF Fehler:', err);
+    showToast('Archiv PDF Fehler: ' + (err && err.message ? err.message : 'unbekannt'), 'err');
+  } finally {
+    S = tmp;
+  }
+}
 
 // ═══════════════════════════════════════════════════
 // DASHBOARD REFRESH
@@ -5706,7 +6140,7 @@ const TERMINPLAN_MONTHS = [
   {key:'2025-10', label:'Oktober 2025', phase:'Einbau Probenahmekabine / Finishes / Ausbau Büro + Mezzanine', soll:86},
   {key:'2025-11', label:'November 2025', phase:'Regalmontage / Regalsprinkler / Beschichtung / Finishes', soll:92},
   {key:'2025-12', label:'Dezember 2025', phase:'TGA-Fertigstellung / Sachverständigen- und Bauamtsabnahme', soll:97},
-  {key:'2026-01', label:'Januar 2026', phase:'Abnahme / Übergabe an DHL', soll:100}
+  {key:'', label:'', phase:'', soll:''}
 ];
 
 function getMonthKeyFromReportDate(){
@@ -5911,6 +6345,8 @@ function startNewDay(){
       contractors: JSON.parse(JSON.stringify(S.contractors || [])),
       contacts: JSON.parse(JSON.stringify(S.contacts || [])),
       gewerkePresets: JSON.parse(JSON.stringify(S.gewerkePresets || [])),
+      todos: JSON.parse(JSON.stringify(S.todos || [])),
+      kanban: JSON.parse(JSON.stringify(S.kanban || {today:[], tomorrow:[], done:[]})),
       signatures: Array.isArray(S.signatures) && S.signatures.length
         ? JSON.parse(JSON.stringify(S.signatures))
         : [{id:'sig_'+Date.now(), role:'Bauleiter', name:S.bauleiter||'', firmId:''}]
@@ -5942,7 +6378,8 @@ function startNewDay(){
     S.workAreas = [];
     S.maengel = [];
     S.meetings = [];
-    S.kanban = {today:[], tomorrow:[], done:[]};
+    if (!Array.isArray(S.todos)) S.todos = [];
+    if (!S.kanban) S.kanban = {today:[], tomorrow:[], done:[]};
 
     if (S.personnelCounts) Object.keys(S.personnelCounts).forEach(k => S.personnelCounts[k] = 0);
     if (S.personnelNames) Object.keys(S.personnelNames).forEach(k => S.personnelNames[k] = []);
@@ -5972,13 +6409,18 @@ function startNewDay(){
     if (typeof renderWorkAreas === 'function') renderWorkAreas();
     if (typeof renderMaengel === 'function') renderMaengel();
     if (typeof renderMeetings === 'function') renderMeetings();
+    if (typeof ensureTodoKanbanSync === 'function') ensureTodoKanbanSync();
     if (typeof renderKanban === 'function') renderKanban();
+    if (typeof renderTodoPage === 'function') renderTodoPage();
     if (typeof buildPersonnel === 'function') buildPersonnel();
     if (typeof buildGeraete === 'function') buildGeraete();
     if (typeof renderSigGrid === 'function') renderSigGrid();
     if (typeof renderProgressPanel === 'function') renderProgressPanel();
     if (typeof renderProgressLive === 'function') renderProgressLive();
     if (typeof updateWeatherSummary === 'function') updateWeatherSummary();
+    if (typeof ensurePatchState === 'function') ensurePatchState();
+    if (typeof syncSettingsFields === 'function') syncSettingsFields();
+    if (typeof renderGewerkCodeDataList === 'function') renderGewerkCodeDataList();
     if (typeof renderFirms === 'function') renderFirms();
     if (typeof updateBadges === 'function') updateBadges();
     if (typeof autoSave === 'function') autoSave();
@@ -6167,6 +6609,7 @@ function ensureSeroPdfFonts(doc){
 async function exportPDF() {
   try {
     collectFormToState();
+    if (typeof hydratePhotosFromIDB === 'function') await hydratePhotosFromIDB();
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF({ unit: 'mm', format: 'a4' });
 
@@ -6389,12 +6832,55 @@ async function exportPDF() {
       ['Bauleiter', S.bauleiter || '']
     ]);
 
+    const ps = S.projectSetup || {};
+    const psRows = [
+      ['Baustellenadresse', ps.baustellenadresse || ''],
+      ['Lieferadresse', ps.lieferadresse || ''],
+      ['Notfall / Sicherheit', ps.notfall || ''],
+      ['Besonderheiten', ps.besonderheiten || '']
+    ].filter(r => String(r[1] || '').trim());
+    if (psRows.length) {
+      addSectionTitle('Projekt-Stammdaten');
+      addKV(psRows);
+    }
+
+    if ((S.documentRegister || []).length) {
+      addSectionTitle('Dokumentenregister');
+      const docRegRows = (S.documentRegister || []).map(d => [
+        d.title || '',
+        d.type || '',
+        [d.date || '', d.location || ''].filter(Boolean).join(' | '),
+        d.note || ''
+      ]);
+      drawTable(['Dokument','Typ','Stand / Ablage','Notiz'], docRegRows, [48, 28, 50, 56]);
+    }
+
     addSectionTitle('Wetter');
     addKV([
       ['Wetter automatisch', (S.autoWeather && S.autoWeather.weather) ? S.autoWeather.weather : (S.weather || '-')],
       ['Temperatur', (S.autoWeather ? `${S.autoWeather.tempMin} °C bis ${S.autoWeather.tempMax} °C` : `${S.tempMin || '-'} °C bis ${S.tempMax || '-'} °C`)],
       ['Wind / Regen', (S.autoWeather ? `${S.autoWeather.wind} km/h / ${S.autoWeather.rainDay} mm` : `${S.wind || '-'} / -`)]
     ]);
+
+    addSectionTitle('Aktive Firmen');
+    const referencedFirmIds = new Set();
+    (S.workEntries || []).forEach(w => { if (w.firmId) referencedFirmIds.add(w.firmId); });
+    (S.timeline || []).forEach(t => { if (t.firmId) referencedFirmIds.add(t.firmId); });
+    Object.values(S.personnelFirms || {}).forEach(id => { if (id) referencedFirmIds.add(id); });
+    (S.geraete || []).forEach(g => { if (g.firmId) referencedFirmIds.add(g.firmId); });
+    (S.maengel || []).forEach(m => { if (m.firmId && m.status !== 'erledigt') referencedFirmIds.add(m.firmId); });
+    (S.todos || []).forEach(t => { if (t.firmId && !['Erledigt','Entfällt'].includes(t.status)) referencedFirmIds.add(t.firmId); });
+    const activeFirmRows = (S.contractors || [])
+      .filter(f => f.status === 'active' || referencedFirmIds.has(f.id))
+      .map(f => [
+        f.name || '',
+        f.trade || '',
+        f.contact || '',
+        f.phone || '',
+        f.status || ''
+      ]);
+    if (activeFirmRows.length) drawTable(['Firma','Gewerk','Ansprechpartner','Telefon','Status'], activeFirmRows, [44, 38, 42, 32, 24]);
+    else addKV([['Aktive Firmen','Keine aktiven Firmen']]);
 
     addSectionTitle('Bauarbeiten');
     const workRows = (S.workEntries || []).map((w) => {
@@ -6462,6 +6948,69 @@ async function exportPDF() {
     }).filter(Boolean);
     if (geraetRows.length) drawTable(['Gerät','Anzahl','Typ','Firma','Bemerkung'], geraetRows, [28, 15, 34, 38, 57]);
     else addKV([['Geräte','Keine aktiven Einträge']]);
+
+    addSectionTitle('Offene Mängel');
+    const mangelRows = (S.maengel || [])
+      .filter(m => m.status !== 'erledigt')
+      .map(m => {
+        const firmName = (S.contractors || []).find(f => f.id === m.firmId)?.name || '';
+        const photo = (S.photos || []).find(p => p.id === m.photoId);
+        return [
+          m.title || '',
+          m.status === 'bearbeitung' ? 'In Bearbeitung' : 'Offen',
+          [m.area || '', firmName || '', m.owner || ''].filter(Boolean).join(' | '),
+          [m.deadline ? `Frist: ${m.deadline}` : '', m.desc || '', photo ? `Foto: ${photo.caption || photo.name || photo.id}` : ''].filter(Boolean).join(' | ')
+        ];
+      });
+    if (mangelRows.length) drawTable(['Mangel','Status','Ort / Firma / Verantwortlich','Beschreibung'], mangelRows, [42, 28, 52, 60]);
+    else addKV([['Offene Mängel','Keine offenen Mängel']]);
+
+    addSectionTitle('Offene To-dos');
+    const todoRows = (S.todos || [])
+      .filter(t => !['Erledigt','Entfällt'].includes(t.status))
+      .map(t => {
+        const firmName = (S.contractors || []).find(f => f.id === t.firmId)?.name || '';
+        return [
+          t.title || '',
+          t.status || 'Offen',
+          [t.priority || '', t.due ? `Fällig: ${t.due}` : '', firmName || ''].filter(Boolean).join(' | '),
+          [t.desc || '', t.comment || ''].filter(Boolean).join(' | ')
+        ];
+      });
+    if (todoRows.length) drawTable(['Aufgabe','Status','Priorität / Frist / Firma','Beschreibung'], todoRows, [45, 30, 52, 55]);
+    else addKV([['Offene To-dos','Keine offenen Aufgaben']]);
+
+    addSectionTitle('Container');
+    const containerRows = (S.containers || []).map(c => [
+      c.id || '',
+      c.type || '',
+      c.status || '',
+      [c.size || '', c.loc || c.location || '', c.note || ''].filter(Boolean).join(' | ')
+    ]);
+    if (containerRows.length) drawTable(['ID','Typ','Status','Standort / Notiz'], containerRows, [24, 38, 32, 88]);
+    else addKV([['Container','Keine Container']]);
+
+    addSectionTitle('Besprechungen');
+    const reportDate = S.reportDate || todayStr();
+    const meetingRows = (S.meetings || [])
+      .filter(m => !m.date || m.date === reportDate)
+      .map(m => [
+        [m.date || reportDate, m.time || ''].filter(Boolean).join(' '),
+        m.title || '',
+        m.loc || '',
+        [m.att || '', m.agenda || '', m.dec || '', m.next ? `Nächster Termin: ${m.next}` : ''].filter(Boolean).join(' | ')
+      ]);
+    if (meetingRows.length) drawTable(['Datum / Zeit','Thema','Ort','Details'], meetingRows, [32, 42, 30, 78]);
+    else addKV([['Besprechungen','Keine Besprechungen für diesen Berichtstag']]);
+
+    if (S.checklists && Array.isArray(S.checklists.tagesabschluss) && S.checklists.tagesabschluss.length) {
+      addSectionTitle('Tagesabschluss-Checkliste');
+      const checklistRows = S.checklists.tagesabschluss.map(c => [
+        c.done ? 'OK' : 'Offen',
+        c.text || ''
+      ]);
+      drawTable(['Status','Punkt'], checklistRows, [22, 160]);
+    }
 
     addSectionTitle('Bemerkungen');
     if (S.remarks) addParagraph(S.remarks);
@@ -6556,6 +7105,115 @@ function showToast(msg,type='ok'){
   const GEWERK_PRESETS = [];
   window.currentFirmId = window.currentFirmId || '';
   window.currentNUCode = window.currentNUCode || '';
+
+  const GEWERK_TR = {
+    'TGA-allgemein':'Genel mekanik tesisat',
+    '(Ab-) Wasser_Sanitär':'Temiz ve atık su tesisatı',
+    'Sanitär':'Sıhhi tesisat',
+    'TW Rohrleitung':'İçme suyu borulama',
+    'Dachentwässerung':'Çatı yağmur suyu drenajı',
+    'HKL':'Isıtma-Klima-Havalandırma',
+    'Wärmeversorgung':'Isı temini sistemi',
+    'Lüftung':'Havalandırma',
+    'Kälteanlagen':'Soğutma sistemleri',
+    'Starkstromanlagen':'Kuvvetli akım tesisatı',
+    'Elektro Hauptvergabe':'Ana elektrik işleri',
+    'E-Mobilität':'Elektrikli araç altyapısı',
+    'E-Bike Ladestationen':'E-bike şarj istasyonları',
+    'Hallenbeleuchtung':'Salon aydınlatması',
+    'Blitzschutz':'Yıldırımdan korunma',
+    'PV-Anlagen':'Güneş enerjisi sistemi',
+    'Feuerlöschanlagen':'Yangın söndürme sistemleri',
+    'Sprinkleranlage':'Sprinkler sistemi',
+    'Feuerlöscher':'Yangın tüpleri',
+    'GLT':'Bina otomasyon sistemi',
+    'Tiefbau':'Altyapı kazı işleri',
+    'Erdbauer':'Toprak işleri',
+    'Rohbau':'Kaba inşaat',
+    'Stahlbetonarbeiten':'Betonarme işleri',
+    'Mauerwerk':'Duvar imalatı',
+    'Vergussbeton':'Grout betonu',
+    'Bewehrung':'Donatı işleri',
+    'Betonsohle':'Beton zemin plakası',
+    'Bauwerksabdichtung':'Yapı su yalıtımı',
+    'WHG_Folie unter Bodenplatte':'Radye altı membran',
+    'Estricharbeiten':'Şap işleri',
+    'Zementestriche':'Çimento şapı',
+    'Porenbeton':'Gazbeton',
+    'PU-Fugen':'PU derz',
+    'Betonkosmetik':'Beton yüzey düzeltme',
+    'Schalungsholz':'Kalıp kerestesi',
+    'Betonpumpe':'Beton pompası',
+    'Ringankerbewehrung':'Hatıl donatısı',
+    'Unterlegplatten':'Altlık plakalar',
+    'Schrägstützen':'Geçici destekler',
+    'Absturzsicherung':'Düşme koruma',
+    'vertikale Verfugung':'Dikey derz',
+    'Krananlagen':'Vinç sistemleri',
+    'Tore, Türen, Verladetechnik':'Kapılar ve yükleme rampaları',
+    'Stahltüren':'Çelik kapılar',
+    'Schnelllauftore':'Hızlı kapılar',
+    'Überladebrücken':'Yükleme köprüleri',
+    'Torabdichtung':'Kapı sızdırmazlık',
+    'Bauelemente Fassaden':'Cephe doğrama elemanları',
+    'Kunststofffenster':'PVC pencereler',
+    'Aluminiumfenster':'Alüminyum pencereler',
+    'Dachdecker':'Çatı kaplama işleri',
+    'Lichtkuppeln, Dachlichtbänder':'Çatı ışıklıkları',
+    'Innenausbau':'İç imalatlar',
+    'Trockenbau gesamt':'Alçıpan işleri',
+    'Innentüren':'İç kapılar',
+    'Sanitär Trennwände':'WC bölme panelleri',
+    'Sonnenschutz':'Güneş kırıcı sistemler',
+    'Sonnenschutz außen':'Dış güneş kırıcı',
+    'Sonnenschutz innen':'İç güneş kırıcı',
+    'Malerarbeiten, Tapezierarbeiten':'Boya işleri',
+    'Malerarbeiten':'Boya işleri',
+    'Fliesenarbeiten':'Seramik işleri',
+    'Fliesenleger':'Seramik ustası',
+    'Bodenbelagsarbeiten':'Zemin kaplamaları',
+    'Bodenleger':'Zemin kaplama ustası',
+    'Sauberlaufzonen Matten':'Paspas bölgeleri',
+    'Schlosserarbeiten':'Demir doğrama',
+    'Schlosser allgemein':'Genel demir doğrama',
+    'Baustelleneinrichtung':'Şantiye kurulumu',
+    'Unterkünfte, Toiletten, Reinigung':'Konteyner, tuvalet, temizlik',
+    'Pacht Miete (Grundstücke)':'Arsa kira bedeli',
+    'Verkehrssicherung':'Trafik güvenliği',
+    'Baustrom':'Şantiye elektriği',
+    'Bauwasser':'Şantiye suyu',
+    'Telekommunikation':'Telekomünikasyon',
+    'Bauzaun':'Şantiye çiti',
+    'Wachschutz':'Güvenlik hizmeti',
+    'Bauschild, Baustellenwerbung':'Şantiye tabelası',
+    'Webcam':'Web kamera',
+    'Fotos, Videos':'Fotoğraf, videolar',
+    'Gerüste, Aufzüge':'İskele ve asansörler',
+    'Turmdrehkran':'Kule vinç',
+    'Mobilkran':'Mobil vinç',
+    'Hebebühnen':'Yükseltici platformlar',
+    'Baustellenreinigung, Müllentsorgung':'Şantiye temizliği, atık bertarafı',
+    'Rohr, Kanal, Straßenreinigung':'Boru, kanal, yol temizliği',
+    'Bauendreinigung':'İnşaat sonu temizlik',
+    'Baustoffe':'İnşaat malzemeleri',
+    'Hotel-Reisekosten':'Otel-seyahat masrafları',
+    'Aufzugsanlage':'Asansör',
+    'Spezialtiefbau':'Özel temel mühendisliği',
+    'Blechverlegearbeiten':'Sac kaplama işleri',
+    'Blechverleger':'Sac kaplama ustası',
+    'Abbrucharbeiten':'Yıkım işleri',
+    'Abbruch komplett':'Komple yıkım',
+    'Betonschneiden, Kernbohrung':'Beton kesme ve karot',
+    'Betonschneiden':'Beton kesme',
+    'Kernbohrung':'Karot delme',
+    'Kühlhallenausbau':'Soğuk depo iç işleri'
+  };
+
+  function gewerkDisplay(name){
+    const key = String(name || '').trim();
+    const tr = GEWERK_TR[key];
+    return tr ? `${key} (${tr})` : key;
+  }
 
   function e(id){ return document.getElementById(id); }
   function h(s){ return String(s||'').replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
@@ -7109,7 +7767,7 @@ window.renderFirms = function renderFirmsPatched() {
               <div style="display:flex;align-items:center;gap:10px;min-width:0;">
                 <div class="ci ci-c" style="width:26px;height:26px;font-size:12px;">↳</div>
                 <div style="min-width:0;">
-                  <div style="font-size:13px;font-weight:700;color:var(--text);">${h(child.code)} ${h(child.name || child.code)}</div>
+                  <div style="font-size:13px;font-weight:700;color:var(--text);">${h(child.code)} ${h(gewerkDisplay(child.name || child.code))}</div>
                   <div style="font-size:10px;color:var(--text3);margin-top:2px;">${(child.firms||[]).length} Firma</div>
                 </div>
               </div>
@@ -7129,7 +7787,7 @@ window.renderFirms = function renderFirmsPatched() {
           <div class="card-hd" style="justify-content:space-between;">
             <div class="card-hd-l">
               <div class="ci ci-b">📁</div>
-              <h3>${h(parentCode)} ${h(g.name || parentCode)} <small>${parentFirmCount} Firma · ${childCount} Alt-Gewerk</small></h3>
+              <h3>${h(parentCode)} ${h(gewerkDisplay(g.name || parentCode))} <small>${parentFirmCount} Firma · ${childCount} Alt-Gewerk</small></h3>
             </div>
             ${headerBtns}
           </div>
@@ -7470,16 +8128,17 @@ window.renderFirms = function renderFirmsPatched() {
             Build 2026.04<br><br>
             Offline Bauleitungs- und Dokumentationstool für Bauleitung, Nachunternehmer-Koordination und Tagesdokumentation.<br><br>
             <strong>Entwicklung &amp; Support</strong><br>
-            Serdal Arslan<br><br>
-            Support, Fehlermeldungen oder Verbesserungsvorschläge:<br>
-            srdlrsln@hotmail.com<br><br>
+            Lokale Installation / projektspezifische Kontaktdaten werden nicht im öffentlichen HTML gespeichert.<br><br>
             <span style="font-size:12px;color:var(--text3);">Alle Daten werden lokal im Browser gespeichert (Offline-System).</span>
           </div>
         </div>
       </div>`;
     grid.appendChild(wrap);
-    loadDefaultGewerkPresets(false);
-    syncSettingsFields();
+    if (!Array.isArray(S.gewerkePresets) || !S.gewerkePresets.length) {
+      loadDefaultGewerkPresets(false);
+    } else {
+      syncSettingsFields();
+    }
   }
 
   function syncSettingsFields(){
@@ -8501,7 +9160,466 @@ async function delPhoto(id){
   document.addEventListener('DOMContentLoaded', initUB);
   window.addEventListener('load', initUB);
 })();
+
+
+// ═══════════════════════════════════════════════════
+// PROJEKT-STAMMDATEN + DOKUMENTENREGISTER + CHECKLISTE
+// Wiki yok: sadece sabit proje bilgileri, belge referansı ve gün sonu kontrolü.
+// ═══════════════════════════════════════════════════
+(function(){
+  const DEFAULT_DAILY_CHECKLIST = [
+    'Personal eingetragen?',
+    'Geräte / Container geprüft?',
+    'Tageschronologie vollständig?',
+    'Fotos mit Firma / Bereich / Uhrzeit verknüpft?',
+    'Mängel erfasst oder aktualisiert?',
+    'To-dos / Kanban aktualisiert?',
+    'Bericht gespeichert / archiviert?',
+    'PDF kurz kontrolliert?'
+  ];
+
+  function ensureProjectAdminState(){
+    if(!window.S) return;
+    if(!S.projectSetup || typeof S.projectSetup !== 'object') S.projectSetup = {};
+    if(!Array.isArray(S.documentRegister)) S.documentRegister = [];
+    if(!S.checklists || typeof S.checklists !== 'object') S.checklists = {};
+    if(!Array.isArray(S.checklists.tagesabschluss)) {
+      S.checklists.tagesabschluss = DEFAULT_DAILY_CHECKLIST.map((text, idx)=>({id:'dc_'+idx, text, done:false}));
+    }
+  }
+
+  function val(id){ return (document.getElementById(id)?.value || '').trim(); }
+  function setVal(id,v){ const el=document.getElementById(id); if(el) el.value = v || ''; }
+  function uid(prefix){ return prefix + '_' + Date.now() + '_' + Math.random().toString(16).slice(2); }
+
+  function saveProjectFieldsToState(){
+    ensureProjectAdminState();
+    S.projectSetup = Object.assign({}, S.projectSetup || {}, {
+      projectNr: val('psProjectNr'),
+      projectName: val('psProjectName'),
+      standort: val('psStandort'),
+      bauleiter: val('psBauleiter'),
+      baustellenadresse: val('psBaustellenadresse'),
+      lieferadresse: val('psLieferadresse'),
+      notfall: val('psNotfall'),
+      besonderheiten: val('psBesonderheiten')
+    });
+  }
+
+  window.psApplyProjectToHeader = function(){
+    ensureProjectAdminState();
+    saveProjectFieldsToState();
+    const p = S.projectSetup || {};
+    S.projectNr = p.projectNr || S.projectNr || '';
+    S.projectName = p.projectName || S.projectName || '';
+    S.standort = p.standort || S.standort || p.baustellenadresse || '';
+    S.bauleiter = p.bauleiter || S.bauleiter || '';
+    if(typeof sv === 'function'){
+      sv('hPN', S.projectNr); sv('hPName', S.projectName); sv('hST', S.standort); sv('hBL', S.bauleiter);
+      sv('tbPN', S.projectNr); sv('tbPName', S.projectName); sv('tbST', S.standort); sv('tbBL', S.bauleiter);
+    }
+    if(typeof persistState === 'function') persistState();
+    if(typeof refreshDash === 'function') refreshDash();
+    if(typeof showToast === 'function') showToast('Projekt-Stammdaten übernommen','ok');
+  };
+
+  window.psSaveProjectStammdaten = function(){
+    ensureProjectAdminState();
+    saveProjectFieldsToState();
+    if(typeof persistState === 'function') persistState();
+    if(typeof showToast === 'function') showToast('Projekt-Stammdaten gespeichert','ok');
+  };
+
+  function renderProjectFields(){
+    ensureProjectAdminState();
+    const p = Object.assign({
+      projectNr: S.projectNr || '', projectName: S.projectName || '', standort: S.standort || '', bauleiter: S.bauleiter || ''
+    }, S.projectSetup || {});
+    setVal('psProjectNr', p.projectNr);
+    setVal('psProjectName', p.projectName);
+    setVal('psStandort', p.standort);
+    setVal('psBauleiter', p.bauleiter);
+    setVal('psBaustellenadresse', p.baustellenadresse);
+    setVal('psLieferadresse', p.lieferadresse);
+    setVal('psNotfall', p.notfall);
+    setVal('psBesonderheiten', p.besonderheiten);
+  }
+
+  window.psSaveDocRegisterItem = function(){
+    ensureProjectAdminState();
+    const title = val('psDocTitle');
+    if(!title){ if(typeof showToast === 'function') showToast('Dokumentnamen eingeben','warn'); return; }
+    const editId = val('psDocEditId');
+    const item = {
+      id: editId || uid('docreg'),
+      title,
+      type: val('psDocType'),
+      location: val('psDocLocation'),
+      date: val('psDocDate'),
+      note: val('psDocNote')
+    };
+    const idx = S.documentRegister.findIndex(d=>String(d.id)===String(item.id));
+    if(idx >= 0) S.documentRegister[idx] = item; else S.documentRegister.unshift(item);
+    ['psDocEditId','psDocTitle','psDocType','psDocLocation','psDocDate','psDocNote'].forEach(id=>setVal(id,''));
+    if(typeof persistState === 'function') persistState();
+    renderDocRegister();
+    if(typeof showToast === 'function') showToast('Dokument gespeichert','ok');
+  };
+
+  window.psEditDocRegisterItem = function(id){
+    ensureProjectAdminState();
+    const d = S.documentRegister.find(x=>String(x.id)===String(id));
+    if(!d) return;
+    setVal('psDocEditId', d.id);
+    setVal('psDocTitle', d.title);
+    setVal('psDocType', d.type);
+    setVal('psDocLocation', d.location);
+    setVal('psDocDate', d.date);
+    setVal('psDocNote', d.note);
+    document.getElementById('psDocTitle')?.focus();
+  };
+
+  window.psDeleteDocRegisterItem = function(id){
+    ensureProjectAdminState();
+    if(!confirm('Dokument aus Register löschen?')) return;
+    S.documentRegister = S.documentRegister.filter(d=>String(d.id)!==String(id));
+    if(typeof persistState === 'function') persistState();
+    renderDocRegister();
+  };
+
+  function renderDocRegister(){
+    ensureProjectAdminState();
+    const box = document.getElementById('psDocRegisterList');
+    if(!box) return;
+    const docs = S.documentRegister || [];
+    if(!docs.length){
+      box.innerHTML = '<div class="empty-state" style="padding:18px;"><div class="ei">📑</div><h4>Noch keine Dokumente</h4><p>Buraya dosya değil, belge referansı ekle.</p></div>';
+      return;
+    }
+    box.innerHTML = docs.map(d=>`
+      <div class="ps-register-card">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;">
+          <div style="min-width:0;flex:1;">
+            <div class="ps-register-title">${esc(d.title || 'Dokument')}</div>
+            <div class="ps-register-meta">${esc(d.type || '—')} · ${esc(d.date || '—')} · ${esc(d.location || '—')}</div>
+            ${d.note ? `<div class="ps-register-note">${esc(d.note)}</div>` : ''}
+          </div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;">
+            <button class="btn btn-ghost btn-xs" type="button" onclick="psEditDocRegisterItem('${esc(d.id)}')">Bearbeiten</button>
+            <button class="btn btn-ghost btn-xs" type="button" onclick="psDeleteDocRegisterItem('${esc(d.id)}')">Löschen</button>
+          </div>
+        </div>
+      </div>`).join('');
+  }
+
+  window.psAddChecklistItem = function(){
+    ensureProjectAdminState();
+    const text = val('psChecklistNew');
+    if(!text){ if(typeof showToast === 'function') showToast('Checklistenpunkt eingeben','warn'); return; }
+    S.checklists.tagesabschluss.push({id:uid('dc'), text, done:false});
+    setVal('psChecklistNew','');
+    if(typeof persistState === 'function') persistState();
+    renderDailyChecklist();
+  };
+
+  window.psDeleteChecklistItem = function(id){
+    ensureProjectAdminState();
+    S.checklists.tagesabschluss = (S.checklists.tagesabschluss || []).filter(x=>String(x.id)!==String(id));
+    if(typeof persistState === 'function') persistState();
+    renderDailyChecklist();
+  };
+
+  window.psToggleChecklistItem = function(id, checked){
+    ensureProjectAdminState();
+    const item = (S.checklists.tagesabschluss || []).find(x=>String(x.id)===String(id));
+    if(item) item.done = !!checked;
+    if(typeof persistState === 'function') persistState();
+  };
+
+  window.psResetDailyChecklist = function(){
+    ensureProjectAdminState();
+    (S.checklists.tagesabschluss || []).forEach(x=>x.done=false);
+    if(typeof persistState === 'function') persistState();
+    renderDailyChecklist();
+    if(typeof showToast === 'function') showToast('Checkliste zurückgesetzt','ok');
+  };
+
+  window.psLoadDefaultChecklist = function(){
+    ensureProjectAdminState();
+    const existing = new Set((S.checklists.tagesabschluss || []).map(x=>String(x.text).toLowerCase()));
+    DEFAULT_DAILY_CHECKLIST.forEach((text, idx)=>{
+      if(!existing.has(text.toLowerCase())) S.checklists.tagesabschluss.push({id:uid('dc'), text, done:false});
+    });
+    if(typeof persistState === 'function') persistState();
+    renderDailyChecklist();
+  };
+
+  function renderDailyChecklist(){
+    ensureProjectAdminState();
+    const box = document.getElementById('psChecklistList');
+    if(!box) return;
+    const list = S.checklists.tagesabschluss || [];
+    if(!list.length){
+      box.innerHTML = '<div class="empty-state" style="padding:18px;"><div class="ei">✅</div><h4>Keine Checkliste</h4><p>Standard laden veya kendi maddeni ekle.</p></div>';
+      return;
+    }
+    box.innerHTML = list.map(item=>`
+      <div class="ps-check-row">
+        <input type="checkbox" ${item.done?'checked':''} onchange="psToggleChecklistItem('${esc(item.id)}', this.checked)">
+        <div class="ps-check-text" style="${item.done?'text-decoration:line-through;color:var(--text3);':''}">${esc(item.text)}</div>
+        <button class="btn btn-ghost btn-xs" type="button" onclick="psDeleteChecklistItem('${esc(item.id)}')">Löschen</button>
+      </div>`).join('');
+  }
+
+  window.psFillExampleSetupJson = function(){
+    const example = {
+      project: {
+        projectNr: 'PROJ-001',
+        projectName: 'Beispielprojekt',
+        standort: 'Projektort',
+        bauleiter: '',
+        baustellenadresse: '',
+        lieferadresse: '',
+        notfall: 'SiGeKo / Ersthelfer / Rettungspunkt hier eintragen',
+        besonderheiten: 'Zufahrt, Anmeldung und projektspezifische Vorgaben hier eintragen'
+      },
+      documentRegister: [
+        {title:'Vertragsunterlagen', type:'Vertrag / Leistungsumfang', location:'Projektordner', date:'', note:'Aktuellen Stand prüfen.'},
+        {title:'Ausführungsplan', type:'Plan', location:'Planordner', date:'', note:'Aktuelle Revision prüfen.'}
+      ],
+      checklists: { tagesabschluss: DEFAULT_DAILY_CHECKLIST },
+      standardAreas: ['Baustelleneinrichtung','Außenanlagen','Halle','Büro / Sozialbereich','Dach','Fassade','TGA','Elektro','Verkehrsflächen'],
+      defaultTodos: [
+        {title:'Wichtige Ansprechpartner erfassen', category:'Organisation', priority:'Mittel', status:'Offen', comment:'Bauherr, Nachunternehmer, Versorger, Entsorger, SiGeKo.'},
+        {title:'Dokumentenregister vervollständigen', category:'Dokumentation', priority:'Mittel', status:'Offen', comment:'Planstand, Ablageort und wichtige Hinweise ergänzen.'}
+      ],
+      contacts: []
+    };
+    setVal('psSetupJson', JSON.stringify(example, null, 2));
+  };
+
+  window.psImportSetupJson = function(overwrite){
+    ensureProjectAdminState();
+    let data;
+    try{ data = JSON.parse(val('psSetupJson') || '{}'); }
+    catch(e){ if(typeof showToast === 'function') showToast('JSON Format ungültig','err'); return; }
+    const p = data.project || {};
+    S.projectSetup = overwrite ? {} : (S.projectSetup || {});
+    ['projectNr','projectName','standort','bauleiter','baustellenadresse','lieferadresse','notfall','besonderheiten'].forEach(k=>{
+      if(overwrite || !S.projectSetup[k]) S.projectSetup[k] = p[k] || S.projectSetup[k] || '';
+    });
+    if(data.project && (overwrite || !S.projectNr)) S.projectNr = S.projectSetup.projectNr || S.projectNr || '';
+    if(data.project && (overwrite || !S.projectName)) S.projectName = S.projectSetup.projectName || S.projectName || '';
+    if(data.project && (overwrite || !S.standort)) S.standort = S.projectSetup.standort || S.projectSetup.baustellenadresse || S.standort || '';
+    if(data.project && (overwrite || !S.bauleiter)) S.bauleiter = S.projectSetup.bauleiter || S.bauleiter || '';
+
+    if(Array.isArray(data.documentRegister)){
+      if(overwrite) S.documentRegister = [];
+      const existing = new Set((S.documentRegister||[]).map(d=>(d.title||'').toLowerCase()));
+      data.documentRegister.forEach(d=>{
+        if(!d || !d.title) return;
+        if(overwrite || !existing.has(String(d.title).toLowerCase())){
+          S.documentRegister.push({id:uid('docreg'), title:d.title||'', type:d.type||'', location:d.location||'', date:d.date||'', note:d.note||''});
+        }
+      });
+    }
+
+    if(data.checklists && Array.isArray(data.checklists.tagesabschluss)){
+      const arr = data.checklists.tagesabschluss.map((x,i)=>({id:uid('dc'), text: typeof x === 'string' ? x : (x.text||''), done:false})).filter(x=>x.text);
+      if(overwrite) S.checklists.tagesabschluss = arr;
+      else {
+        const existing = new Set((S.checklists.tagesabschluss||[]).map(x=>String(x.text).toLowerCase()));
+        arr.forEach(x=>{ if(!existing.has(String(x.text).toLowerCase())) S.checklists.tagesabschluss.push(x); });
+      }
+    }
+
+    if(Array.isArray(data.standardAreas)){
+      if(!Array.isArray(S.workAreas)) S.workAreas = [];
+      const existing = new Set(S.workAreas.map(a=>String(a.name || a).toLowerCase()));
+      data.standardAreas.forEach(name=>{
+        if(!name) return;
+        if(overwrite || !existing.has(String(name).toLowerCase())) S.workAreas.push({id:uid('wa'), name:String(name), note:'', createdAt:new Date().toISOString()});
+      });
+    }
+
+    if(Array.isArray(data.contacts)){
+      if(!Array.isArray(S.contacts)) S.contacts = [];
+      const existing = new Set(S.contacts.map(c=>String(c.name||'').toLowerCase()+'|'+String(c.mail||'')));
+      data.contacts.forEach(c=>{
+        if(!c || !c.name) return;
+        const key = String(c.name||'').toLowerCase()+'|'+String(c.mail||'');
+        if(overwrite || !existing.has(key)) S.contacts.push({id:uid('contact'), name:c.name||'', firm:c.firm||'', role:c.role||'', group:c.group||'Sonstige', phone:c.phone||'', mail:c.mail||'', note:c.note||''});
+      });
+    }
+
+    if(Array.isArray(data.defaultTodos)){
+      if(!Array.isArray(S.todos)) S.todos = [];
+      const existing = new Set(S.todos.map(t=>String(t.title||'').toLowerCase()));
+      data.defaultTodos.forEach(t=>{
+        if(!t || !t.title) return;
+        if(overwrite || !existing.has(String(t.title).toLowerCase())){
+          S.todos.push({id:uid('todo'), title:t.title||'', desc:t.desc||'', category:t.category||'Allgemein', priority:t.priority||'Mittel', status:t.status||'Offen', due:t.due||'', comment:t.comment||'', firmId:t.firmId||'', createdAt:new Date().toISOString(), history:[]});
+        }
+      });
+    }
+
+    renderProjectAdmin();
+    if(typeof applyStateToForm === 'function') applyStateToForm();
+    if(typeof renderWorkAreas === 'function') renderWorkAreas();
+    if(typeof renderContacts === 'function') renderContacts();
+    if(typeof renderTodoPage === 'function') renderTodoPage();
+    if(typeof updateBadges === 'function') updateBadges();
+    if(typeof refreshDash === 'function') refreshDash();
+    if(typeof persistState === 'function') persistState();
+    if(typeof showToast === 'function') showToast('Projekt-Setup übernommen','ok');
+  };
+
+  function renderProjectAdmin(){
+    ensureProjectAdminState();
+    renderProjectFields();
+    renderDocRegister();
+    renderDailyChecklist();
+  }
+
+  window.renderProjectAdmin = renderProjectAdmin;
+
+  document.addEventListener('DOMContentLoaded', function(){
+    setTimeout(renderProjectAdmin, 80);
+  });
+})();
+
+
+
+// ═══════════════════════════════════════════════════
+// GROBTERMINPLAN — VISUALISIERUNG
+// ═══════════════════════════════════════════════════
+const TERM_WEEKS = (()=>{
+  const cur=termCurrentYW();
+  const arr=[];
+  let y=cur.year,w=cur.week;
+  for(let i=0;i<16;i++){ arr.push({year:y,week:w}); w++; if(w>52){w=1;y++;} }
+  return arr;
+})();
+const TERM_DATA = [];
+function termCodeToYW(v){return v>=100?{year:2027,week:v-100}:{year:2026,week:v}}
+function termIndex(v){const x=termCodeToYW(v);return TERM_WEEKS.findIndex(w=>w.year===x.year&&w.week===x.week)}
+function termCurrentYW(){const d=new Date(),t=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()));t.setUTCDate(t.getUTCDate()+4-(t.getUTCDay()||7));const y=new Date(Date.UTC(t.getUTCFullYear(),0,1));return {year:t.getUTCFullYear(),week:Math.ceil((((t-y)/86400000)+1)/7)}}
+function termRangeLabel(a,b){const A=termCodeToYW(a),B=termCodeToYW(b);return A.week===B.week?'KW'+String(A.week).padStart(2,'0'):'KW'+String(A.week).padStart(2,'0')+'–'+String(B.week).padStart(2,'0')}
+function renderTerminplan(filter='all'){
+ const grid=document.getElementById('termGrid');if(!grid)return;const cur=termCurrentYW();
+ let h='<div class="term-week-head"><div class="term-week-label">Leistung / Meilenstein</div>';
+ TERM_WEEKS.forEach((w,i)=>{const cls=(w.week===1?' year-start':'')+(w.year===cur.year&&w.week===cur.week?' current':'');h+=`<div class="term-week${cls}" data-term-week="${w.year}-${w.week}">${w.week===1?w.year+' · ':''}KW${String(w.week).padStart(2,'0')}</div>`});h+='</div>';
+ const groups=TERM_DATA.filter(g=>filter==='all'||g.id===filter);
+ groups.forEach(g=>{h+=`<div class="term-group-title"><span>${g.label}</span><small>${g.sub} · ${g.tasks.length} Termine</small></div>`;g.tasks.forEach(t=>{const [name,a,b,type]=t,si=termIndex(a),ei=termIndex(b);h+=`<div class="term-row"><div class="term-task-name">${name}<small>${termRangeLabel(a,b)}</small></div>`;TERM_WEEKS.forEach((w,i)=>{const current=w.year===cur.year&&w.week===cur.week?' current':'';if(i===si){h+=`<div class="term-cell${current}" style="grid-column:span ${Math.max(1,ei-si+1)}"><div class="term-bar ${type}" title="${name} · ${termRangeLabel(a,b)}">${termRangeLabel(a,b)}</div></div>`}else if(i<si||i>ei)h+=`<div class="term-cell${current}"></div>`});h+='</div>'});});grid.innerHTML=h;
+ const all=groups.flatMap(g=>g.tasks);document.getElementById('termKpis').innerHTML=`<div class="term-kpi"><strong>${groups.length}</strong><span>Bereiche</span></div><div class="term-kpi"><strong>${all.length}</strong><span>Terminblöcke</span></div>`; if(!groups.length) grid.innerHTML += '<div class="empty-state" style="padding:30px"><div class="ei">📅</div><h4>Kein Terminplan hinterlegt</h4><p>Projektdaten lokal hinzufügen.</p></div>'; 
+ renderTermSummary(groups);
+}
+function renderTermSummary(groups){const box=document.getElementById('termSummary');if(!box)return;box.innerHTML=groups.map(g=>{const key=g.tasks.filter(t=>['BFT Montage','Dacheindeckung','Estrich einbauen','SV-Abnahmen','SV-Abnahme'].includes(t[0])).slice(0,5);return `<div class="term-summary-card"><h4>${g.label} · Schlüsseltermine</h4>${key.map(t=>`<div class="term-milestone"><span class="term-dot" style="background:${t[3]==='accept'?'#22c55e':t[3]==='interior'?'#06b6d4':'#f97316'}"></span><div class="term-ms-text"><strong>${t[0]}</strong>${termRangeLabel(t[1],t[2])}</div></div>`).join('')}</div>`}).join('')}
+function termSetFilter(filter){document.querySelectorAll('.term-filter').forEach(b=>b.classList.toggle('active',b.dataset.termFilter===filter));renderTerminplan(filter)}
+function termScrollToday(){const cur=termCurrentYW();const el=document.querySelector(`[data-term-week="${cur.year}-${cur.week}"]`);if(el)el.scrollIntoView({behavior:'smooth',inline:'center',block:'nearest'});else showToast('Aktuelle KW liegt vor dem dargestellten Terminfenster','warn')}
+const _oldGoPage=goPage;goPage=function(btn){_oldGoPage(btn);if(btn&&btn.dataset&&btn.dataset.page==='pg-termine')renderTerminplan(document.querySelector('.term-filter.active')?.dataset.termFilter||'all')}
+document.addEventListener('DOMContentLoaded',()=>renderTerminplan('all'));
+
 </script>
+
+<style id="sero-performance-pack-style">
+/* SERO PERFORMANCE PACK */
+.perf-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:14px}
+.perf-kpi{background:var(--card-bg);border:1px solid var(--border);border-radius:16px;padding:14px;box-shadow:var(--shadow);cursor:pointer;transition:.18s}
+.perf-kpi:hover{transform:translateY(-1px);border-color:var(--border2);box-shadow:var(--shadow2)}
+.perf-kpi .n{font-size:28px;font-weight:800;letter-spacing:-.05em;color:var(--text)}
+.perf-kpi .l{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);font-weight:700;margin-top:4px}
+.perf-kpi .s{font-size:11px;color:var(--text2);margin-top:5px}
+.perf-tabs{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:14px}
+.perf-tab{border:1px solid var(--border);background:var(--bg2);color:var(--text2);padding:8px 12px;border-radius:999px;font-size:11px;font-weight:700;cursor:pointer}
+.perf-tab.active{background:rgba(0,122,255,.1);color:var(--accent2);border-color:rgba(0,122,255,.22)}
+.perf-pane{display:none}.perf-pane.active{display:block}
+.perf-two{display:grid;grid-template-columns:1fr 1fr;gap:14px}.perf-three{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.perf-form{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.perf-form .wide{grid-column:1/-1}
+.perf-list{display:flex;flex-direction:column;gap:8px}.perf-item{background:var(--bg3);border:1px solid var(--border);border-radius:13px;padding:11px 12px}
+.perf-item-hd{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}.perf-title{font-size:13px;font-weight:750;color:var(--text)}
+.perf-meta{font-size:10px;color:var(--text3);line-height:1.6;margin-top:3px}.perf-note{font-size:11px;color:var(--text2);line-height:1.55;margin-top:6px;white-space:pre-wrap}
+.perf-actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}.perf-chip{display:inline-flex;padding:3px 8px;border-radius:999px;font-size:9px;font-weight:750;border:1px solid var(--border)}
+.perf-ok{background:rgba(52,199,89,.1);color:#239a43}.perf-warn{background:rgba(255,159,10,.12);color:#b96b00}.perf-bad{background:rgba(255,59,48,.1);color:#d92d20}.perf-blue{background:rgba(0,122,255,.1);color:#007aff}
+.perf-alert{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border-radius:12px;border:1px solid var(--border);background:var(--bg3);margin-bottom:8px}.perf-alert .ico{font-size:17px}.perf-alert strong{font-size:12px;color:var(--text)}.perf-alert div div{font-size:11px;color:var(--text2);margin-top:2px;line-height:1.5}
+.perf-trade-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:10px}.perf-trade{background:var(--bg3);border:1px solid var(--border);border-radius:14px;padding:12px}.perf-trade h4{font-size:13px;color:var(--text);margin-bottom:4px}.perf-trade-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:10px}.perf-mini{text-align:center;background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:7px 4px}.perf-mini strong{display:block;font-size:16px;color:var(--text)}.perf-mini span{font-size:8px;color:var(--text3);text-transform:uppercase;letter-spacing:.05em}.perf-progress{height:8px;background:var(--bg4);border-radius:999px;overflow:hidden;margin-top:10px}.perf-progress>div{height:100%;background:var(--accent2);border-radius:999px}
+.perf-dashboard-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}.perf-dash-card{background:var(--card-bg);border:1px solid var(--border);border-radius:14px;padding:11px 12px;box-shadow:var(--shadow);cursor:pointer}.perf-dash-card strong{font-size:18px;color:var(--text)}.perf-dash-card span{display:block;font-size:9px;color:var(--text3);text-transform:uppercase;font-weight:700;margin-top:3px}
+@media(max-width:1000px){.perf-grid{grid-template-columns:repeat(2,1fr)}.perf-two,.perf-three{grid-template-columns:1fr}}
+@media(max-width:600px){.perf-grid,.perf-dashboard-strip{grid-template-columns:repeat(2,1fr)}.perf-form{grid-template-columns:1fr}.perf-form .wide{grid-column:auto}.perf-trade-stats{grid-template-columns:repeat(2,1fr)}}
+[data-theme="dark"] .perf-kpi,[data-theme="dark"] .perf-tab,[data-theme="dark"] .perf-item,[data-theme="dark"] .perf-alert,[data-theme="dark"] .perf-trade,[data-theme="dark"] .perf-dash-card,[data-theme="dark"] .perf-mini{background:var(--bg2)!important;border-color:var(--border)!important}
+</style>
+<script id="sero-performance-pack-script">
+(function(){
+  const PERF_KEY='sero_performance_pack_v1';
+  let PERF={deliveries:[],acceptances:[],changes:[],tradeProgress:{}};
+  function pUid(p){return p+'_'+Date.now()+'_'+Math.random().toString(36).slice(2,7)}
+  function pEsc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+  function pToday(){return new Date().toISOString().slice(0,10)}
+  function pLoad(){try{const x=JSON.parse(localStorage.getItem(PERF_KEY)||'null');if(x&&typeof x==='object')PERF=Object.assign(PERF,x)}catch(e){};SERO_PERFORMANCE_PACK=PERF}
+  function pSave(){localStorage.setItem(PERF_KEY,JSON.stringify(PERF));SERO_PERFORMANCE_PACK=PERF;renderPerformance();renderPerfDashStrip()}
+  function pFirmName(id){return (S?.contractors||[]).find(f=>String(f.id)===String(id))?.name||''}
+  function pFirmOptions(selected=''){return '<option value="">— Keine Firma</option>'+((S?.contractors||[]).map(f=>`<option value="${pEsc(f.id)}" ${String(f.id)===String(selected)?'selected':''}>${pEsc(f.name||'')}</option>`).join(''))}
+  function pStatusClass(s){const x=String(s||'').toLowerCase();if(x.includes('erled')||x.includes('abgesch')||x.includes('gelief')||x.includes('beauftragt'))return'perf-ok';if(x.includes('überf')||x.includes('abgelehnt')||x.includes('krit'))return'perf-bad';if(x.includes('offen')||x.includes('wart')||x.includes('prüfung')||x.includes('bestellt'))return'perf-warn';return'perf-blue'}
+  function pFmtDate(d){if(!d)return'—';const a=String(d).split('-');return a.length===3?`${a[2]}.${a[1]}.${a[0]}`:d}
+  function pDaysUntil(d){if(!d)return null;const a=new Date(pToday()+'T12:00:00'),b=new Date(d+'T12:00:00');return Math.round((b-a)/86400000)}
+  function pOpen(){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.getElementById('pg-performance')?.classList.add('active');document.querySelectorAll('.side-link[data-side-page]').forEach(b=>b.classList.remove('active'));document.getElementById('perfSideLink')?.classList.add('active');if(typeof closeSideNav==='function')closeSideNav();renderPerformance()}
+  window.perfOpenPage=pOpen;
+  function pTab(name){document.querySelectorAll('.perf-tab').forEach(b=>b.classList.toggle('active',b.dataset.perfTab===name));document.querySelectorAll('.perf-pane').forEach(p=>p.classList.toggle('active',p.dataset.perfPane===name));}
+  window.perfTab=pTab;
+
+  function isoWeekStart(year,week){const simple=new Date(Date.UTC(year,0,4));const day=simple.getUTCDay()||7;simple.setUTCDate(simple.getUTCDate()-day+1+(week-1)*7);return simple}
+  function currentIso(){const d=new Date(),t=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()));t.setUTCDate(t.getUTCDate()+4-(t.getUTCDay()||7));const y=new Date(Date.UTC(t.getUTCFullYear(),0,1));return{year:t.getUTCFullYear(),week:Math.ceil((((t-y)/86400000)+1)/7)}}
+  function codeYW(v){return v>=100?{year:2027,week:v-100}:{year:2026,week:v}}
+  function scheduleAlerts(){
+    if(typeof TERM_DATA==='undefined')return[];const c=currentIso(),cStart=isoWeekStart(c.year,c.week);const out=[];
+    TERM_DATA.forEach(g=>(g.tasks||[]).forEach(t=>{const y=codeYW(t[1]),st=isoWeekStart(y.year,y.week),days=Math.round((st-cStart)/86400000);if(days>=0&&days<=21){out.push({level:days<=7?'bad':'warn',icon:days<=7?'🚨':'⏳',title:`${g.label}: ${t[0]}`,text:days===0?'Start diese Woche':`Start in ${Math.ceil(days/7)} Woche(n) · KW${String(y.week).padStart(2,'0')}`})}}));return out.slice(0,8)
+  }
+  function derivedAlerts(){
+    const alerts=[...scheduleAlerts()],today=pToday();
+    (S?.todos||[]).filter(t=>t.due&&t.due<today&&!['Erledigt','Entfällt'].includes(t.status)).slice(0,4).forEach(t=>alerts.push({level:'bad',icon:'⚠️',title:'To-do überfällig: '+t.title,text:`Fällig ${pFmtDate(t.due)}${pFirmName(t.firmId)?' · '+pFirmName(t.firmId):''}`}));
+    (S?.maengel||[]).filter(m=>m.deadline&&m.deadline<today&&m.status!=='erledigt').slice(0,4).forEach(m=>alerts.push({level:'bad',icon:'🧯',title:'Mangel überfällig: '+(m.title||'Mangel'),text:`Deadline ${pFmtDate(m.deadline)}${pFirmName(m.firmId)?' · '+pFirmName(m.firmId):''}`}));
+    PERF.deliveries.filter(x=>x.deliveryDate&&x.deliveryDate<today&&!['Geliefert','Erledigt'].includes(x.status)).slice(0,4).forEach(x=>alerts.push({level:'bad',icon:'📦',title:'Lieferung überfällig: '+x.title,text:`Termin ${pFmtDate(x.deliveryDate)}${pFirmName(x.firmId)?' · '+pFirmName(x.firmId):''}`}));
+    PERF.acceptances.filter(x=>x.date&&x.date<today&&!['Erledigt','Abgenommen'].includes(x.status)).slice(0,4).forEach(x=>alerts.push({level:'bad',icon:'✅',title:'Abnahme überfällig: '+x.title,text:`Termin ${pFmtDate(x.date)}`}));
+    return alerts.slice(0,16)
+  }
+  function tradeKeys(){
+    const map=new Map();(S?.contractors||[]).forEach(f=>{const key=(f.trade||f.gewerkName||f.gewerkCode||'Allgemein').trim()||'Allgemein';if(!map.has(key))map.set(key,[]);map.get(key).push(f)});return map
+  }
+  function renderTrade360(){const box=document.getElementById('perfTradeGrid');if(!box)return;const mp=tradeKeys();if(!mp.size){box.innerHTML='<div class="empty-state"><div class="ei">🏗️</div><h4>Keine Gewerke/Firmen</h4><p>Firmenbereich üzerinden firmaları ekleyebilirsin.</p></div>';return}box.innerHTML=[...mp.entries()].map(([trade,firms])=>{const ids=new Set(firms.map(f=>String(f.id)));const todo=(S?.todos||[]).filter(x=>ids.has(String(x.firmId))&&!['Erledigt','Entfällt'].includes(x.status)).length;const mg=(S?.maengel||[]).filter(x=>ids.has(String(x.firmId))&&x.status!=='erledigt').length;const ph=(S?.photos||[]).filter(x=>ids.has(String(x.firmId))).length;const tl=(S?.timeline||[]).filter(x=>ids.has(String(x.firmId))).length;const pr=Math.max(0,Math.min(100,Number(PERF.tradeProgress[trade]||0)));return `<div class="perf-trade"><h4>${pEsc(trade)}</h4><div class="perf-meta">${firms.map(f=>pEsc(f.name||'')).join(' · ')}</div><div class="perf-trade-stats"><div class="perf-mini"><strong>${todo}</strong><span>To-do</span></div><div class="perf-mini"><strong>${mg}</strong><span>Mängel</span></div><div class="perf-mini"><strong>${ph}</strong><span>Fotos</span></div><div class="perf-mini"><strong>${tl}</strong><span>Einträge</span></div></div><div class="perf-progress"><div style="width:${pr}%"></div></div><div style="display:flex;align-items:center;gap:8px;margin-top:8px"><input class="fi" type="number" min="0" max="100" value="${pr}" style="width:88px;padding:6px 8px" onchange="perfSetTradeProgress('${pEsc(trade).replace(/'/g,'&#39;')}',this.value)"><span style="font-size:11px;color:var(--text3)">Fortschritt %</span></div></div>`}).join('')}
+  window.perfSetTradeProgress=function(trade,v){PERF.tradeProgress[trade]=Math.max(0,Math.min(100,Number(v)||0));pSave()}
+
+  function renderAlerts(){const box=document.getElementById('perfAlerts');if(!box)return;const a=derivedAlerts();box.innerHTML=a.length?a.map(x=>`<div class="perf-alert"><div class="ico">${x.icon}</div><div><strong>${pEsc(x.title)}</strong><div>${pEsc(x.text)}</div></div></div>`).join(''):'<div class="empty-state" style="padding:22px"><div class="ei">✅</div><h4>Keine kritischen Hinweise</h4><p>Aktuell kein automatisch erkannter Handlungsbedarf.</p></div>'}
+  function listCRUD(type){const cfg={deliveries:{box:'perfDeliveryList',empty:'Keine Lieferungen',date:'deliveryDate'},acceptances:{box:'perfAcceptanceList',empty:'Keine Abnahmen',date:'date'},changes:{box:'perfChangeList',empty:'Keine Nachträge',date:'date'}}[type],box=document.getElementById(cfg.box);if(!box)return;const arr=PERF[type]||[];if(!arr.length){box.innerHTML=`<div class="empty-state" style="padding:22px"><div class="ei">—</div><h4>${cfg.empty}</h4><p>Yeni kayıt ekleyebilirsin.</p></div>`;return}box.innerHTML=arr.slice().sort((a,b)=>String(a[cfg.date]||'9999').localeCompare(String(b[cfg.date]||'9999'))).map(x=>`<div class="perf-item"><div class="perf-item-hd"><div><div class="perf-title">${pEsc(x.title)}</div><div class="perf-meta">${pFirmName(x.firmId)?pEsc(pFirmName(x.firmId))+' · ':''}${x.trade?pEsc(x.trade)+' · ':''}${pFmtDate(x[cfg.date])}</div></div><span class="perf-chip ${pStatusClass(x.status)}">${pEsc(x.status||'Offen')}</span></div>${type==='changes'&&x.amount?`<div class="perf-note"><strong>${pEsc(x.amount)} €</strong></div>`:''}${x.note?`<div class="perf-note">${pEsc(x.note)}</div>`:''}<div class="perf-actions"><button class="btn btn-ghost btn-xs" onclick="perfEdit('${type}','${x.id}')">Bearbeiten</button><button class="btn btn-ghost btn-xs" onclick="perfDelete('${type}','${x.id}')">Löschen</button></div></div>`).join('')}
+  function read(id){return document.getElementById(id)?.value||''}
+  window.perfSaveDelivery=function(){const id=read('perfDelId')||pUid('del'),title=read('perfDelTitle').trim();if(!title)return showToast('Lieferung Titel eingeben','warn');const x={id,title,firmId:read('perfDelFirm'),trade:read('perfDelTrade'),orderDate:read('perfDelOrder'),deliveryDate:read('perfDelDate'),status:read('perfDelStatus')||'Offen',note:read('perfDelNote')};upsert('deliveries',x);clearForm('del');pSave();showToast('Lieferung gespeichert','ok')}
+  window.perfSaveAcceptance=function(){const id=read('perfAccId')||pUid('acc'),title=read('perfAccTitle').trim();if(!title)return showToast('Abnahme Titel eingeben','warn');const x={id,title,firmId:read('perfAccFirm'),trade:read('perfAccTrade'),date:read('perfAccDate'),status:read('perfAccStatus')||'Offen',type:read('perfAccType'),note:read('perfAccNote')};upsert('acceptances',x);clearForm('acc');pSave();showToast('Abnahme gespeichert','ok')}
+  window.perfSaveChange=function(){const id=read('perfChgId')||pUid('chg'),title=read('perfChgTitle').trim();if(!title)return showToast('Nachtrag Titel eingeben','warn');const x={id,title,firmId:read('perfChgFirm'),trade:read('perfChgTrade'),date:read('perfChgDate'),amount:read('perfChgAmount'),status:read('perfChgStatus')||'Offen',note:read('perfChgNote')};upsert('changes',x);clearForm('chg');pSave();showToast('Nachtrag gespeichert','ok')}
+  function upsert(type,x){const i=PERF[type].findIndex(a=>a.id===x.id);if(i>=0)PERF[type][i]=x;else PERF[type].unshift(x)}
+  function clearForm(k){const ids=k==='del'?['perfDelId','perfDelTitle','perfDelTrade','perfDelOrder','perfDelDate','perfDelNote']:k==='acc'?['perfAccId','perfAccTitle','perfAccTrade','perfAccDate','perfAccType','perfAccNote']:['perfChgId','perfChgTitle','perfChgTrade','perfChgDate','perfChgAmount','perfChgNote'];ids.forEach(id=>{const e=document.getElementById(id);if(e)e.value=''});const fs=k==='del'?['perfDelFirm','perfDelStatus']:k==='acc'?['perfAccFirm','perfAccStatus']:['perfChgFirm','perfChgStatus'];fs.forEach(id=>{const e=document.getElementById(id);if(e)e.selectedIndex=0})}
+  window.perfDelete=function(type,id){if(!confirm('Eintrag wirklich löschen?'))return;PERF[type]=PERF[type].filter(x=>x.id!==id);pSave()}
+  window.perfEdit=function(type,id){const x=PERF[type].find(a=>a.id===id);if(!x)return;const map=type==='deliveries'?{perfDelId:x.id,perfDelTitle:x.title,perfDelFirm:x.firmId,perfDelTrade:x.trade,perfDelOrder:x.orderDate,perfDelDate:x.deliveryDate,perfDelStatus:x.status,perfDelNote:x.note}:type==='acceptances'?{perfAccId:x.id,perfAccTitle:x.title,perfAccFirm:x.firmId,perfAccTrade:x.trade,perfAccDate:x.date,perfAccStatus:x.status,perfAccType:x.type,perfAccNote:x.note}:{perfChgId:x.id,perfChgTitle:x.title,perfChgFirm:x.firmId,perfChgTrade:x.trade,perfChgDate:x.date,perfChgAmount:x.amount,perfChgStatus:x.status,perfChgNote:x.note};Object.entries(map).forEach(([id,v])=>{const e=document.getElementById(id);if(e)e.value=v||''});pTab(type==='deliveries'?'lieferungen':type==='acceptances'?'abnahmen':'nachtraege');document.getElementById(Object.keys(map)[1])?.scrollIntoView({behavior:'smooth',block:'center'})}
+  window.perfExport=function(){const blob=new Blob([JSON.stringify(PERF,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='SERO_ProjectManagement_'+pToday()+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),500)}
+  window.perfImport=function(inp){const f=inp.files?.[0];if(!f)return;const r=new FileReader();r.onload=e=>{try{const d=JSON.parse(e.target.result);PERF=Object.assign({deliveries:[],acceptances:[],changes:[],tradeProgress:{}},d||{});pSave();showToast('Projektsteuerung importiert','ok')}catch(err){showToast('Import ungültig','err')}};r.readAsText(f);inp.value=''}
+
+  function kpis(){const openTodo=(S?.todos||[]).filter(t=>!['Erledigt','Entfällt'].includes(t.status)).length,openMg=(S?.maengel||[]).filter(m=>m.status!=='erledigt').length,upDel=PERF.deliveries.filter(x=>!['Geliefert','Erledigt'].includes(x.status)).length,openChg=PERF.changes.filter(x=>!['Beauftragt','Abgelehnt','Erledigt'].includes(x.status)).length,pendingAcc=PERF.acceptances.filter(x=>!['Abgenommen','Erledigt'].includes(x.status)).length,alerts=derivedAlerts().filter(a=>a.level==='bad').length;return{openTodo,openMg,upDel,openChg,pendingAcc,alerts}}
+  function renderPerformance(){const page=document.getElementById('pg-performance');if(!page)return;const k=kpis();document.getElementById('perfKpis').innerHTML=`<div class="perf-kpi" onclick="perfTab('cockpit')"><div class="n">${k.alerts}</div><div class="l">Kritisch</div><div class="s">automatische Warnungen</div></div><div class="perf-kpi" onclick="perfTab('lieferungen')"><div class="n">${k.upDel}</div><div class="l">Lieferungen</div><div class="s">offen / erwartet</div></div><div class="perf-kpi" onclick="perfTab('abnahmen')"><div class="n">${k.pendingAcc}</div><div class="l">Abnahmen</div><div class="s">offen</div></div><div class="perf-kpi" onclick="perfTab('nachtraege')"><div class="n">${k.openChg}</div><div class="l">Nachträge</div><div class="s">offen</div></div>`;renderAlerts();renderTrade360();listCRUD('deliveries');listCRUD('acceptances');listCRUD('changes');['perfDelFirm','perfAccFirm','perfChgFirm'].forEach(id=>{const e=document.getElementById(id);if(e){const v=e.value;e.innerHTML=pFirmOptions(v);if(v)e.value=v}})}
+  function renderPerfDashStrip(){const host=document.getElementById('perfDashStrip');if(!host)return;const k=kpis();host.innerHTML=`<div class="perf-dash-card" onclick="perfOpenPage()"><strong>${k.alerts}</strong><span>Kritische Hinweise</span></div><div class="perf-dash-card" onclick="perfOpenPage()"><strong>${k.upDel}</strong><span>Lieferungen offen</span></div><div class="perf-dash-card" onclick="perfOpenPage()"><strong>${k.pendingAcc}</strong><span>Abnahmen offen</span></div><div class="perf-dash-card" onclick="perfOpenPage()"><strong>${k.openChg}</strong><span>Nachträge offen</span></div>`}
+
+  function pageHtml(){return `<div class="page" id="pg-performance"><div class="sh"><h2>Bauleiter Cockpit <span class="sub">Projektsteuerung</span></h2><div class="sh-act"><button class="btn btn-ghost btn-sm" onclick="perfExport()">⬇ Backup</button><button class="btn btn-ghost btn-sm" onclick="document.getElementById('perfImportIn').click()">⬆ Import</button><input id="perfImportIn" type="file" accept=".json,application/json" style="display:none" onchange="perfImport(this)"><button class="btn btn-primary btn-sm" onclick="renderPerformance()">↻ Aktualisieren</button></div></div><div class="perf-grid" id="perfKpis"></div><div class="perf-tabs"><button class="perf-tab active" data-perf-tab="cockpit" onclick="perfTab('cockpit')">🚨 Cockpit</button><button class="perf-tab" data-perf-tab="gewerk" onclick="perfTab('gewerk')">🏗 Gewerk 360°</button><button class="perf-tab" data-perf-tab="lieferungen" onclick="perfTab('lieferungen')">📦 Lieferungen</button><button class="perf-tab" data-perf-tab="abnahmen" onclick="perfTab('abnahmen')">✅ Abnahmen</button><button class="perf-tab" data-perf-tab="nachtraege" onclick="perfTab('nachtraege')">💶 Nachträge</button></div>
+  <div class="perf-pane active" data-perf-pane="cockpit"><div class="perf-two"><div class="card"><div class="card-hd"><div class="card-hd-l"><div class="ci ci-r">🚨</div><h3>Kritische Hinweise <small>otomatik</small></h3></div></div><div class="card-body" id="perfAlerts"></div></div><div class="card"><div class="card-hd"><div class="card-hd-l"><div class="ci ci-b">🎯</div><h3>Steuerungslogik</h3></div></div><div class="card-body"><div class="perf-note">Bu ekran; Terminplan başlangıçlarını, gecikmiş To-do/Mängel, teslimat ve Abnahme tarihlerini birlikte kontrol eder. Kırmızı uyarılar doğrudan aksiyon gerektirir.</div><div class="divider"></div><button class="btn btn-ghost btn-sm" onclick="goPageById('pg-termine')">Terminplan öffnen →</button></div></div></div></div>
+  <div class="perf-pane" data-perf-pane="gewerk"><div class="card"><div class="card-hd"><div class="card-hd-l"><div class="ci ci-c">🏗</div><h3>Gewerk 360°</h3></div></div><div class="card-body"><div class="perf-trade-grid" id="perfTradeGrid"></div></div></div></div>
+  <div class="perf-pane" data-perf-pane="lieferungen"><div class="perf-two"><div class="card"><div class="card-hd"><div class="card-hd-l"><div class="ci ci-o">📦</div><h3>Lieferung erfassen</h3></div></div><div class="card-body"><input type="hidden" id="perfDelId"><div class="perf-form"><input class="fi wide" id="perfDelTitle" placeholder="Lieferung / Material"><select class="fs" id="perfDelFirm"></select><input class="fi" id="perfDelTrade" placeholder="Gewerk"><input class="fi" id="perfDelOrder" type="date" title="Bestelldatum"><input class="fi" id="perfDelDate" type="date" title="Liefertermin"><select class="fs" id="perfDelStatus"><option>Offen</option><option>Bestellt</option><option>Bestätigt</option><option>Geliefert</option><option>Erledigt</option></select><textarea class="fta wide" id="perfDelNote" placeholder="Notiz" style="min-height:64px"></textarea></div><button class="btn btn-primary" onclick="perfSaveDelivery()">Speichern</button></div></div><div class="card"><div class="card-hd"><div class="card-hd-l"><div class="ci ci-b">📋</div><h3>Lieferübersicht</h3></div></div><div class="card-body perf-list" id="perfDeliveryList"></div></div></div></div>
+  <div class="perf-pane" data-perf-pane="abnahmen"><div class="perf-two"><div class="card"><div class="card-hd"><div class="card-hd-l"><div class="ci ci-g">✅</div><h3>Abnahme erfassen</h3></div></div><div class="card-body"><input type="hidden" id="perfAccId"><div class="perf-form"><input class="fi wide" id="perfAccTitle" placeholder="Abnahme / Prüfung"><select class="fs" id="perfAccFirm"></select><input class="fi" id="perfAccTrade" placeholder="Gewerk"><input class="fi" id="perfAccDate" type="date"><input class="fi" id="perfAccType" placeholder="z. B. SV, Bauamt, intern"><select class="fs" id="perfAccStatus"><option>Offen</option><option>Terminiert</option><option>In Prüfung</option><option>Abgenommen</option><option>Erledigt</option></select><textarea class="fta wide" id="perfAccNote" placeholder="Notiz / Restpunkte" style="min-height:64px"></textarea></div><button class="btn btn-primary" onclick="perfSaveAcceptance()">Speichern</button></div></div><div class="card"><div class="card-hd"><div class="card-hd-l"><div class="ci ci-b">📋</div><h3>Abnahmeübersicht</h3></div></div><div class="card-body perf-list" id="perfAcceptanceList"></div></div></div></div>
+  <div class="perf-pane" data-perf-pane="nachtraege"><div class="perf-two"><div class="card"><div class="card-hd"><div class="card-hd-l"><div class="ci ci-gl">💶</div><h3>Nachtrag erfassen</h3></div></div><div class="card-body"><input type="hidden" id="perfChgId"><div class="perf-form"><input class="fi wide" id="perfChgTitle" placeholder="Nachtrag / Zusatzleistung"><select class="fs" id="perfChgFirm"></select><input class="fi" id="perfChgTrade" placeholder="Gewerk"><input class="fi" id="perfChgDate" type="date"><input class="fi" id="perfChgAmount" type="number" step="0.01" placeholder="Betrag €"><select class="fs" id="perfChgStatus"><option>Offen</option><option>In Prüfung</option><option>Verhandelt</option><option>Beauftragt</option><option>Abgelehnt</option><option>Erledigt</option></select><textarea class="fta wide" id="perfChgNote" placeholder="Grund / Stand / Entscheidung" style="min-height:64px"></textarea></div><button class="btn btn-primary" onclick="perfSaveChange()">Speichern</button></div></div><div class="card"><div class="card-hd"><div class="card-hd-l"><div class="ci ci-b">📋</div><h3>Nachtragsübersicht</h3></div></div><div class="card-body perf-list" id="perfChangeList"></div></div></div></div></div>`}
+  function install(){pLoad();const main=document.querySelector('.main');if(main&&!document.getElementById('pg-performance'))main.insertAdjacentHTML('beforeend',pageHtml());const navBody=document.querySelector('.side-nav-body');if(navBody&&!document.getElementById('perfSideLink')){const g=document.createElement('div');g.className='side-group';g.innerHTML='<div class="side-group-label">Steuerung</div><button class="side-link" id="perfSideLink" onclick="perfOpenPage()"><span class="side-link-main"><span class="ti">🎯</span><span>Bauleiter Cockpit</span></span></button>';const sys=[...navBody.querySelectorAll('.side-group')].find(x=>x.textContent.includes('System'));sys?navBody.insertBefore(g,sys):navBody.appendChild(g)}const stats=document.getElementById('dashStats');if(stats&&!document.getElementById('perfDashStrip')){const x=document.createElement('div');x.id='perfDashStrip';x.className='perf-dashboard-strip';stats.insertAdjacentElement('afterend',x)}renderPerformance();renderPerfDashStrip();
+    try{const oldExp=window.exportBackup;if(typeof oldExp==='function'&&!oldExp.__perfWrapped){const w=async function(){if(S)S.performancePack=PERF;try{return await oldExp.apply(this,arguments)}finally{if(S)delete S.performancePack}};w.__perfWrapped=true;window.exportBackup=w}}catch(e){}
+    try{const oldImp=window.importBackup;if(typeof oldImp==='function'&&!oldImp.__perfWrapped){const w=function(inp){const r=oldImp.apply(this,arguments);setTimeout(()=>{if(S&&S.performancePack){PERF=Object.assign({deliveries:[],acceptances:[],changes:[],tradeProgress:{}},S.performancePack);localStorage.setItem(PERF_KEY,JSON.stringify(PERF));delete S.performancePack;renderPerformance();renderPerfDashStrip()}},1500);return r};w.__perfWrapped=true;window.importBackup=w}}catch(e){}
+  }
+  window.renderPerformance=renderPerformance;
+  document.addEventListener('DOMContentLoaded',()=>setTimeout(install,120));
+})();
+</script>
+
 
 </body>
 </html>
