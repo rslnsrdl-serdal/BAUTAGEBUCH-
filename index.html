@@ -7629,11 +7629,23 @@ window.renderFirms = function renderFirmsPatched() {
 
     const sortCode = (a,b) => String(a).localeCompare(String(b), undefined, {numeric:true, sensitivity:'base'});
 
+    const formatFirmCost = (value) => {
+      const amount = Number(value);
+      if (!Number.isFinite(amount)) return '';
+      return new Intl.NumberFormat('de-DE', {
+        style: 'currency',
+        currency: 'EUR',
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      }).format(amount);
+    };
+
     const renderFirmCard = (c, codeLabel) => {
       const active = window.currentFirmId === c.id ? 'border-color:var(--accent2);box-shadow:0 0 0 2px rgba(59,130,246,.1);' : '';
       const statusMap = {active:{lbl:'Aktiv',cls:'cs-a'},pause:{lbl:'Pause',cls:'cs-p'},done:{lbl:'Abgeschlossen',cls:'cs-d'}};
       const sm = statusMap[c.status] || statusMap.active;
       const noteCount = (c.notes||[]).length;
+      const orderCost = formatFirmCost(c.orderData?.kosten);
       const notesHtml = (c.notes||[]).map(n=>`<div class="con-note-item">
           <div style="flex:1"><div class="con-note-txt">${renderFirmNoteText(n)}</div></div>
           <div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px;">
@@ -7653,6 +7665,7 @@ window.renderFirms = function renderFirmsPatched() {
               <div class="con-trade">${h(c.contact||'')}${c.phone?' · '+h(c.phone):''}</div>
               <div class="tag-row" style="margin-top:6px;">
                 <span class="tag">📁 ${h(codeLabel)}</span>
+                ${orderCost ? `<span class="tag">💶 Kosten: ${h(orderCost)}</span>` : ''}
                 ${noteCount ? `<span class="tag">📝 ${noteCount}</span>`:''}
               </div>
             </div>
