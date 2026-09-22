@@ -9466,11 +9466,18 @@ function termCodeToYW(v){return v>=100?{year:2027,week:v-100}:{year:2026,week:v}
 function termIndex(v){const x=termCodeToYW(v);return TERM_WEEKS.findIndex(w=>w.year===x.year&&w.week===x.week)}
 function termCurrentYW(){const d=new Date(),t=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()));t.setUTCDate(t.getUTCDate()+4-(t.getUTCDay()||7));const y=new Date(Date.UTC(t.getUTCFullYear(),0,1));return {year:t.getUTCFullYear(),week:Math.ceil((((t-y)/86400000)+1)/7)}}
 function termRangeLabel(a,b){const A=termCodeToYW(a),B=termCodeToYW(b);return A.week===B.week?'KW'+String(A.week).padStart(2,'0'):'KW'+String(A.week).padStart(2,'0')+'–'+String(B.week).padStart(2,'0')}
+function termBuildWeeks(groups){
+ const values=groups.flatMap(g=>Array.isArray(g.tasks)?g.tasks.flatMap(t=>[Number(t[1]),Number(t[2])]):[]).filter(Number.isFinite);
+ if(!values.length){const cur=termCurrentYW(),arr=[];let y=cur.year,w=cur.week;for(let i=0;i<16;i++){arr.push({year:y,week:w});if(++w>52){w=1;y++}}return arr}
+ const points=values.map(termCodeToYW).sort((a,b)=>(a.year*53+a.week)-(b.year*53+b.week)),first=points[0],last=points[points.length-1],arr=[];let y=first.year,w=first.week;
+ while(arr.length<60){arr.push({year:y,week:w});if(y===last.year&&w===last.week)break;if(++w>52){w=1;y++}}
+ return arr;
+}
 function renderTerminplan(filter='all'){
- const grid=document.getElementById('termGrid');if(!grid)return;const cur=termCurrentYW();
+ const grid=document.getElementById('termGrid');if(!grid)return;const cur=termCurrentYW(),termData=Array.isArray(S&&S.terminplan)?S.terminplan:TERM_DATA;TERM_WEEKS.splice(0,TERM_WEEKS.length,...termBuildWeeks(termData));
  let h='<div class="term-week-head"><div class="term-week-label">Leistung / Meilenstein</div>';
  TERM_WEEKS.forEach((w,i)=>{const cls=(w.week===1?' year-start':'')+(w.year===cur.year&&w.week===cur.week?' current':'');h+=`<div class="term-week${cls}" data-term-week="${w.year}-${w.week}">${w.week===1?w.year+' · ':''}KW${String(w.week).padStart(2,'0')}</div>`});h+='</div>';
- const groups=TERM_DATA.filter(g=>filter==='all'||g.id===filter);
+ const groups=termData.filter(g=>filter==='all'||g.id===filter);
  groups.forEach(g=>{h+=`<div class="term-group-title"><span>${g.label}</span><small>${g.sub} · ${g.tasks.length} Termine</small></div>`;g.tasks.forEach(t=>{const [name,a,b,type]=t,si=termIndex(a),ei=termIndex(b);h+=`<div class="term-row"><div class="term-task-name">${name}<small>${termRangeLabel(a,b)}</small></div>`;TERM_WEEKS.forEach((w,i)=>{const current=w.year===cur.year&&w.week===cur.week?' current':'';if(i===si){h+=`<div class="term-cell${current}" style="grid-column:span ${Math.max(1,ei-si+1)}"><div class="term-bar ${type}" title="${name} · ${termRangeLabel(a,b)}">${termRangeLabel(a,b)}</div></div>`}else if(i<si||i>ei)h+=`<div class="term-cell${current}"></div>`});h+='</div>'});});grid.innerHTML=h;
  const all=groups.flatMap(g=>g.tasks);document.getElementById('termKpis').innerHTML=`<div class="term-kpi"><strong>${groups.length}</strong><span>Bereiche</span></div><div class="term-kpi"><strong>${all.length}</strong><span>Terminblöcke</span></div>`; if(!groups.length) grid.innerHTML += '<div class="empty-state" style="padding:30px"><div class="ei">📅</div><h4>Kein Terminplan hinterlegt</h4><p>Projektdaten lokal hinzufügen.</p></div>'; 
  renderTermSummary(groups);
