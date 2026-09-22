@@ -2275,6 +2275,15 @@ button[id*="terminplan" i],
     <h2>Nachunternehmer <span class="sub">Yüklenici Firmalar</span></h2>
     <div class="sh-act"><button class="btn btn-ghost" onclick="addGewerkCodePrompt()">+ Gewerk-Code</button><button class="btn btn-primary" onclick="prepareFirmModal()">+ Firma hinzufügen</button></div>
   </div>
+  <div class="card" style="margin-bottom:14px;">
+    <div class="card-body">
+      <input type="search" class="fi" id="firmSearch"
+        placeholder="🔍 Firma oder Gewerk suchen… / Firma veya iş ara…"
+        aria-label="Firma oder Gewerk suchen"
+        autocomplete="off"
+        oninput="renderFirms()">
+    </div>
+  </div>
   <div id="firmList"><div class="empty-state"><div class="ei">🏢</div><h4>Keine Firmen</h4><p>Yüklenici ekle</p></div></div>
 </div>
 
@@ -7532,6 +7541,15 @@ window.renderFirms = function renderFirmsPatched() {
 
     const presets = Array.isArray(S.gewerkePresets) ? S.gewerkePresets.slice() : [];
     const contractors = Array.isArray(S.contractors) ? S.contractors.slice() : [];
+    const normalizeFirmSearch = (value) => String(value || '')
+      .normalize('NFKD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/ß/g, 'ss')
+      .toLocaleLowerCase('de-DE')
+      .trim();
+    const firmSearchQuery = normalizeFirmSearch(e('firmSearch')?.value);
+    const matchesFirmSearch = (...values) => !firmSearchQuery ||
+      normalizeFirmSearch(values.filter(Boolean).join(' ')).includes(firmSearchQuery);
 
     if (!presets.length && !contractors.length) {
       cont.innerHTML = '<div class="empty-state"><div class="ei">📁</div><h4>Keine Gewerke / Nachunternehmer</h4><p>Gewerk altında firma ekle</p></div>';
@@ -7656,8 +7674,25 @@ window.renderFirms = function renderFirmsPatched() {
 
     const html = parentCodes.map(parentCode => {
       const g = groups[parentCode];
-      const parentFirmCount = (g.firms || []).length;
-      const childCodes = Object.keys(g.children || {}).sort(sortCode);
+      const parentMatches = matchesFirmSearch(parentCode, g.name, gewerkDisplay(g.name || parentCode));
+      const visibleParentFirms = parentMatches
+        ? (g.firms || [])
+        : (g.firms || []).filter(c => matchesFirmSearch(c.name, c.trade, c.nuCode, c.gewerkCode, parentCode, g.name));
+      const visibleChildren = {};
+      Object.keys(g.children || {}).forEach(childCode => {
+        const child = g.children[childCode];
+        const childMatches = parentMatches || matchesFirmSearch(child.code, child.name, gewerkDisplay(child.name || child.code));
+        const visibleFirms = childMatches
+          ? (child.firms || [])
+          : (child.firms || []).filter(c => matchesFirmSearch(c.name, c.trade, c.nuCode, c.gewerkCode, child.code, child.name));
+        if (!firmSearchQuery || childMatches || visibleFirms.length) {
+          visibleChildren[childCode] = {...child, firms: visibleFirms};
+        }
+      });
+      if (firmSearchQuery && !parentMatches && !visibleParentFirms.length && !Object.keys(visibleChildren).length) return '';
+
+      const parentFirmCount = visibleParentFirms.length;
+      const childCodes = Object.keys(visibleChildren).sort(sortCode);
       const childCount = childCodes.length;
 
       const headerBtns = `
@@ -7667,10 +7702,10 @@ window.renderFirms = function renderFirmsPatched() {
           <button class="btn btn-primary btn-xs" onclick="event.stopPropagation();prepareFirmModal('${h(parentCode)}')">+ Firma</button>
         </div>`;
 
-      const parentFirmsHtml = (g.firms || []).sort((a,b)=>(a.nuCode||'').localeCompare(b.nuCode||'', undefined, {numeric:true})).map(c => renderFirmCard(c, parentCode)).join('');
+      const parentFirmsHtml = visibleParentFirms.sort((a,b)=>(a.nuCode||'').localeCompare(b.nuCode||'', undefined, {numeric:true})).map(c => renderFirmCard(c, parentCode)).join('');
 
       const childrenHtml = childCodes.map(childCode => {
-        const child = g.children[childCode];
+        const child = visibleChildren[childCode];
         const firmsHtml = (child.firms || []).sort((a,b)=>(a.nuCode||'').localeCompare(b.nuCode||'', undefined, {numeric:true})).map(c => renderFirmCard(c, childCode)).join('');
         return `
           <details style="margin-top:10px;background:var(--bg3);border:1px solid var(--border);border-radius:12px;overflow:hidden;" ${firmsHtml ? '' : ''}>
@@ -7710,7 +7745,9 @@ window.renderFirms = function renderFirmsPatched() {
         </div>`;
     }).join('');
 
-    cont.innerHTML = html || '<div class="empty-state"><div class="ei">📁</div><h4>Keine Gewerke / Nachunternehmer</h4><p>Gewerk altında firma ekle</p></div>';
+    cont.innerHTML = html || (firmSearchQuery
+      ? '<div class="empty-state"><div class="ei">🔍</div><h4>Keine Treffer <small>Sonuç bulunamadı</small></h4><p>Firma veya iş adıyla yeniden ara</p></div>'
+      : '<div class="empty-state"><div class="ei">📁</div><h4>Keine Gewerke / Nachunternehmer</h4><p>Gewerk altında firma ekle</p></div>');
   };
 
   window.openAddNotePatched = function(fid){
