@@ -1886,6 +1886,7 @@ button[id*="terminplan" i],
       <button class="nav-tab" data-page="pg-archive" onclick="goPage(this)"><span class="ti">🗃</span>Archiv <span class="nav-badge" id="nb-archive">0</span></button>
       <button class="nav-tab" data-page="pg-todos" onclick="goPage(this)"><span class="ti">🗂️</span>To-do <span class="nav-badge" id="nb-todos">0</span></button>
       <button class="nav-tab" data-page="pg-termine" onclick="goPage(this)"><span class="ti">🗓️</span>Terminplan</button>
+      <button class="nav-tab" data-page="pg-scope" onclick="goPage(this)"><span class="ti">🔧</span>TGA / Schlosser</button>
       <button class="nav-tab" data-page="pg-settings" onclick="goPage(this)"><span class="ti">⚙️</span>Einstellungen</button>
     </div>
   </div>
@@ -1903,6 +1904,7 @@ button[id*="terminplan" i],
       <div class="side-group-label">Hauptbereich</div>
       <button class="side-link active" data-side-page="pg-dash" onclick="sideGo('pg-dash')"><span class="side-link-main"><span class="ti">🏠</span><span>Dashboard</span></span></button>
       <button class="side-link" data-side-page="pg-tb" onclick="sideGo('pg-tb')"><span class="side-link-main"><span class="ti">📝</span><span>Tagesbericht</span></span></button>
+      <button class="side-link" data-side-page="pg-scope" onclick="sideGo('pg-scope')"><span class="side-link-main">🔧 TGA / Schlosser</span></button>
       <button class="side-link" data-side-page="pg-termine" onclick="sideGo('pg-termine')"><span class="side-link-main"><span class="ti">🗓️</span><span>Terminplan</span></span></button>
       <button class="side-link" data-side-page="pg-todos" onclick="sideGo('pg-todos')"><span class="side-link-main"><span class="ti">🗂️</span><span>To-do</span></span><span class="nav-badge" id="side-nb-todos">0</span></button>
       <button class="side-link" data-side-page="pg-kanban" onclick="sideGo('pg-kanban')"><span class="side-link-main"><span class="ti">📋</span><span>Kanban</span></span><span class="nav-badge" id="side-nb-kanban">0</span></button>
@@ -3146,6 +3148,7 @@ function newState() {
     geraete: JSON.parse(JSON.stringify(DEFAULT_GERAETE)),
     workEntries: [],
     kanban: {today:[], tomorrow:[], done:[]},
+    scopeItems: [],
     contractors: [],
     containers: [],
     meetings: [],
@@ -9488,6 +9491,33 @@ function termScrollToday(){const cur=termCurrentYW();const el=document.querySele
 const _oldGoPage=goPage;goPage=function(btn){_oldGoPage(btn);if(btn&&btn.dataset&&btn.dataset.page==='pg-termine')renderTerminplan(document.querySelector('.term-filter.active')?.dataset.termFilter||'all')}
 document.addEventListener('DOMContentLoaded',()=>renderTerminplan('all'));
 
+</script>
+
+
+<style>
+.scope-tools{display:flex;flex-wrap:wrap;gap:10px;margin:16px 0}.scope-tools input,.scope-tools select{padding:10px;font-size:16px;max-width:100%}.scope-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}.scope-card{padding:18px;background:var(--bg2);border:1px solid var(--border);border-radius:16px}.scope-card dl{display:grid;grid-template-columns:110px 1fr;gap:8px;font-size:14px}.scope-card dd{margin:0;white-space:pre-wrap;overflow-wrap:anywhere}.scope-card dt{color:var(--text2)}#scope-dialog{width:min(700px,94vw);max-height:90vh;overflow:auto;background:var(--bg2);color:var(--text);border:1px solid var(--border);border-radius:18px;padding:22px}#scope-dialog::backdrop{background:#0008}.scope-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.scope-form-grid label{display:flex;flex-direction:column;gap:6px;font-size:14px}.scope-form-grid input,.scope-form-grid select,.scope-form-grid textarea{width:100%;box-sizing:border-box;font-size:16px;padding:10px;background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:8px}@media(max-width:600px){.scope-form-grid{grid-template-columns:1fr}.scope-grid{grid-template-columns:1fr}}
+</style>
+<div class="page" id="pg-scope">
+<h2>TGA / Schlosser</h2><p>Scope / Schnittstellen</p>
+<div class="scope-tools"><button class="btn" onclick="scopeEdit()">+ Eintrag hinzufügen</button><button class="btn" onclick="scopeExport()">Backup exportieren</button><label class="btn">Backup importieren<input type="file" accept=".json,application/json" hidden onchange="scopeImport(this)"></label></div>
+<div class="scope-tools"><input id="scope-search" placeholder="Suchen …" oninput="scopeRender()" aria-label="Suchen"><select id="scope-area" onchange="scopeRender()" aria-label="Bereich"><option value="">Alle Bereiche</option><option>TGA</option><option>Schlosser</option></select><select id="scope-status" onchange="scopeRender()" aria-label="Status"><option value="">Alle Status</option><option>Offen</option><option>In Klärung</option><option>Freigegeben</option><option>Erledigt</option><option>Kritisch</option><option>Warten</option></select></div>
+<p id="scope-count"></p><div class="scope-grid" id="scope-list"></div>
+</div>
+<dialog id="scope-dialog"><form id="scope-form"><h3 id="scope-title">Eintrag</h3><div class="scope-form-grid" id="scope-fields"></div><div class="scope-tools"><button class="btn" type="submit">Speichern</button><button class="btn" type="button" onclick="document.getElementById('scope-dialog').close()">Abbrechen</button></div></form></dialog>
+<script>
+const SCOPE_FIELDS=[['bereich','Bereich'],['firma','Firma'],['leistung','Leistung'],['leistungTR','Leistung (TR)'],['planung','Planung'],['freigabe','Freigabe'],['vorleistung','Vorleistung'],['schnittstelle','Schnittstelle'],['termin','Termin'],['status','Status'],['offenePunkte','Offene Punkte'],['verantwortlicher','Verantwortlicher']];
+const SCOPE_STATUS=['Offen','In Klärung','Freigegeben','Erledigt','Kritisch','Warten'];
+let scopeEditing=null;
+function scopeEscape(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function scopeRows(){if(!Array.isArray(S.scopeItems))S.scopeItems=[];return S.scopeItems;}
+function scopeRender(){const rows=scopeRows(),q=document.getElementById('scope-search').value.toLocaleLowerCase(),area=document.getElementById('scope-area').value,status=document.getElementById('scope-status').value;const visible=rows.filter(r=>(!area||r.bereich===area)&&(!status||r.status===status)&&SCOPE_FIELDS.some(([k])=>String(r[k]||'').toLocaleLowerCase().includes(q)));document.getElementById('scope-count').textContent=visible.length+' / '+rows.length+' Einträge';const box=document.getElementById('scope-list');box.innerHTML='';if(!visible.length){box.innerHTML='<div class="scope-card">'+(rows.length?'Keine passenden Einträge.':'Noch keine Einträge. Manuell hinzufügen oder ein TGA / Schlosser Backup importieren.')+'</div>';return;}visible.forEach(r=>{const card=document.createElement('article');card.className='scope-card';card.innerHTML='<h3>'+scopeEscape(r.leistung||'Eintrag')+'</h3><dl>'+SCOPE_FIELDS.filter(([k])=>k!=='leistung').map(([k,l])=>'<dt>'+l+'</dt><dd>'+scopeEscape(r[k]||'—')+'</dd>').join('')+'</dl>';const actions=document.createElement('div');actions.className='scope-tools';[['Bearbeiten',()=>scopeEdit(r.id)],['Löschen',()=>scopeDelete(r.id)]].forEach(([label,fn])=>{const b=document.createElement('button');b.className='btn';b.textContent=label;b.onclick=fn;actions.append(b)});card.append(actions);box.append(card)});}
+function scopeEdit(id){scopeEditing=id||null;const row=scopeRows().find(r=>r.id===id)||{};document.getElementById('scope-title').textContent=id?'Eintrag bearbeiten':'Eintrag hinzufügen';document.getElementById('scope-fields').innerHTML=SCOPE_FIELDS.map(([k,l])=>{let control;if(k==='bereich'||k==='status'){const options=k==='bereich'?['TGA','Schlosser']:SCOPE_STATUS;control='<select name="'+k+'">'+options.map(v=>'<option'+(v===row[k]?' selected':'')+'>'+v+'</option>').join('')+'</select>';}else{control='<textarea name="'+k+'" rows="2"'+(k==='leistung'?' required':'')+'>'+scopeEscape(row[k]||'')+'</textarea>';}return '<label>'+l+control+'</label>'}).join('');document.getElementById('scope-dialog').showModal();}
+document.getElementById('scope-form').onsubmit=function(e){e.preventDefault();const r={id:scopeEditing||crypto.randomUUID()};const data=new FormData(this);SCOPE_FIELDS.forEach(([k])=>r[k]=String(data.get(k)||'').trim());if(!r.leistung)return;const rows=scopeRows(),i=rows.findIndex(x=>x.id===r.id);if(i>=0)rows[i]=r;else rows.push(r);persistState();scopeRender();document.getElementById('scope-dialog').close();showToast('Eintrag gespeichert','ok');};
+function scopeDelete(id){if(!confirm('Diesen Eintrag löschen?'))return;S.scopeItems=scopeRows().filter(r=>r.id!==id);persistState();scopeRender();}
+function scopeExport(){const data={type:'sero-scope-backup',version:1,exportedAt:new Date().toISOString(),items:scopeRows()};const url=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download='SERO_TGA_Schlosser_Backup_'+new Date().toISOString().slice(0,10)+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
+function scopeValidate(data){const items=data.type==='sero-scope-backup'&&data.version===1?data.items:data.version===3?data.state?.scopeItems:null;if(!Array.isArray(items)||items.length>10000)throw Error('Kein gültiges TGA / Schlosser Backup.');const ids=new Set();return items.map(raw=>{if(!raw||typeof raw!=='object'||Array.isArray(raw))throw Error('Ungültiger Eintrag.');const row={id:typeof raw.id==='string'&&raw.id?raw.id:crypto.randomUUID()};if(ids.has(row.id))throw Error('Doppelte Eintrag-ID.');ids.add(row.id);SCOPE_FIELDS.forEach(([k])=>{if(raw[k]!=null&&typeof raw[k]!=='string')throw Error('Ungültiges Feld: '+k);row[k]=raw[k]||'';});if(!['TGA','Schlosser'].includes(row.bereich)||!SCOPE_STATUS.includes(row.status)||!row.leistung.trim())throw Error('Bereich, Status oder Leistung ungültig.');return row;});}
+async function scopeImport(input){const f=input.files?.[0];if(!f)return;try{if(f.size>10*1024*1024)throw Error('Datei zu groß.');const rows=scopeValidate(JSON.parse(await f.text()));const existing=scopeRows();const replace=existing.length?confirm('OK: vorhandene TGA / Schlosser Einträge ersetzen. Abbrechen: neue Einträge ergänzen. Andere App-Daten bleiben erhalten.'):true;if(!confirm(rows.length+' Einträge '+(replace?'übernehmen':'ergänzen')+'?'))return;S.scopeItems=replace?rows:[...existing,...rows.map(r=>({...r,id:crypto.randomUUID()}))];persistState();scopeRender();showToast('TGA / Schlosser importiert','ok');}catch(e){showToast(e.message,'err');}finally{input.value='';}}
+const scopePreviousGoPage=goPage;goPage=function(btn){scopePreviousGoPage(btn);if(btn?.dataset.page==='pg-scope')scopeRender();};
 </script>
 
 </body>
